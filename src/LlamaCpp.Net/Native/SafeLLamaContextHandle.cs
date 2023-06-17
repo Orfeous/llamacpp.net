@@ -5,7 +5,7 @@ namespace LlamaCpp.Net.Native
     /// <summary>
     /// todo
     /// </summary>
-    internal class SafeLLamaContextHandle : SafeLLamaHandleBase
+    internal sealed class SafeLLamaContextHandle : SafeLLamaHandleBase
     {
         /// <summary>
         /// todo
