@@ -1,4 +1,6 @@
-﻿using Cake.Common;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Cake.Common;
 using Cake.Common.IO;
 using Cake.Core;
 using Cake.Core.IO;
