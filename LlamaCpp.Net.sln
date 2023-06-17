@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33723.286
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LlamaCpp.Net.Cpu", "src\LlamaCpp.Net.Cpu\LlamaCpp.Net.Cpu.csproj", "{C753A404-54A3-4051-AEE9-6DEBAEFB17BE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LlamaCpp.Net.Cpu", "src\LlamaCpp.Net.Cpu\LlamaCpp.Net.Cpu.csproj", "{C753A404-54A3-4051-AEE9-6DEBAEFB17BE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LlamaCpp.Net.Cuda11", "src\LlamaCpp.Net.Cuda11\LlamaCpp.Net.Cuda11.csproj", "{E882655A-0105-4093-AA5A-0364E6E9B27B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LlamaCpp.Net.Cuda11", "src\LlamaCpp.Net.Cuda11\LlamaCpp.Net.Cuda11.csproj", "{E882655A-0105-4093-AA5A-0364E6E9B27B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LlamaCpp.Net.Cuda12", "src\LlamaCpp.Net.Cuda12\LlamaCpp.Net.Cuda12.csproj", "{C148C608-91AA-4A8F-86EA-BBF0DD9C6F73}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LlamaCpp.Net.Cuda12", "src\LlamaCpp.Net.Cuda12\LlamaCpp.Net.Cuda12.csproj", "{C148C608-91AA-4A8F-86EA-BBF0DD9C6F73}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LlamaCpp.Net", "src\LlamaCpp.Net\LlamaCpp.Net.csproj", "{B50DC593-5C5F-4000-9F73-A98420158E75}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LlamaCpp.Net", "src\LlamaCpp.Net\LlamaCpp.Net.csproj", "{B50DC593-5C5F-4000-9F73-A98420158E75}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Github", "Github", "{11E7090F-26FE-4CE2-841E-BEA7CDBEAF48}"
 EndProject
@@ -19,9 +19,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{41E88449
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{B52CB79E-C6BB-49A1-BB97-9C600BDF50A6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LlamaCpp.Net.Test", "src\LlamaCpp.Net.Test\LlamaCpp.Net.Test.csproj", "{8E9EB6FB-FA9D-434F-BF08-25B099CEA969}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LlamaCpp.Net.Test", "src\LlamaCpp.Net.Test\LlamaCpp.Net.Test.csproj", "{8E9EB6FB-FA9D-434F-BF08-25B099CEA969}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LlamaCpp.Net.Build", "src\LlamaCpp.Net.Build\LlamaCpp.Net.Build.csproj", "{D1D30BD2-E338-479F-A0C4-1A8E3EDBB902}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LlamaCpp.Net.Build", "src\LlamaCpp.Net.Build\LlamaCpp.Net.Build.csproj", "{D1D30BD2-E338-479F-A0C4-1A8E3EDBB902}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Files", "Solution Files", "{A21D1551-D4FC-4248-B0E5-EFD25BB697DF}"
+	ProjectSection(SolutionItems) = preProject
+		src\Directory.Build.props = src\Directory.Build.props
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
