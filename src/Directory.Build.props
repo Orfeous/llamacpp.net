@@ -1,0 +1,69 @@
+<Project>
+	<!-- Library -->
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
+		<Nullable>enable</Nullable>
+		<ErrorReport>none</ErrorReport>
+		<DebugType>embedded</DebugType>
+        
+		<CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<AnalysisLevel>latest-recommended</AnalysisLevel>
+		<WarningLevel>4</WarningLevel>
+
+	</PropertyGroup>
+	<!-- /Library -->
+
+	<!-- Version -->
+	<PropertyGroup>
+		<Version>0.0.1</Version>
+		<PackageVersion>$(Version)-alpha</PackageVersion>
+		<AssemblyVersion>$(Version).0</AssemblyVersion>
+		<FileVersion>$(Version).0</FileVersion>
+	</PropertyGroup>
+	<!-- /Version -->
+
+	<!-- Package -->
+	<PropertyGroup>
+		<Authors>orfeous, mlof</Authors>
+		<Copyright>2023 - orfeous, mlof</Copyright>
+		<PackageTags>LLama, LLM, AI,</PackageTags>
+		<ApplicationIcon>llama-glyph-256.ico</ApplicationIcon>
+		<PackageIcon>llama-glyph-128.png</PackageIcon>
+		<PackageProjectUrl>https://github.com/Orfeous/llamacpp.net</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/Orfeous/llamacpp.net.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageReadmeFile>readme.md</PackageReadmeFile>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<DebugType>embedded</DebugType>
+
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Content Include="llama-glyph-256.ico" />
+		<None Include="..\..\assets\llama-glyph-128.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\..\LICENSE">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\..\readme.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+	<!-- /Package -->
+
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+</Project>
