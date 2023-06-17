@@ -18,15 +18,13 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{41E88449-8687-45F0-962E-3CAAE63F9F26}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{B52CB79E-C6BB-49A1-BB97-9C600BDF50A6}"
+	ProjectSection(SolutionItems) = preProject
+		src\Directory.Build.props = src\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LlamaCpp.Net.Test", "src\LlamaCpp.Net.Test\LlamaCpp.Net.Test.csproj", "{8E9EB6FB-FA9D-434F-BF08-25B099CEA969}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LlamaCpp.Net.Build", "src\LlamaCpp.Net.Build\LlamaCpp.Net.Build.csproj", "{D1D30BD2-E338-479F-A0C4-1A8E3EDBB902}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Files", "Solution Files", "{A21D1551-D4FC-4248-B0E5-EFD25BB697DF}"
-	ProjectSection(SolutionItems) = preProject
-		src\Directory.Build.props = src\Directory.Build.props
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
