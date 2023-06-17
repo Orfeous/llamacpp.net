@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<!-- Library -->
 	<PropertyGroup>
@@ -76,8 +76,10 @@
 		<DebugType>embedded</DebugType>
 		<CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
 	</PropertyGroup>
-
-
 	<!-- /Package -->
+
+	<ItemGroup>
+		<ProjectReference Include="..\LlamaCpp.Net\LlamaCpp.Net.csproj" />
+	</ItemGroup>
 
 </Project>
