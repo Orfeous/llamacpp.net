@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Llama.Build": {
+      "commandName": "Project"
+    },
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": ""
+    }
+  }
+}

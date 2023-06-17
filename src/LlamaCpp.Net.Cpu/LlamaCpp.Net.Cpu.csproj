@@ -1,3 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+    <PropertyGroup>
+        <Title>LlamaCpp.Net.Cpu</Title>
+        <Description>C#/.NET binding of llama.cpp - CPU inference library</Description>
+    </PropertyGroup>
 </Project>
