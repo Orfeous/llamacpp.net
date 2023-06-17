@@ -30,7 +30,7 @@ namespace LlamaCpp.Net.Native
 
             if (libHandle == IntPtr.Zero)
             {
-                throw new InvalidComObjectException($"Failed to load {libraryPath}");
+                throw new DllNotFoundException($"Failed to load {libraryPath}");
             }
         }
     }

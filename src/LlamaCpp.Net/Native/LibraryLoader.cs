@@ -10,9 +10,16 @@ namespace LlamaCpp.Net.Native
     internal static class LibraryLoader
     {
         /// <summary>
+        /// Name of the native library
+        /// 
+        /// By default when you build llama.cpp this is called llama.{dll/so/dylib} respectively
+        /// </summary>
+        internal const string NativeLibraryName = "llama";
+
+        /// <summary>
         /// Helper method to load the OS specific llama.cpp library
         /// </summary>
-        public static void LibraryLoad()
+        internal static void LibraryLoad()
         {
             //* Use windows as default
             var os = "win";
@@ -34,7 +41,8 @@ namespace LlamaCpp.Net.Native
                 ext = "dylib";
             }
 
-            var libraryPath = Path.Combine(AppContext.BaseDirectory, $"llama.{ext}");
+
+            var libraryPath = Path.Combine(AppContext.BaseDirectory, $"{NativeLibraryName}.{ext}");
             switch (os)
             {
                 case "win":
