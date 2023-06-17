@@ -1,0 +1,7 @@
+This project can be built through the use of Cake Frosting. If you can see this message, you've already got the .net sdk set up.
+
+You can view the different options by running .\build.ps1 -h or .\build.sh -h, as appropriate.
+
+To see the list of available targets, run it with the --tree option.
+
+Good luck!

@@ -1,10 +1,14 @@
-﻿namespace LlamaCpp.Net.Build
+using Cake.Frosting;
+
+namespace LlamaCpp.Net.Build
 {
-    internal class Program
+    public static class Program
     {
-        static void Main(string[] args)
+        public static int Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            return new CakeHost()
+                .UseContext<BuildContext>()
+                .Run(args);
         }
     }
 }
