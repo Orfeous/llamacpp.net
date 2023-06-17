@@ -19,7 +19,7 @@ namespace LlamaCpp.Net.Native
         /// <summary>
         /// Helper method to load the OS specific llama.cpp library
         /// </summary>
-        public static void LibraryLoad()
+        internal static void LibraryLoad()
         {
             //* Use windows as default
             var os = "win";
