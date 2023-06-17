@@ -1,4 +1,5 @@
-﻿using Cake.Common.IO;
+﻿using System.Linq;
+using Cake.Common.IO;
 using Cake.Common.Net;
 using Cake.Frosting;
 using LlamaCpp.Net.Build.Configuration;
