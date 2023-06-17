@@ -1,3 +1,5 @@
+using System;
+
 namespace LlamaCpp.Net.Build.Configuration
 {
     [Flags]

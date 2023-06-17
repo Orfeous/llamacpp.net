@@ -1,3 +1,4 @@
+using System;
 using Cake.Core.IO;
 using LlamaCpp.Net.Build.Configuration;
 

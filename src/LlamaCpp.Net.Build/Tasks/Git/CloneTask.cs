@@ -1,4 +1,5 @@
-﻿using Cake.Common.IO;
+﻿using System;
+using Cake.Common.IO;
 using Cake.Core.Diagnostics;
 using Cake.Frosting;
 using LibGit2Sharp;
