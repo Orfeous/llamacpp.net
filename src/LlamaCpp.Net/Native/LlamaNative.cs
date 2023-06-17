@@ -5,6 +5,16 @@ namespace LlamaCpp.Net.Native
 {
     using llama_token = Int32;
 
+    /// <summary>
+    /// Wrapper around the native library
+    /// 
+    /// Primary Source: https://github.com/ggerganov/llama.cpp/blob/master/llama.h
+    /// Primary Source: https://github.com/ggerganov/llama.cpp/blob/master/ggml.h
+    /// 
+    /// Secondary Source: https://github.com/abetlen/llama-cpp-python/blob/main/llama_cpp/llama_cpp.py
+    /// Secondary Source: https://github.com/SciSharp/LLamaSharp/blob/master/LLama/Native/NativeApi.cs
+    /// Secondary Source: https://github.com/hpretila/llama.net/blob/main/LLaMA.NET/Native/LLaMANativeMethods.cs
+    /// </summary>
     internal unsafe sealed class LlamaNative
     {
         /// <summary>
