@@ -3,6 +3,9 @@ using System.Runtime.InteropServices;
 
 namespace LlamaCpp.Net.Native
 {
+    /// <summary>
+    /// Loader class to load the windows specific llama.cpp library
+    /// </summary>
     internal static class WindowsLoader
     {
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]

@@ -3,6 +3,9 @@ using System.Runtime.InteropServices;
 
 namespace LlamaCpp.Net.Native
 {
+    /// <summary>
+    /// Loader class to load the macos specific llama.cpp library
+    /// </summary>
     internal static class MacLoader
     {
         private const int RTLD_LAZY = 0x00001;

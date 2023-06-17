@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 namespace LlamaCpp.Net.Native
 {
     /// <summary>
-    /// 
+    /// Helper class to load the OS specific llama.cpp library
     /// </summary>
     internal static class LibraryLoader
     {
         /// <summary>
-        /// 
+        /// Helper method to load the OS specific llama.cpp library
         /// </summary>
         public static void LibraryLoad()
         {

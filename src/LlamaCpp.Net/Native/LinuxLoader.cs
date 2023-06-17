@@ -3,6 +3,9 @@ using System.Runtime.InteropServices;
 
 namespace LlamaCpp.Net.Native
 {
+    /// <summary>
+    /// Loader class to load the linux specific llama.cpp library
+    /// </summary>
     internal static class LinuxLoader
     {
         private const int RTLD_LAZY = 0x00001;
