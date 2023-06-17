@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Library -->
+	<!-- Library -->
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
@@ -14,7 +14,7 @@
 	</PropertyGroup>
 	<!-- /Library -->
 
-  <!-- Version -->
+	<!-- Version -->
 	<PropertyGroup>
 		<Version>0.0.1</Version>
 		<PackageVersion>$(Version)-alpha</PackageVersion>
@@ -23,7 +23,7 @@
 	</PropertyGroup>
 	<!-- /Version -->
 
-  <!-- Package -->
+	<!-- Package -->
 	<PropertyGroup>
 		<Title>LlamaCpp.Net.Cpu</Title>
 		<Description>C#/.NET binding of llama.cpp - CPU inference library</Description>
@@ -40,44 +40,44 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	<Content Include="llama-glyph-256.ico" />
-	  <None Include="..\..\assets\llama-glyph-128.png">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
-	  <None Include="..\..\LICENSE">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
-	  <None Include="..\..\readme.md">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
+		<Content Include="llama-glyph-256.ico" />
+		<None Include="..\..\assets\llama-glyph-128.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\..\LICENSE">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\..\readme.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
 	</ItemGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.1|AnyCPU'">
-	  <DebugType>embedded</DebugType>
-	  <WarningLevel>4</WarningLevel>
-	  <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+		<DebugType>embedded</DebugType>
+		<WarningLevel>4</WarningLevel>
+		<CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0|AnyCPU'">
-	  <DebugType>embedded</DebugType>
-	  <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+		<DebugType>embedded</DebugType>
+		<CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.1|AnyCPU'">
-	  <DebugType>embedded</DebugType>
-	  <WarningLevel>4</WarningLevel>
-	  <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+		<DebugType>embedded</DebugType>
+		<WarningLevel>4</WarningLevel>
+		<CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0|AnyCPU'">
-	  <DebugType>embedded</DebugType>
-	  <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+		<DebugType>embedded</DebugType>
+		<CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
 	</PropertyGroup>
 
-	
+
 	<!-- /Package -->
 
 </Project>
