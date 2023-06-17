@@ -82,4 +82,10 @@
 		<ProjectReference Include="..\LlamaCpp.Net\LlamaCpp.Net.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Update="llama.dll">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
 </Project>
