@@ -1,17 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
 using LlamaCpp.Net.Abstractions;
+using LlamaCpp.Net.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using NUnit.Framework;
 
 namespace LlamaCpp.Net.Test
 {
+    [SetUpFixture]
+    public class SetupTrace
+    {
+        [OneTimeSetUp]
+        public void StartTest()
+        {
+            Trace.Listeners.Add(new ConsoleTraceListener());
+        }
+
+        [OneTimeTearDown]
+        public void EndTest()
+        {
+            Trace.Flush();
+        }
+    }
+
     [TestFixture]
     public class LanguageModelTests
     {
@@ -20,7 +38,8 @@ namespace LlamaCpp.Net.Test
             var modelFileName = "wizardLM-7B.ggmlv3.q4_0.bin";
             var modelPath = Path.Join(Constants.ModelDirectory, modelFileName);
             modelPath = Path.GetFullPath(modelPath);
-            return new LanguageModel(modelPath, new Logger<LanguageModel>(new NullLoggerFactory()));
+            return new LanguageModel(modelPath, new Logger<LanguageModel>(new NullLoggerFactory()),
+                LanguageModelOptions.Default);
         }
 
         [Test]
@@ -62,6 +81,27 @@ namespace LlamaCpp.Net.Test
 
 
             sb.ToString().Should().Be(input);
+        }
+
+        [Test]
+        public void Infer_Should_ReturnExpectedString()
+        {
+            var instance = CreateInstance();
+
+            var prompt =
+                "What is the common name for felis catus?\n\n### Response:";
+            Debug.WriteLine(prompt);
+
+            var enumerable = new List<string>();
+
+            enumerable.AddRange(instance.InferAsync(prompt));
+
+            var s = string.Join("", enumerable).Replace(prompt, "");;
+
+
+            Debug.WriteLine(s);
+
+            s.Should().Contain("cat", "because the answer is cat");
         }
     }
 }
