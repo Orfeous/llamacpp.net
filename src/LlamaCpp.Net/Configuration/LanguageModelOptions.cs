@@ -12,7 +12,7 @@
         {
             ContextSize = 1024,
             GpuLayerCount = 24,
-            Seed = 42,
+            Seed = -1,
             UseFp16Memory = false,
             UseMemoryLock = false,
             EmbeddingMode = false
