@@ -16,9 +16,9 @@ namespace LlamaCpp.Net
     /// <inheritdoc />
     public class LanguageModel : ILanguageModel
     {
-        private readonly ILogger<LanguageModel> _logger;
         private readonly SafeLLamaContextHandle _contextHandle;
         private readonly Encoding _encoding = Encoding.UTF8;
+        private readonly ILogger<LanguageModel> _logger;
 
         /// <summary>
         ///     The constructor for the language model
@@ -84,7 +84,7 @@ namespace LlamaCpp.Net
                 InitializeLora(handle, modelPath, options.LoraAdapterPath, options.LoraThreads);
             }
 
-            this._contextHandle = handle;
+            _contextHandle = handle;
         }
 
         /// <inheritdoc />
@@ -122,6 +122,13 @@ namespace LlamaCpp.Net
             GC.SuppressFinalize(this);
         }
 
+        /// <inheritdoc />
+        public string TokenToString(int token)
+        {
+            var ptr = LlamaNative.llama_token_to_str(_contextHandle, token);
+            return ptr.PtrToString(_encoding);
+        }
+
 
         private static void ProgressCallback(float progress, IntPtr ctx)
         {
@@ -151,13 +158,6 @@ namespace LlamaCpp.Net
             {
                 _contextHandle?.Dispose();
             }
-        }
-
-        /// <inheritdoc />
-        public string TokenToString(int token)
-        {
-            var ptr = LlamaNative.llama_token_to_str(_contextHandle, token);
-            return ptr.PtrToString(_encoding);
         }
     }
 }
