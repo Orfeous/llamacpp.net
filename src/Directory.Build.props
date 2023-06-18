@@ -42,23 +42,23 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Content Include="..\..\assets\llama-glyph-256.ico" >
+        <Content Include="..\..\assets\llama-glyph-256.ico" Visible="False">
             <Link>llama-glyph-256.ico</Link>
             <Pack>True</Pack>
             <PackagePath>\</PackagePath>
 
         </Content>
-        <None Include="..\..\assets\llama-glyph-128.png" >
+        <None Include="..\..\assets\llama-glyph-128.png" Visible="False">
             <Link>llama-glyph-128.png</Link>
 
             <Pack>True</Pack>
             <PackagePath>\</PackagePath>
         </None>
-        <None Include="..\..\LICENSE">
+        <None Include="..\..\LICENSE" Visible="False">
             <Pack>True</Pack>
             <PackagePath>\</PackagePath>
         </None>
-        <None Include="..\..\readme.md">
+        <None Include="..\..\readme.md" Visible="False">
             <Pack>True</Pack>
             <PackagePath>\</PackagePath>
         </None>

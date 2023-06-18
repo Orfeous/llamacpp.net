@@ -1,4 +1,4 @@
-namespace LlamaCpp.Net.Build.Configuration
+﻿namespace LlamaCpp.Net.Build.Configuration
 {
     public record MsvcBuildSettings : BuildSettings
     {
