@@ -98,10 +98,10 @@ namespace LlamaCpp.Net
         /// <inheritdoc />
         public List<int> Tokenize(string text)
         {
-            var embd_inp = new int[text.Length + 1];
+            var tokens = new int[text.Length + 1];
 
 
-            var numberOfTokens = LlamaNative.llama_tokenize(_contextHandle, text, embd_inp, embd_inp.Length, true);
+            var numberOfTokens = LlamaNative.llama_tokenize(_contextHandle, text, tokens, tokens.Length, true);
 
             if (numberOfTokens == 0)
             {
@@ -109,9 +109,9 @@ namespace LlamaCpp.Net
             }
 
 
-            Array.Resize(ref embd_inp, numberOfTokens);
+            Array.Resize(ref tokens, numberOfTokens);
 
-            return embd_inp.Take(numberOfTokens).ToList();
+            return tokens.Take(numberOfTokens).ToList();
         }
 
 
