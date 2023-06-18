@@ -7,7 +7,7 @@ namespace LlamaCpp.Net.Abstractions
     /// <summary>
     /// An interface for the language model
     /// </summary>
-    internal interface ILanguageModel : IDisposable
+    public interface ILanguageModel : IDisposable
     {
         /// <summary>
         /// The path to the model
