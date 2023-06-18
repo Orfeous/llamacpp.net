@@ -20,6 +20,7 @@ namespace LlamaCpp.Net.Build.Configuration
         public bool EnableLinkTimeOptimization { get; set; }
 
         public abstract string CompilerType { get; }
+        public string BuildConfiguration { get; set; }
 
         public DirectoryPath GetDirectoryPath()
 

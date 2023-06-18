@@ -3,12 +3,14 @@ using System.IO;
 using Cake.Core;
 using Cake.Core.Diagnostics;
 using Cake.Frosting;
+using LlamaCpp.Net.Build.Tasks.Cmake;
 
 namespace LlamaCpp.Net.Build.Tasks
 {
     [TaskName("Default")]
     [TaskDescription("A friendly entrypoint for the build system")]
-    [IsDependentOn(typeof(Cmake.Msvc.BuildTask))]
+    [IsDependentOn(typeof(CmakeBuildTask))]
+
     public class DefaultTask : FrostingTask
     {
         public override void Run(ICakeContext context)

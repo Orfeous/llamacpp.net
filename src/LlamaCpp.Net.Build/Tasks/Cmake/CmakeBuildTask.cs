@@ -8,7 +8,6 @@ namespace LlamaCpp.Net.Build.Tasks.Cmake
     [IsDependentOn(typeof(ConfigureTask))]
     [IsDependentOn(typeof(BuildTask))]
     [IsDependentOn(typeof(MoveToRuntimeDirectoryTask))]
-    [IsDependeeOf(typeof(Dotnet.BuildTask))]
     public class CmakeBuildTask : FrostingTask<BuildContext>
     {
     }

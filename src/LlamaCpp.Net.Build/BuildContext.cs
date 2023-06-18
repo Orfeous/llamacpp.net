@@ -37,12 +37,12 @@ namespace LlamaCpp.Net.Build
             {
                 new MsvcBuildSettings
                 {
-                    FriendlyName = "Bells-and-whistles",
                     Platform = "X64",
+                    BuildConfiguration = "Release",
+                    Avx512Support = Avx512Support.Avx512 | Avx512Support.Vbmi | Avx512Support.Vnni,
                     BlasType =
                         BlasType.CuBlas,
-                    EnableKQuants = true,
-                    Avx512Support = Avx512Support.Avx512 | Avx512Support.Vbmi | Avx512Support.Vnni
+                    EnableKQuants = false,
                 }
             };
         }

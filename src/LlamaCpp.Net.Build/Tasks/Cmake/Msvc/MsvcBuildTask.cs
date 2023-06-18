@@ -26,7 +26,7 @@ namespace LlamaCpp.Net.Build.Tasks.Cmake.Msvc
             processParameterBuilder.AppendQuoted(context.LlamaBuildDirectory.Combine(setting.BuildPath).FullPath);
             processParameterBuilder.Append("--parallel");
             processParameterBuilder.Append("--config ");
-            processParameterBuilder.AppendQuoted(context.BuildConfiguration);
+            processParameterBuilder.AppendQuoted(setting.BuildConfiguration);
 
 
             var process = context.StartProcess("cmake",
