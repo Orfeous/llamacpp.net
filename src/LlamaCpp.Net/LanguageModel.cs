@@ -18,7 +18,7 @@ namespace LlamaCpp.Net
     {
         private readonly ILogger<LanguageModel> _logger;
         private readonly SafeLLamaContextHandle _contextHandle;
-        private Encoding encoding = Encoding.UTF8;
+        private readonly Encoding _encoding = Encoding.UTF8;
 
         /// <summary>
         ///     The constructor for the language model
@@ -157,7 +157,7 @@ namespace LlamaCpp.Net
         public string TokenToString(int token)
         {
             var ptr = LlamaNative.llama_token_to_str(_contextHandle, token);
-            return ptr.PtrToString(encoding);
+            return ptr.PtrToString(_encoding);
         }
     }
 }
