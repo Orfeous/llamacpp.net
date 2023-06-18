@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using LlamaCpp.Net.Configuration;
 
 namespace LlamaCpp.Net.Abstractions
@@ -33,5 +34,14 @@ namespace LlamaCpp.Net.Abstractions
         /// <param name="token"></param>
         /// <returns></returns>
         string TokenToString(int token);
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="options"></param>
+        /// <param name="cancellationToken"></param>
+        IEnumerable<string> InferAsync(string input, InferenceOptions? options = null, CancellationToken cancellationToken = default);
     }
 }

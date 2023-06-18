@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using LlamaCpp.Net.Abstractions;
 using LlamaCpp.Net.Configuration;
 using LlamaCpp.Net.Exceptions;
@@ -17,8 +19,11 @@ namespace LlamaCpp.Net
     public class LanguageModel : ILanguageModel
     {
         private readonly SafeLLamaContextHandle _contextHandle;
+        private readonly int _contextSize;
         private readonly Encoding _encoding = Encoding.UTF8;
+        private readonly int _eosToken;
         private readonly ILogger<LanguageModel> _logger;
+        private readonly int _nlToken;
 
         /// <summary>
         ///     The constructor for the language model
@@ -85,7 +90,12 @@ namespace LlamaCpp.Net
             }
 
             _contextHandle = handle;
+
+            _eosToken = LlamaNative.llama_token_eos();
+            _nlToken = LlamaNative.llama_token_nl();
+            _contextSize = LlamaNative.llama_n_ctx(_contextHandle);
         }
+
 
         /// <inheritdoc />
 
@@ -127,6 +137,163 @@ namespace LlamaCpp.Net
         {
             var ptr = LlamaNative.llama_token_to_str(_contextHandle, token);
             return ptr.PtrToString(_encoding);
+        }
+
+        /// <inheritdoc />
+        public IEnumerable<string> InferAsync(string input, InferenceOptions? options = null,
+            CancellationToken cancellationToken = default)
+        {
+            options ??= InferenceOptions.Default;
+
+            var inputTokens = Tokenize(input).ToArray();
+
+
+            var outputTokens = new List<int>();
+            outputTokens.AddRange(inputTokens);
+
+            for (var i = 0; i < options.MaxNumberOfTokens; i++)
+            {
+
+                var tokens = outputTokens.ToArray();
+                var evalResult = LlamaNative.llama_eval(_contextHandle, tokens, tokens.Length, tokens.Length,
+                    options.Threads);
+
+                if (evalResult != 0)
+                {
+                    break;
+                }
+
+                var candidates = ApplyPenalty(outputTokens);
+
+
+                var id = Sample(candidates);
+
+                if (id == _eosToken)
+                {
+                    Console.WriteLine("EOS");
+                    break;
+                }
+
+                Debug.WriteLine($"{id} : {TokenToString(id)}");
+                outputTokens.Add(id);
+            }
+
+
+            return outputTokens.Select(TokenToString).ToList();
+        }
+
+        private int Sample(TokenDataArray st)
+        {
+            llama_sample_temperature(_contextHandle, st, 1.0f);
+
+
+            var id = llama_sample_token(_contextHandle, st);
+            return id;
+        }
+
+        private static unsafe int llama_sample_token(SafeLLamaContextHandle ctx, TokenDataArray candidates)
+        {
+            var handle = candidates.data.Pin();
+            var st = new TokenDataArrayNative
+            {
+                data = new IntPtr(handle.Pointer), size = candidates.size, sorted = candidates.sorted
+            };
+            return LlamaNative.llama_sample_token(ctx, new IntPtr(&st));
+        }
+
+        private static unsafe void llama_sample_temperature(SafeLLamaContextHandle ctx, TokenDataArray candidates,
+            float temp)
+        {
+            var handle = candidates.data.Pin();
+            var st = new TokenDataArrayNative
+            {
+                data = new IntPtr(handle.Pointer), size = candidates.size, sorted = candidates.sorted
+            };
+            LlamaNative.llama_sample_temperature(ctx, new IntPtr(&st), temp);
+        }
+
+
+        private TokenDataArray ApplyPenalty(IEnumerable<int> lastTokens,
+            Dictionary<int, float>? logitBias = null,
+            int repeatLastTokensCount = 64, float repeatPenalty = 1.1f, float alphaFrequency = .0f,
+            float alphaPresence = .0f,
+            bool penalizeNl = true)
+        {
+            var vocabSize = LlamaNative.llama_n_vocab(_contextHandle);
+            var logits = GetLogits(_contextHandle, vocabSize);
+
+            if (logitBias is not null)
+            {
+                foreach (var (key, value) in logitBias)
+                {
+                    logits[key] += value;
+                }
+            }
+
+            var candidates = new List<TokenData> { Capacity = vocabSize };
+            for (var tokenId = 0; tokenId < vocabSize; tokenId++)
+            {
+                candidates.Add(new TokenData(tokenId, logits[tokenId], 0.0f));
+            }
+
+            var candidatesP = new TokenDataArray(candidates.ToArray(), (ulong)candidates.Count, false);
+
+            // Apply penalties
+            var nlLogit = logits[_nlToken];
+
+            var lt = lastTokens.ToList();
+            var lastTokensCount = lt.Count;
+            // TODO: set context size
+            var lastNRepeat = Math.Min(Math.Min(lastTokensCount, repeatLastTokensCount), _contextSize);
+
+
+            SampleRepetitionPenalty(_contextHandle, candidatesP,
+                lt.Skip(lastTokensCount - lastNRepeat).ToArray(),
+                (ulong)lastNRepeat, repeatPenalty);
+            SampleFrequencyAndPresencePenalties(_contextHandle, candidatesP,
+                lt.Skip(lastTokensCount - lastNRepeat).ToArray(),
+                (ulong)lastNRepeat, alphaFrequency, alphaPresence);
+
+
+            if (!penalizeNl)
+            {
+                logits[_nlToken] = nlLogit;
+            }
+
+            return candidatesP;
+        }
+
+        private static unsafe void SampleRepetitionPenalty(SafeLLamaContextHandle ctx,
+            TokenDataArray candidates,
+            int[] lastTokens, ulong lastTokensSize, float penalty)
+        {
+            var handle = candidates.data.Pin();
+            var st = new TokenDataArrayNative
+            {
+                data = new IntPtr(handle.Pointer), size = candidates.size, sorted = candidates.sorted
+            };
+            LlamaNative.llama_sample_repetition_penalty(ctx, new IntPtr(&st), lastTokens, lastTokensSize, penalty);
+        }
+
+        private static unsafe void SampleFrequencyAndPresencePenalties(SafeLLamaContextHandle ctx,
+            TokenDataArray candidates, int[] lastTokens, ulong lastTokensSize, float alphaFrequency,
+            float alphaPresence)
+        {
+            var handle = candidates.data.Pin();
+            var st = new TokenDataArrayNative
+            {
+                data = new IntPtr(handle.Pointer), size = candidates.size, sorted = candidates.sorted
+            };
+            LlamaNative.llama_sample_frequency_and_presence_penalties(ctx, new IntPtr(&st), lastTokens,
+                lastTokensSize,
+                alphaFrequency, alphaPresence);
+        }
+
+
+        private static unsafe Span<float> GetLogits(SafeLLamaContextHandle contextHandle, int length)
+        {
+            var logits = LlamaNative.llama_get_logits(contextHandle);
+            return new Span<float>(logits, length);
         }
 
 
