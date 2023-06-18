@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using LlamaCpp.Net.Abstractions;
 using LlamaCpp.Net.Configuration;
 using LlamaCpp.Net.Exceptions;
 using LlamaCpp.Net.Extensions;
@@ -157,65 +158,6 @@ namespace LlamaCpp.Net
         {
             var ptr = LlamaNative.llama_token_to_str(_contextHandle, token);
             return ptr.PtrToString(encoding);
-        }
-    }
-
-    /// <summary>
-    /// Exception thrown when tokenization fails
-    /// </summary>
-    public class TokenizationFailedException : Exception
-    {
-        /// <summary>
-        ///    Constructor
-        /// </summary>
-        /// <param name="text"></param>
-        public TokenizationFailedException(string text) : base($"Tokenization of {text} failed")
-        {
-        }
-    }
-
-    /// <summary>
-    /// Convenience extensions for pointers
-    /// </summary>
-    public static class PointerExtensions
-    {
-        /// <summary>
-        ///    Converts a stringPointer to a string
-        /// </summary>
-        /// <param name="stringPointer"></param>
-        /// <param name="encoding"></param>
-        /// <returns></returns>
-        public static unsafe string PtrToString(this IntPtr stringPointer, Encoding encoding)
-        {
-#if NET6_0_OR_GREATER
-            if(encoding == Encoding.UTF8)
-            {
-                return Marshal.PtrToStringUTF8(stringPointer);
-            }
-            else if(encoding == Encoding.Unicode)
-            {
-                return Marshal.PtrToStringUni(stringPointer);
-            }
-            else
-            {
-                return Marshal.PtrToStringAuto(stringPointer);
-            }
-#else
-            var tp = (byte*)stringPointer.ToPointer();
-            List<byte> bytes = new();
-            while (true)
-            {
-                var c = *tp++;
-                if (c == '\0')
-                {
-                    break;
-                }
-
-                bytes.Add(c);
-            }
-
-            return encoding.GetString(bytes.ToArray());
-#endif
         }
     }
 }
