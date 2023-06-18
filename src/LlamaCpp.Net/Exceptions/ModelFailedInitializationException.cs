@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace LlamaCpp.Net.Exceptions
 {
@@ -7,6 +8,11 @@ namespace LlamaCpp.Net.Exceptions
     /// </summary>
     public sealed class ModelFailedInitializationException : Exception
     {
+        internal ModelFailedInitializationException(string modelPath, SEHException e) : base(
+            $"Failed to initialize model {modelPath}: {e.ErrorCode}", e)
+        {
+            ModelPath = modelPath;
+        }
         /// <summary>
         /// Constructor for the exception
         /// </summary>

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using LlamaCpp.Net.Configuration;
 using LlamaCpp.Net.Exceptions;
 using LlamaCpp.Net.Extensions;
@@ -59,7 +61,15 @@ namespace LlamaCpp.Net
             var contextParams = LlamaNative.llama_context_default_params();
             options.Apply(contextParams);
 
-            var context = LlamaNative.llama_init_from_file(modelPath, contextParams);
+            IntPtr context;
+            try
+            {
+                context = LlamaNative.llama_init_from_file(modelPath, contextParams);
+            }
+            catch (SEHException e)
+            {
+                throw new ModelFailedInitializationException(modelPath, e);
+            }
 
             if (context == IntPtr.Zero)
             {
