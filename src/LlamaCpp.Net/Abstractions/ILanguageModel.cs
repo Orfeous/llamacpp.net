@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Text;
 using LlamaCpp.Net.Configuration;
 
 namespace LlamaCpp.Net.Abstractions

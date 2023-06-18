@@ -3,9 +3,9 @@ using LlamaCpp.Net.Native;
 
 namespace LlamaCpp.Net.Extensions
 {
-    internal static class LanguageModelOptionsExtensions
+    internal static class ContextParamsExtensions
     {
-        internal static void Apply(this LanguageModelOptions options, LLamaContextParams lparams)
+        internal static void Apply( this LLamaContextParams lparams, LanguageModelOptions options)
         {
             lparams.n_ctx = options.ContextSize;
             lparams.n_gpu_layers = options.GpuLayerCount;

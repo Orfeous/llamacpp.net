@@ -51,10 +51,12 @@ namespace LlamaCpp.Net.Native
         /// Return NULL on failure
         /// </summary>
         /// <param name="path_model"></param>
-        /// <param name="params_"></param>
+        /// <param name="params"></param>
         /// <returns></returns>
-        [DllImport(LibraryLoader.NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern IntPtr llama_init_from_file(string path_model, LLamaContextParams params_);
+#pragma warning disable CA2101
+        [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
+#pragma warning restore CA2101
+        internal static extern IntPtr llama_init_from_file(string path_model, LLamaContextParams @params);
 
         /// <summary>
         /// not great API - very likely to change. 
@@ -190,8 +192,10 @@ namespace LlamaCpp.Net.Native
         /// <param name="n_max_tokens"></param>
         /// <param name="add_bos"></param>
         /// <returns></returns>
-        [DllImport(LibraryLoader.NativeLibraryName, EntryPoint = "llama_tokenize", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern int llama_tokenize(SafeLLamaContextHandle ctx, sbyte[] text, llama_token[] tokens, int n_max_tokens, bool add_bos);
+#pragma warning disable CA2101
+        [DllImport(LibraryLoader.NativeLibraryName, EntryPoint = "llama_tokenize",  CallingConvention = CallingConvention.Cdecl)]
+#pragma warning restore CA2101
+        internal static extern int llama_tokenize(SafeLLamaContextHandle ctx, string text, llama_token[] tokens, int n_max_tokens, bool add_bos);
 
         /// <summary>
         /// todo

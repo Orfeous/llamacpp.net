@@ -21,41 +21,41 @@
         /// <summary>
         /// The context size for the language model
         /// </summary>
-        public int ContextSize { get; set; }
+        public int ContextSize { get; init; }
 
         /// <summary>
         /// The number of gpu layers for the language model
         /// </summary>
-        public int GpuLayerCount { get; set; }
+        public int GpuLayerCount { get; init; }
 
         /// <summary>
         /// The seed for the language model
         /// </summary>
-        public int Seed { get; set; }
+        public int Seed { get; init; }
 
         /// <summary>
         /// Whether to use fp16 memory
         /// </summary>
-        public bool UseFp16Memory { get; set; }
+        public bool UseFp16Memory { get; init; }
 
         /// <summary>
         /// Whether to use memory lock
         /// </summary>
-        public bool UseMemoryLock { get; set; }
+        public bool UseMemoryLock { get; init; }
 
         /// <summary>
         /// Whether to use embedding mode
         /// </summary>
-        public bool EmbeddingMode { get; set; }
+        public bool EmbeddingMode { get; init; }
 
         /// <summary>
         /// The path to the lora adapter
         /// </summary>
-        public string? LoraAdapterPath { get; set; } = string.Empty;
+        public string? LoraAdapterPath { get; init; } = string.Empty;
 
         /// <summary>
         /// The number of lora threads
         /// </summary>
-        public int LoraThreads { get; set; } = 20;
+        public int LoraThreads { get; init; } = 20;
     }
 }

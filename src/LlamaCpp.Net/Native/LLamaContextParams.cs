@@ -68,7 +68,7 @@ namespace LlamaCpp.Net.Native
         /// <summary>
         /// called with a progress value between 0 and 1, pass NULL to disable
         /// </summary>
-        public IntPtr progress_callback;
+        public LlamaProgressCallback progress_callback;
 
         /// <summary>
         /// context pointer passed to the progress callback
