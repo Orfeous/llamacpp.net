@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -18,12 +17,11 @@ namespace LlamaCpp.Net
     /// <inheritdoc />
     public class LanguageModel : ILanguageModel
     {
+        private readonly ModelConstraints _constraints;
         private readonly SafeLLamaContextHandle _contextHandle;
-        private readonly int _contextSize;
         private readonly Encoding _encoding = Encoding.UTF8;
         private readonly int _eosToken;
         private readonly ILogger<LanguageModel> _logger;
-        private readonly int _nlToken;
 
         /// <summary>
         ///     The constructor for the language model
@@ -92,8 +90,10 @@ namespace LlamaCpp.Net
             _contextHandle = handle;
 
             _eosToken = LlamaNative.llama_token_eos();
-            _nlToken = LlamaNative.llama_token_nl();
-            _contextSize = _contextHandle.llama_n_ctx();
+            var nlToken = LlamaNative.llama_token_nl();
+            var contextSize = _contextHandle.llama_n_ctx();
+
+            _constraints = new ModelConstraints(_contextHandle, nlToken, contextSize);
         }
 
 
@@ -110,14 +110,12 @@ namespace LlamaCpp.Net
         {
             var tokens = new int[text.Length + 1];
 
-
             var numberOfTokens = _contextHandle.llama_tokenize(text, tokens, tokens.Length, true);
 
             if (numberOfTokens == 0)
             {
                 throw new TokenizationFailedException(text);
             }
-
 
             Array.Resize(ref tokens, numberOfTokens);
 
@@ -153,20 +151,20 @@ namespace LlamaCpp.Net
 
             for (var i = 0; i < options.MaxNumberOfTokens; i++)
             {
-
                 var tokens = outputTokens.ToArray();
-                var evalResult = _contextHandle.llama_eval(tokens, tokens.Length, tokens.Length,
-                    options.Threads);
-
-                if (evalResult != 0)
+                TryEvaluate(options, tokens, out var evalResult);
+                if (!evalResult)
                 {
                     break;
                 }
 
-                var candidates = ApplyPenalty(outputTokens);
+                var vocabSize = GetVocab(out var logits);
+
+                var candidatesP = GetCandidates(vocabSize, logits);
 
 
-                var id = Sample(candidates);
+                _constraints.ApplyConstraints(candidatesP, outputTokens, logits);
+                var id = Sample(candidatesP);
 
                 if (id == _eosToken)
                 {
@@ -174,7 +172,6 @@ namespace LlamaCpp.Net
                     break;
                 }
 
-                Debug.WriteLine($"{id} : {TokenToString(id)}");
                 outputTokens.Add(id);
             }
 
@@ -182,58 +179,26 @@ namespace LlamaCpp.Net
             return outputTokens.Select(TokenToString).ToList();
         }
 
-        private int Sample(TokenDataArray st)
-        {
-            llama_sample_temperature(_contextHandle, st, 1.0f);
-
-
-            var id = llama_sample_token(_contextHandle, st);
-            return id;
-        }
-
-        private static unsafe int llama_sample_token(SafeLLamaContextHandle ctx, TokenDataArray candidates)
-        {
-            var handle = candidates.data.Pin();
-            var st = new TokenDataArrayNative
-            {
-                data = new IntPtr(handle.Pointer),
-                size = candidates.size,
-                sorted = candidates.sorted
-            };
-            return ctx.llama_sample_token(new IntPtr(&st));
-        }
-
-        private static unsafe void llama_sample_temperature(SafeLLamaContextHandle ctx, TokenDataArray candidates,
-            float temp)
-        {
-            var handle = candidates.data.Pin();
-            var st = new TokenDataArrayNative
-            {
-                data = new IntPtr(handle.Pointer),
-                size = candidates.size,
-                sorted = candidates.sorted
-            };
-            ctx.llama_sample_temperature(new IntPtr(&st), temp);
-        }
-
-
-        private TokenDataArray ApplyPenalty(IEnumerable<int> lastTokens,
-            Dictionary<int, float>? logitBias = null,
-            int repeatLastTokensCount = 64, float repeatPenalty = 1.1f, float alphaFrequency = .0f,
-            float alphaPresence = .0f,
-            bool penalizeNl = true)
+        private int GetVocab(out Span<float> logits, Dictionary<int, float>? logitBias = null)
         {
             var vocabSize = _contextHandle.llama_n_vocab();
-            var logits = GetLogits(_contextHandle, vocabSize);
+            logits = GetLogits(_contextHandle, vocabSize);
 
-            if (logitBias is not null)
+            if (logitBias is null)
             {
-                foreach (var (key, value) in logitBias)
-                {
-                    logits[key] += value;
-                }
+                return vocabSize;
             }
 
+            foreach (var (key, value) in logitBias)
+            {
+                logits[key] += value;
+            }
+
+            return vocabSize;
+        }
+
+        private static TokenDataArray GetCandidates(int vocabSize, Span<float> logits)
+        {
             var candidates = new List<TokenData> { Capacity = vocabSize };
             for (var tokenId = 0; tokenId < vocabSize; tokenId++)
             {
@@ -241,60 +206,22 @@ namespace LlamaCpp.Net
             }
 
             var candidatesP = new TokenDataArray(candidates.ToArray(), (ulong)candidates.Count, false);
-
-            // Apply penalties
-            var nlLogit = logits[_nlToken];
-
-            var lt = lastTokens.ToList();
-            var lastTokensCount = lt.Count;
-            // TODO: set context size
-            var lastNRepeat = Math.Min(Math.Min(lastTokensCount, repeatLastTokensCount), _contextSize);
-
-
-            SampleRepetitionPenalty(_contextHandle, candidatesP,
-                lt.Skip(lastTokensCount - lastNRepeat).ToArray(),
-                (ulong)lastNRepeat, repeatPenalty);
-            SampleFrequencyAndPresencePenalties(_contextHandle, candidatesP,
-                lt.Skip(lastTokensCount - lastNRepeat).ToArray(),
-                (ulong)lastNRepeat, alphaFrequency, alphaPresence);
-
-
-            if (!penalizeNl)
-            {
-                logits[_nlToken] = nlLogit;
-            }
-
             return candidatesP;
         }
 
-        private static unsafe void SampleRepetitionPenalty(SafeLLamaContextHandle ctx,
-            TokenDataArray candidates,
-            int[] lastTokens, ulong lastTokensSize, float penalty)
+        private void TryEvaluate(InferenceOptions options, int[] tokens, out bool result)
         {
-            var handle = candidates.data.Pin();
-            var st = new TokenDataArrayNative
-            {
-                data = new IntPtr(handle.Pointer),
-                size = candidates.size,
-                sorted = candidates.sorted
-            };
-            ctx.llama_sample_repetition_penalty(new IntPtr(&st), lastTokens, lastTokensSize, penalty);
+            var evalResult = _contextHandle.llama_eval(tokens, tokens.Length, tokens.Length,
+                options.Threads);
+            result = evalResult == 0;
         }
 
-        private static unsafe void SampleFrequencyAndPresencePenalties(SafeLLamaContextHandle ctx,
-            TokenDataArray candidates, int[] lastTokens, ulong lastTokensSize, float alphaFrequency,
-            float alphaPresence)
+        private int Sample(TokenDataArray st)
         {
-            var handle = candidates.data.Pin();
-            var st = new TokenDataArrayNative
-            {
-                data = new IntPtr(handle.Pointer),
-                size = candidates.size,
-                sorted = candidates.sorted
-            };
-            ctx.llama_sample_frequency_and_presence_penalties(new IntPtr(&st), lastTokens,
-                lastTokensSize,
-                alphaFrequency, alphaPresence);
+            _contextHandle.llama_sample_temperature(st, 1.0f);
+
+            var id = _contextHandle.llama_sample_token(st);
+            return id;
         }
 
 
@@ -331,7 +258,7 @@ namespace LlamaCpp.Net
         {
             if (isDisposing)
             {
-                _contextHandle?.Dispose();
+                _contextHandle.Dispose();
             }
         }
     }

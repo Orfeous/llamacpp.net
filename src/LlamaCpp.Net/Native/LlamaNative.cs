@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
 namespace LlamaCpp.Net.Native
@@ -18,7 +17,6 @@ namespace LlamaCpp.Net.Native
     /// Secondary Source: https://github.com/SciSharp/LLamaSharp/blob/master/LLama/Native/NativeApi.cs
     /// Secondary Source: https://github.com/hpretila/llama.net/blob/main/LLaMA.NET/Native/LLaMANativeMethods.cs
     /// </summary>
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal static unsafe class LlamaNative
     {
         /// <summary>
