@@ -26,7 +26,6 @@ namespace LlamaCpp.Net.Build
             LlamaCppNetTestDirectory = RepositoryRoot.Combine("src").Combine("LlamaCpp.Net.Test");
             SolutionPath = RepositoryRoot.CombineWithFilePath("LlamaCpp.Net.sln");
             ModelDirectory = RepositoryRoot.Combine("models");
-
             // arguments
             LlamaCppCommitSha = context.Argument("llama-cpp-commit-sha", "7e4ea5beff567f53be92f75f9089e6f11fa5dabd");
             MsvcGenerator = context.Argument("msvc-generator", "Visual Studio 17 2022");
@@ -34,7 +33,10 @@ namespace LlamaCpp.Net.Build
             OpenClVersion = context.Argument("opencl-version", "2023.04.17");
             // settings
             BuildSettings = GetBuildSettings();
+            this.GitData = new GitData(this);
         }
+
+        public GitData GitData { get; set; }
 
         private static List<BuildSettings> GetBuildSettings()
         {
@@ -58,7 +60,6 @@ namespace LlamaCpp.Net.Build
                         BlasType.CuBlas,
                     EnableKQuants = true,
                 },
-
             };
 
 

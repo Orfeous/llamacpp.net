@@ -3,7 +3,9 @@ using System.IO;
 using System.Linq;
 using Cake.Common.IO;
 using Cake.Core.Diagnostics;
+using Cake.Core.IO;
 using Cake.Frosting;
+using LlamaCpp.Net.Build.Configuration;
 using LlamaCpp.Net.Build.Tasks.Cmake;
 using NuGet.Packaging;
 using NuGet.Versioning;
@@ -22,6 +24,11 @@ namespace LlamaCpp.Net.Build.Tasks.Packaging
 
             context.CleanDirectory(nugetTemp);
 
+            PackageRuntimes(context, nugetTemp);
+        }
+
+        private static void PackageRuntimes(BuildContext context, DirectoryPath nugetTemp)
+        {
             foreach (var groups in context.BuildSettings.GroupBy(settings => settings.PackageName()))
             {
                 var id = groups.Key;
@@ -31,19 +38,40 @@ namespace LlamaCpp.Net.Build.Tasks.Packaging
                 var package = new PackageBuilder
                 {
                     Id = id,
-                    Description = "LlamaCpp.Net Runtime",
-                    Title = "LlamaCpp.Net Runtime",
+                    Title = "LlamaCpp.Net ",
                     Properties =
                     {
                         [nameof(setting.Avx512Support)] = setting.Avx512Support.ToString(),
                         [nameof(setting.EnableKQuants)] = setting.EnableKQuants.ToString(),
                         [nameof(setting.BlasType)] = setting.BlasType.ToString()
                     },
-                    Version = NuGetVersion.Parse("1.0.0"),
-                    Authors = { "LlamaCpp.Net" },
+                    Version = NuGetVersion.Parse(context.GitData.NugetVersion),
                     Owners = { "LlamaCpp.Net" },
                     TargetFrameworks = { new NuGet.Frameworks.NuGetFramework("netstandard", new Version(2, 1)) }
                 };
+                foreach (var author in context.GitData.Authors)
+                {
+                    package.Authors.Add(author);
+                }
+
+
+                var description =
+                    "This is the runtime package for LlamaCpp.Net. It contains the native binaries for the platform \n\n" +
+                    "This package uses " + setting.BlasType + " for BLAS operations.\n" +
+                    "AVX512 support is " + ((setting.Avx512Support == Avx512Support.None) ? "enabled" : "disabled") +
+                    "\n";
+                if (setting.EnableKQuants)
+                {
+                    description +=
+                        "This package uses K-Quants for quantization and may not be compatible with all models.\n";
+                }
+
+
+                description += "\n\n" + "This package is generated based on the llama.cpp commit : " +
+                               context.LlamaCppCommitSha;
+
+                package.Description = description;
+
                 foreach (var s in groups)
                 {
                     context.Log.Information($"Packing {id}");
