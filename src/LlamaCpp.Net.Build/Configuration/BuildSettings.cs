@@ -6,21 +6,21 @@ namespace LlamaCpp.Net.Build.Configuration
 {
     public abstract record BuildSettings
     {
-        public string FriendlyName { get; init; }
+        public string? FriendlyName { get; init; }
         public string Platform { get; init; } = "x64";
 
         public DirectoryPath BuildPath => GetDirectoryPath();
         public BlasType BlasType { get; init; }
 
-        public bool Standalone { get; init; } = false;
-        public bool EnableKQuants { get; init; } = false;
+        public bool Standalone { get; init; }
+        public bool EnableKQuants { get; init; }
 
         public Avx512Support Avx512Support { get; init; } = Avx512Support.None;
 
         public bool EnableLinkTimeOptimization { get; set; }
 
         public abstract string CompilerType { get; }
-        public string BuildConfiguration { get; set; }
+        public string BuildConfiguration { get; set; } = "Release";
 
         public DirectoryPath GetDirectoryPath()
 

@@ -11,8 +11,8 @@ namespace LlamaCpp.Net.Build
 {
     public class BuildContext : FrostingContext
     {
-        public string LlamaRepositoryName = "llama.cpp";
-        public string LlamaRepositoryUrl = "https://github.com/ggerganov/llama.cpp";
+        public const string LlamaRepositoryName = "llama.cpp";
+        public const string LlamaRepositoryUrl = "https://github.com/ggerganov/llama.cpp";
 
         public BuildContext(ICakeContext context)
             : base(context)
@@ -47,29 +47,29 @@ namespace LlamaCpp.Net.Build
             };
         }
 
-        public DirectoryPath LlamaCppNetTestDirectory { get; set; }
+        public DirectoryPath LlamaCppNetTestDirectory { get; }
 
         public FilePath SolutionPath { get; set; }
 
-        public DirectoryPath LlamaCppNetDirectory { get; set; }
+        public DirectoryPath LlamaCppNetDirectory { get; }
 
-        public DirectoryPath RepositoryRoot { get; init; }
+        public DirectoryPath RepositoryRoot { get; }
 
-        public List<BuildSettings> BuildSettings { get; init; }
+        public List<BuildSettings> BuildSettings { get; }
 
         public List<MsvcBuildSettings> MsvcBuildSettings => BuildSettings.OfType<MsvcBuildSettings>().ToList();
-        public string MsvcGenerator { get; init; }
+        public string MsvcGenerator { get; }
 
-        public DirectoryPath LibPath { get; init; }
+        public DirectoryPath LibPath { get; }
 
-        public DirectoryPath TmpDir { get; init; }
-        public string LlamaCppCommitSha { get; init; }
+        public DirectoryPath TmpDir { get; }
+        public string LlamaCppCommitSha { get; }
         public DirectoryPath LlamaSourceDirectory => LibPath.Combine(LlamaRepositoryName);
         public DirectoryPath LlamaBuildDirectory => TmpDir.Combine("llama.cpp").Combine("build");
-        public string BuildConfiguration { get; init; }
-        public DirectoryPath RuntimeDirectory { get; init; }
+        public string BuildConfiguration { get; }
+        public DirectoryPath RuntimeDirectory { get; }
         public DirectoryPath ModelDirectory { get; set; }
-        public string OpenClVersion { get; set; }
+        public string OpenClVersion { get; }
 
         private static DirectoryPath GetRepositoryRoot(ICakeContext context)
         {
