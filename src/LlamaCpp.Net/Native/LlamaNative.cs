@@ -1,5 +1,5 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
+﻿using LlamaCpp.Net.Native.Loaders;
+using System;
 using System.Runtime.InteropServices;
 
 namespace LlamaCpp.Net.Native
@@ -18,7 +18,6 @@ namespace LlamaCpp.Net.Native
     /// Secondary Source: https://github.com/SciSharp/LLamaSharp/blob/master/LLama/Native/NativeApi.cs
     /// Secondary Source: https://github.com/hpretila/llama.net/blob/main/LLaMA.NET/Native/LLaMANativeMethods.cs
     /// </summary>
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal static unsafe class LlamaNative
     {
         /// <summary>
@@ -252,21 +251,21 @@ namespace LlamaCpp.Net.Native
         internal static extern IntPtr llama_token_to_str(this SafeLLamaContextHandle ctx, llama_token token);
 
         /// <summary>
-        /// todo
+        /// Returns the beginning of sequence token
         /// </summary>
         /// <returns></returns>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
         internal static extern llama_token llama_token_bos();
 
         /// <summary>
-        /// todo
+        /// Returns the end of sequence token
         /// </summary>
         /// <returns></returns>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
         internal static extern llama_token llama_token_eos();
 
         /// <summary>
-        /// todo
+        /// Returns the new line token
         /// </summary>
         /// <returns></returns>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]

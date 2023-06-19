@@ -15,7 +15,7 @@ namespace LlamaCpp.Net.Build.Tasks
             CleanDirectory(context, context.RuntimeDirectory);
         }
 
-        private void CleanDirectory(BuildContext context, DirectoryPath contextTmpDir)
+        private static void CleanDirectory(BuildContext context, DirectoryPath contextTmpDir)
         {
             context.Log.Information($"Cleaning {contextTmpDir.FullPath}");
 

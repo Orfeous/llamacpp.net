@@ -32,7 +32,7 @@ namespace LlamaCpp.Net.Extensions
             }
 #else
             var tp = (byte*)stringPointer.ToPointer();
-            List<byte> bytes = new();
+            List<byte> bytes = new List<byte>();
             while (true)
             {
                 var c = *tp++;

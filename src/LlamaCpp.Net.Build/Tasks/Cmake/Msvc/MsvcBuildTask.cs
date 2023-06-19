@@ -18,7 +18,7 @@ namespace LlamaCpp.Net.Build.Tasks.Cmake.Msvc
             }
         }
 
-        private void Run(BuildContext context, MsvcBuildSettings setting)
+        private static void Run(BuildContext context, MsvcBuildSettings setting)
         {
             var processParameterBuilder = new ProcessArgumentBuilder();
 
