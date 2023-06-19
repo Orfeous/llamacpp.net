@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.InteropServices;
+﻿using System.Diagnostics;
 using System.Text;
-using System.Threading.Tasks;
 using FluentAssertions;
 using LlamaCpp.Net.Abstractions;
 using LlamaCpp.Net.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using NUnit.Framework;
+#pragma warning disable CA1707 // Identifiers should not contain underscores
 
 namespace LlamaCpp.Net.Test
 {
@@ -33,7 +29,7 @@ namespace LlamaCpp.Net.Test
     [TestFixture]
     public class LanguageModelTests
     {
-        public ILanguageModel CreateInstance()
+        public static ILanguageModel CreateInstance()
         {
             var modelFileName = "wizardLM-7B.ggmlv3.q4_0.bin";
             var modelPath = Path.Join(Constants.ModelDirectory, modelFileName);
@@ -90,18 +86,20 @@ namespace LlamaCpp.Net.Test
 
             var prompt =
                 "What is the common name for felis catus?\n\n### Response:";
-            Debug.WriteLine(prompt);
+            Trace.WriteLine(prompt);
 
             var enumerable = new List<string>();
 
             enumerable.AddRange(instance.InferAsync(prompt));
 
-            var s = string.Join("", enumerable).Replace(prompt, "");;
+            var s = string.Join("", enumerable).Replace(prompt, "");
 
 
-            Debug.WriteLine(s);
+            Trace.WriteLine(s);
+
 
             s.Should().Contain("cat", "because the answer is cat");
         }
     }
 }
+#pragma warning restore CA1707 // Identifiers should not contain underscores
