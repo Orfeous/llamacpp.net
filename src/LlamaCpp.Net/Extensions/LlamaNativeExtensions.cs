@@ -1,4 +1,5 @@
 ﻿using LlamaCpp.Net.Native;
+using LlamaCpp.Net.Native.Models;
 using System;
 
 namespace LlamaCpp.Net.Extensions

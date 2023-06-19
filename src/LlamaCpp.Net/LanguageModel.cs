@@ -3,6 +3,7 @@ using LlamaCpp.Net.Configuration;
 using LlamaCpp.Net.Exceptions;
 using LlamaCpp.Net.Extensions;
 using LlamaCpp.Net.Native;
+using LlamaCpp.Net.Native.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;

@@ -1,7 +1,8 @@
-﻿using System;
+﻿using LlamaCpp.Net.Native;
+using LlamaCpp.Net.Native.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using LlamaCpp.Net.Native;
 
 namespace LlamaCpp.Net
 {
