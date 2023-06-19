@@ -4,7 +4,6 @@
     {
         None,
         OpenBlas,
-        OpenBlasIntel,
         CuBlas,
         ClBlast,
         Blis

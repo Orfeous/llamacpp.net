@@ -26,14 +26,21 @@ namespace LlamaCpp.Net.Build
             LlamaCppNetTestDirectory = RepositoryRoot.Combine("src").Combine("LlamaCpp.Net.Test");
             SolutionPath = RepositoryRoot.CombineWithFilePath("LlamaCpp.Net.sln");
             ModelDirectory = RepositoryRoot.Combine("models");
-
             // arguments
             LlamaCppCommitSha = context.Argument("llama-cpp-commit-sha", "7e4ea5beff567f53be92f75f9089e6f11fa5dabd");
             MsvcGenerator = context.Argument("msvc-generator", "Visual Studio 17 2022");
             BuildConfiguration = context.Argument("build-configuration", "Release");
             OpenClVersion = context.Argument("opencl-version", "2023.04.17");
             // settings
-            BuildSettings = new List<BuildSettings>
+            BuildSettings = GetBuildSettings();
+            this.GitData = new GitData(this);
+        }
+
+        public GitData GitData { get; set; }
+
+        private static List<BuildSettings> GetBuildSettings()
+        {
+            var list = new List<BuildSettings>
             {
                 new MsvcBuildSettings
                 {
@@ -43,8 +50,20 @@ namespace LlamaCpp.Net.Build
                     BlasType =
                         BlasType.CuBlas,
                     EnableKQuants = false,
-                }
+                },
+                new MsvcBuildSettings
+                {
+                    Platform = "X64",
+                    BuildConfiguration = "Release",
+                    Avx512Support = Avx512Support.Avx512 | Avx512Support.Vbmi | Avx512Support.Vnni,
+                    BlasType =
+                        BlasType.CuBlas,
+                    EnableKQuants = true,
+                },
             };
+
+
+            return list;
         }
 
         public DirectoryPath LlamaCppNetTestDirectory { get; }
@@ -81,6 +100,11 @@ namespace LlamaCpp.Net.Build
             }
 
             return directoryPath;
+        }
+
+        public DirectoryPath GetOutputDirectory(BuildSettings setting)
+        {
+            return LlamaBuildDirectory.Combine(setting.BuildPath);
         }
     }
 }

@@ -8,7 +8,7 @@ using LlamaCpp.Net.Build.Configuration;
 namespace LlamaCpp.Net.Build.Tasks.Cmake
 {
     [TaskName("Cmake.MoveToRuntimeDirectory")]
-    [TaskDescription("Moves the C++ build output to the runtime directory, so it can be used by the application")]
+    [TaskDescription("Moves the C++ build output to the runtime directory, so it can be used in development")]
     [IsDependentOn(typeof(Msvc.BuildTask))]
 
     public sealed class MoveToRuntimeDirectoryTask : FrostingTask<BuildContext>

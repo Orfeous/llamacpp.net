@@ -1,4 +1,5 @@
-﻿using Cake.Core;
+﻿using System;
+using Cake.Core;
 using Cake.Core.IO;
 using LlamaCpp.Net.Build.Extensions;
 
@@ -22,44 +23,75 @@ namespace LlamaCpp.Net.Build.Configuration
         public abstract string CompilerType { get; }
         public string BuildConfiguration { get; set; } = "Release";
 
-        public DirectoryPath GetDirectoryPath()
-
+        public string PackageName()
         {
-            if (FriendlyName != null)
+            var packageName = "LlamaCpp.Net.Runtime";
+
+
+            packageName += BlasType switch
             {
-                return new DirectoryPath("build-" + CompilerType + "-" + FriendlyName);
+                BlasType.None => ".Cpu",
+                BlasType.CuBlas => ".Cuda",
+                BlasType.OpenBlas => ".OpenBlas",
+                BlasType.CLBlast => ".ClBlast",
+                BlasType.Blis => ".Blis",
+                _ => throw new ArgumentOutOfRangeException()
+            };
+
+            if (BlasType == BlasType.OpenBlas)
+            {
+                packageName += "." + OpenBlasVendor.ToString();
+
             }
-
-            var path = $"build-msvc-{Platform}-{BlasType.AsString()}";
-
             if (EnableKQuants)
             {
-                path += "-kquants";
-            }
-            else
-            {
-                path += "-no-kquants";
+                packageName += ".KQuants";
             }
 
             if (Avx512Support != Avx512Support.None)
             {
+                packageName += ".Avx512";
+            }
+
+            return packageName;
+        }
+
+        public DirectoryPath GetDirectoryPath()
+
+        {
+            if (!string.IsNullOrWhiteSpace(FriendlyName))
+            {
+                return new DirectoryPath("build-" + CompilerType + "-" + FriendlyName);
+            }
+
+            var path = PackageName();
+
+            var directoryPath = new DirectoryPath(path);
+
+            return directoryPath.Combine(Platform);
+        }
+
+        public string GetName()
+        {
+            var path = $"build-msvc-{BlasType.AsString()}";
+
+
+            if (Avx512Support != Avx512Support.None)
+            {
                 path += "-avx512";
-
-                if (Avx512Support.HasFlag(Avx512Support.Vbmi))
-                {
-                    path += "-vbmi";
-                }
-
-                if (Avx512Support.HasFlag(Avx512Support.Vnni))
-                {
-                    path += "-vnni";
-                }
             }
             else
             {
                 path += "-no-avx512";
             }
 
+            if (BlasType == BlasType.OpenBlas)
+            {
+                path += "-openblas-";
+                path += OpenBlasVendor.ToString();
+            }
+
+            /*
             if (EnableLinkTimeOptimization)
             {
                 path += "-lto";
@@ -67,19 +99,19 @@ namespace LlamaCpp.Net.Build.Configuration
             else
             {
                 path += "-no-lto";
-            }
+            }*/
 
-            var directoryPath = new DirectoryPath(path);
-
-            return directoryPath;
+            return path;
         }
+
+        public OpenBlasVendor OpenBlasVendor { get; set; }
 
         public void Apply(ProcessArgumentBuilder processParameterBuilder)
         {
             processParameterBuilder.Append("-A ");
             processParameterBuilder.Append(Platform);
 
-            processParameterBuilder.AddBlasType(BlasType);
+            processParameterBuilder.AddBlasType(this);
 
             processParameterBuilder.AppendCmakeOption("LLAMA_STANDALONE", Standalone);
             if (EnableKQuants)
@@ -107,5 +139,33 @@ namespace LlamaCpp.Net.Build.Configuration
                 }
             }
         }
+    }
+
+    public enum OpenBlasVendor
+    {
+        Generic,
+        Acml,
+        AcmlGpu,
+        AcmlMp,
+        Aocl,
+        AoclMt,
+        Arm,
+        ArmIlp64,
+        ArmIlp64Mp,
+        ArmMp,
+        Atlas,
+        Intel1032,
+        Intel1064Dyn,
+        Intel1064Ilp,
+        Intel1064IlpSeq,
+        Intel1064Lp,
+        Intel1064LpSeq,
+        Nvhpc,
+        OpenBlas,
+        PhiPack,
+        Scsl,
+        ScslMp,
+        Sgimath,
+        SunPerf,
     }
 }
