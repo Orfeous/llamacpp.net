@@ -1,14 +1,14 @@
-﻿using System;
-using LlamaCpp.Net.Native;
+﻿using LlamaCpp.Net.Native;
+using System;
 
 namespace LlamaCpp.Net.Extensions
 {
     /// <summary>
     /// Extensions for the native library
     /// </summary>
-    public static class LlamaNativeExtensions
+    internal static class LlamaNativeExtensions
     {
-        internal static unsafe int llama_sample_token(this SafeLLamaContextHandle ctx, TokenDataArray candidates)
+        internal static unsafe int SampleToken(this SafeLLamaContextHandle ctx, TokenDataArray candidates)
         {
             var handle = candidates.data.Pin();
             var st = new TokenDataArrayNative
@@ -20,7 +20,7 @@ namespace LlamaCpp.Net.Extensions
             return ctx.llama_sample_token(new IntPtr(&st));
         }
 
-        internal static unsafe void llama_sample_temperature(this SafeLLamaContextHandle ctx, TokenDataArray candidates,
+        internal static unsafe void SampleTemperature(this SafeLLamaContextHandle ctx, TokenDataArray candidates,
             float temp)
         {
             var handle = candidates.data.Pin();
