@@ -90,7 +90,7 @@ namespace LlamaCpp.Net.Test
 
             var enumerable = new List<string>();
 
-            enumerable.AddRange(instance.InferAsync(prompt));
+            enumerable.AddRange(instance.Infer(prompt));
 
             var s = string.Join("", enumerable).Replace(prompt, "");
 

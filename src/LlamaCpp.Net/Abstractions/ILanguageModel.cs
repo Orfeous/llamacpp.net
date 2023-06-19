@@ -1,47 +1,49 @@
-﻿using System;
+﻿using LlamaCpp.Net.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Threading;
-using LlamaCpp.Net.Configuration;
 
-namespace LlamaCpp.Net.Abstractions
+namespace LlamaCpp.Net.Abstractions;
+
+/// <summary>
+///     An interface for the language model
+/// </summary>
+public interface ILanguageModel : IDisposable
 {
     /// <summary>
-    /// An interface for the language model
+    ///     The path to the model
     /// </summary>
-    public interface ILanguageModel : IDisposable
-    {
-        /// <summary>
-        /// The path to the model
-        /// </summary>
-        string ModelPath { get; init; }
+    string ModelPath { get; init; }
 
-        /// <summary>
-        /// The options for the language model
-        /// </summary>
-        LanguageModelOptions Options { get; init; }
+    /// <summary>
+    ///     The options for the language model
+    /// </summary>
+    LanguageModelOptions Options { get; init; }
 
 
-        /// <summary>
-        /// Tokenizes the input
-        /// </summary>
-        /// <param name="text"></param>
-        /// <returns></returns>
-        List<int> Tokenize(string text);
-
-        /// <summary>
-        /// Convert a token to a string
-        /// </summary>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        string TokenToString(int token);
+    /// <summary>
+    ///     Tokenizes the input
+    /// </summary>
+    /// <param name="text"></param>
+    /// <returns></returns>
+    List<int> Tokenize(string text);
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="input"></param>
-        /// <param name="options"></param>
-        /// <param name="cancellationToken"></param>
-        IEnumerable<string> InferAsync(string input, InferenceOptions? options = null, CancellationToken cancellationToken = default);
-    }
+    /// <summary>
+    ///     Converts a token to its corresponding string representation
+    /// </summary>
+    /// <param name="token">The token to convert</param>
+    /// <returns>The string representation of the token</returns>
+    string TokenToString(int token);
+
+
+    /// <summary>
+    ///     Infers the output for the given input
+    /// </summary>
+    /// <param name="input">The input to infer the output for</param>
+    /// <param name="options">The options for the inference</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    /// <returns>The inferred output</returns>
+    IEnumerable<string> Infer(string input, InferenceOptions? options = null,
+        CancellationToken cancellationToken = default);
 }

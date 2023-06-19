@@ -9,6 +9,9 @@ using System.Linq;
 
 namespace LlamaCpp.Net
 {
+    /// <summary>
+    /// Represents a set of constraints that can be applied to token candidates based on the last tokens and inference options.
+    /// </summary>
     internal sealed class ModelConstraints
     {
         private readonly SafeLLamaContextHandle _contextHandle;
@@ -24,11 +27,16 @@ namespace LlamaCpp.Net
         }
 
 
+        /// <summary>
+        /// Applies constraints to the given token candidates based on the last tokens and inference options.
+        /// </summary>
+        /// <param name="candidatesP">The token candidates to apply constraints to.</param>
+        /// <param name="lastTokens">The last tokens used in the model.</param>
+        /// <param name="logits">The logits for each token.</param>
+        /// <param name="inferenceOptions">The inference options to use for applying constraints.</param>
         public void ApplyConstraints(TokenDataArray candidatesP, IEnumerable<int> lastTokens,
             Span<float> logits,
-            InferenceOptions inferenceOptions,
-            float alphaFrequency = .0f,
-            float alphaPresence = .0f)
+            InferenceOptions inferenceOptions)
         {
             var lt = lastTokens.ToList();
             var lastTokensCount = lt.Count;
@@ -42,7 +50,7 @@ namespace LlamaCpp.Net
                 RepetitionPenaltySampler.CreateInstance(_contextHandle, tokens,
                     (ulong)lastNRepeat, inferenceOptions.RepetitionPenalty),
                 FrequencyAndPresencePenaltySampler.CreateInstance(_contextHandle, tokens,
-                    (ulong)lastNRepeat, alphaFrequency, alphaPresence)
+                    (ulong)lastNRepeat, inferenceOptions.AlphaFrequency, inferenceOptions.AlphaPresence)
             };
             foreach (var sampler in samplers)
             {
