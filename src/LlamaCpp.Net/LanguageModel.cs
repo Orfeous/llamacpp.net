@@ -1,16 +1,16 @@
-﻿using System;
+﻿using LlamaCpp.Net.Abstractions;
+using LlamaCpp.Net.Configuration;
+using LlamaCpp.Net.Exceptions;
+using LlamaCpp.Net.Extensions;
+using LlamaCpp.Net.Native;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using LlamaCpp.Net.Abstractions;
-using LlamaCpp.Net.Configuration;
-using LlamaCpp.Net.Exceptions;
-using LlamaCpp.Net.Extensions;
-using LlamaCpp.Net.Native;
-using Microsoft.Extensions.Logging;
 
 namespace LlamaCpp.Net
 {
@@ -218,9 +218,9 @@ namespace LlamaCpp.Net
 
         private int Sample(TokenDataArray st)
         {
-            _contextHandle.llama_sample_temperature(st, 1.0f);
+            _contextHandle.SampleTemperature(st, 1.0f);
 
-            var id = _contextHandle.llama_sample_token(st);
+            var id = _contextHandle.SampleToken(st);
             return id;
         }
 
