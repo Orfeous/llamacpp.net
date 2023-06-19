@@ -92,5 +92,23 @@ namespace LlamaCpp.Net.Extensions
             };
             return ctx.llama_sample_token_mirostat_v2(new IntPtr(&st), tau, eta, mu);
         }
+
+        /// <summary>
+        /// Selects the token with the highest probability.
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <param name="candidates"></param>
+        /// <returns></returns>
+        internal static unsafe int SampleGreedy(this SafeLLamaContextHandle ctx, TokenDataArray candidates)
+        {
+            var handle = candidates.data.Pin();
+            var st = new TokenDataArrayNative
+            {
+                data = new IntPtr(handle.Pointer),
+                size = candidates.size,
+                sorted = candidates.sorted
+            };
+            return ctx.llama_sample_token_greedy(new IntPtr(&st));
+        }
     }
 }
