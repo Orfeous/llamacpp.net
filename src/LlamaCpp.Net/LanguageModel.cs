@@ -93,7 +93,7 @@ namespace LlamaCpp.Net
 
             _eosToken = LlamaNative.llama_token_eos();
             _nlToken = LlamaNative.llama_token_nl();
-            _contextSize = LlamaNative.llama_n_ctx(_contextHandle);
+            _contextSize = _contextHandle.llama_n_ctx();
         }
 
 
@@ -111,7 +111,7 @@ namespace LlamaCpp.Net
             var tokens = new int[text.Length + 1];
 
 
-            var numberOfTokens = LlamaNative.llama_tokenize(_contextHandle, text, tokens, tokens.Length, true);
+            var numberOfTokens = _contextHandle.llama_tokenize(text, tokens, tokens.Length, true);
 
             if (numberOfTokens == 0)
             {
@@ -135,7 +135,7 @@ namespace LlamaCpp.Net
         /// <inheritdoc />
         public string TokenToString(int token)
         {
-            var ptr = LlamaNative.llama_token_to_str(_contextHandle, token);
+            var ptr = _contextHandle.llama_token_to_str(token);
             return ptr.PtrToString(_encoding);
         }
 
@@ -155,7 +155,7 @@ namespace LlamaCpp.Net
             {
 
                 var tokens = outputTokens.ToArray();
-                var evalResult = LlamaNative.llama_eval(_contextHandle, tokens, tokens.Length, tokens.Length,
+                var evalResult = _contextHandle.llama_eval(tokens, tokens.Length, tokens.Length,
                     options.Threads);
 
                 if (evalResult != 0)
@@ -196,9 +196,11 @@ namespace LlamaCpp.Net
             var handle = candidates.data.Pin();
             var st = new TokenDataArrayNative
             {
-                data = new IntPtr(handle.Pointer), size = candidates.size, sorted = candidates.sorted
+                data = new IntPtr(handle.Pointer),
+                size = candidates.size,
+                sorted = candidates.sorted
             };
-            return LlamaNative.llama_sample_token(ctx, new IntPtr(&st));
+            return ctx.llama_sample_token(new IntPtr(&st));
         }
 
         private static unsafe void llama_sample_temperature(SafeLLamaContextHandle ctx, TokenDataArray candidates,
@@ -207,9 +209,11 @@ namespace LlamaCpp.Net
             var handle = candidates.data.Pin();
             var st = new TokenDataArrayNative
             {
-                data = new IntPtr(handle.Pointer), size = candidates.size, sorted = candidates.sorted
+                data = new IntPtr(handle.Pointer),
+                size = candidates.size,
+                sorted = candidates.sorted
             };
-            LlamaNative.llama_sample_temperature(ctx, new IntPtr(&st), temp);
+            ctx.llama_sample_temperature(new IntPtr(&st), temp);
         }
 
 
@@ -219,7 +223,7 @@ namespace LlamaCpp.Net
             float alphaPresence = .0f,
             bool penalizeNl = true)
         {
-            var vocabSize = LlamaNative.llama_n_vocab(_contextHandle);
+            var vocabSize = _contextHandle.llama_n_vocab();
             var logits = GetLogits(_contextHandle, vocabSize);
 
             if (logitBias is not null)
@@ -270,9 +274,11 @@ namespace LlamaCpp.Net
             var handle = candidates.data.Pin();
             var st = new TokenDataArrayNative
             {
-                data = new IntPtr(handle.Pointer), size = candidates.size, sorted = candidates.sorted
+                data = new IntPtr(handle.Pointer),
+                size = candidates.size,
+                sorted = candidates.sorted
             };
-            LlamaNative.llama_sample_repetition_penalty(ctx, new IntPtr(&st), lastTokens, lastTokensSize, penalty);
+            ctx.llama_sample_repetition_penalty(new IntPtr(&st), lastTokens, lastTokensSize, penalty);
         }
 
         private static unsafe void SampleFrequencyAndPresencePenalties(SafeLLamaContextHandle ctx,
@@ -282,9 +288,11 @@ namespace LlamaCpp.Net
             var handle = candidates.data.Pin();
             var st = new TokenDataArrayNative
             {
-                data = new IntPtr(handle.Pointer), size = candidates.size, sorted = candidates.sorted
+                data = new IntPtr(handle.Pointer),
+                size = candidates.size,
+                sorted = candidates.sorted
             };
-            LlamaNative.llama_sample_frequency_and_presence_penalties(ctx, new IntPtr(&st), lastTokens,
+            ctx.llama_sample_frequency_and_presence_penalties(new IntPtr(&st), lastTokens,
                 lastTokensSize,
                 alphaFrequency, alphaPresence);
         }
@@ -292,7 +300,7 @@ namespace LlamaCpp.Net
 
         private static unsafe Span<float> GetLogits(SafeLLamaContextHandle contextHandle, int length)
         {
-            var logits = LlamaNative.llama_get_logits(contextHandle);
+            var logits = contextHandle.llama_get_logits();
             return new Span<float>(logits, length);
         }
 
@@ -305,7 +313,7 @@ namespace LlamaCpp.Net
         private static void InitializeLora(SafeLLamaContextHandle contextHandle, string modelPath,
             string loraAdapterPath, int optionsLoraThreads)
         {
-            var r = LlamaNative.llama_apply_lora_from_file(contextHandle, loraAdapterPath, modelPath,
+            var r = contextHandle.llama_apply_lora_from_file(loraAdapterPath, modelPath,
                 optionsLoraThreads);
 
             if (r != 0)
