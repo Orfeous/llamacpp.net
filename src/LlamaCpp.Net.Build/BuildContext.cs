@@ -82,5 +82,10 @@ namespace LlamaCpp.Net.Build
 
             return directoryPath;
         }
+
+        public DirectoryPath GetOutputDirectory(BuildSettings setting)
+        {
+            return LlamaBuildDirectory.Combine(setting.BuildPath);
+        }
     }
 }

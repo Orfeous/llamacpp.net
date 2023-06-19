@@ -30,6 +30,15 @@ namespace LlamaCpp.Net.Build.Configuration
                 return new DirectoryPath("build-" + CompilerType + "-" + FriendlyName);
             }
 
+            var path = GetName();
+
+            var directoryPath = new DirectoryPath(path);
+
+            return directoryPath;
+        }
+
+        public string GetName()
+        {
             var path = $"build-msvc-{Platform}-{BlasType.AsString()}";
 
             if (EnableKQuants)
@@ -69,9 +78,7 @@ namespace LlamaCpp.Net.Build.Configuration
                 path += "-no-lto";
             }
 
-            var directoryPath = new DirectoryPath(path);
-
-            return directoryPath;
+            return path;
         }
 
         public void Apply(ProcessArgumentBuilder processParameterBuilder)
