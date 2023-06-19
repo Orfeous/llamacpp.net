@@ -29,12 +29,10 @@ internal abstract class AbstractSampler : ISampler
 
 
     /// <summary>
-    ///     Wraps the native call to the <see cref="Sample" /> method with the given <paramref name="candidates" />.
+    ///     Wraps the native call to the <see cref="AbstractSampler.Sample(SafeLLamaContextHandle, IntPtr)" /> method with the given <paramref name="candidates" />.
     /// </summary>
     /// <param name="candidates">The token data array to be passed to the native method.</param>
-    private unsafe void WrapNativeCall(
-        TokenDataArray candidates
-    )
+    private unsafe void WrapNativeCall(TokenDataArray candidates)
     {
         // Pin the data array to prevent the garbage collector from moving it around
         var handle = candidates.data.Pin();
