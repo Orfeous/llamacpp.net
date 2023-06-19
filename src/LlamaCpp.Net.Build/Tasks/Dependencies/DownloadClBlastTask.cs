@@ -19,15 +19,12 @@ namespace LlamaCpp.Net.Build.Tasks.Dependencies
             context.EnsureDirectoryExists(outputDirectory);
             var outputPath = outputDirectory
                 .CombineWithFilePath("opencl.zip");
-            context.DownloadFile(url, outputPath.FullPath, new DownloadFileSettings()
-            {
-
-            });
+            context.DownloadFile(url, outputPath.FullPath, new DownloadFileSettings());
 
             context.Unzip(outputPath.FullPath, context.LibPath.Combine("OpenCl").FullPath);
         }
 
-        public override bool ShouldRun(BuildContext context) => context.BuildSettings.Any(settings => settings.BlasType == BlasType.CLBlast);
+        public override bool ShouldRun(BuildContext context) => context.BuildSettings.Any(settings => settings.BlasType == BlasType.ClBlast);
     }
 
 }

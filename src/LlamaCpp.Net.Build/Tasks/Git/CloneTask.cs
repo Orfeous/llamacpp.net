@@ -14,7 +14,7 @@ namespace LlamaCpp.Net.Build.Tasks.Git
         {
             context.EnsureDirectoryExists(context.LibPath);
 
-            CloneAndCheckout(context, context.LlamaRepositoryName, context.LlamaRepositoryUrl,
+            CloneAndCheckout(context, BuildContext.LlamaRepositoryName, BuildContext.LlamaRepositoryUrl,
                 context.LlamaCppCommitSha);
         }
 
@@ -52,7 +52,7 @@ namespace LlamaCpp.Net.Build.Tasks.Git
 
         public override bool ShouldRun(BuildContext context)
         {
-            var repositoryPath = context.LibPath.Combine(context.LlamaRepositoryName);
+            var repositoryPath = context.LibPath.Combine(BuildContext.LlamaRepositoryName);
 
             if (!context.DirectoryExists(repositoryPath))
             {

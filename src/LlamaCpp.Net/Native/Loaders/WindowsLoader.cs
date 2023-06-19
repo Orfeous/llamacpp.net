@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace LlamaCpp.Net.Native
+namespace LlamaCpp.Net.Native.Loaders
 {
     /// <summary>
     /// Loader class to load the windows specific llama.cpp library

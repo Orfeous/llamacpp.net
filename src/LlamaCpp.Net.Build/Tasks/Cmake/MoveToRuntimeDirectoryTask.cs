@@ -21,7 +21,7 @@ namespace LlamaCpp.Net.Build.Tasks.Cmake
             }
         }
 
-        private void Run(BuildContext context, BuildSettings setting)
+        private static void Run(BuildContext context, BuildSettings setting)
         {
             context.EnsureDirectoryExists(context.RuntimeDirectory);
 

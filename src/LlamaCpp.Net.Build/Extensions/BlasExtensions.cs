@@ -17,7 +17,7 @@ namespace LlamaCpp.Net.Build.Extensions
                     processParameterBuilder.AppendCmakeOption("LLAMA_BLAS", true);
                     processParameterBuilder.AppendCmakeOption("LLAMA_BLAS_VENDOR", settings.OpenBlasVendor.ToVendor());
                     break;
-                case BlasType.CLBlast:
+                case BlasType.ClBlast:
                     processParameterBuilder.AppendCmakeOption("LLAMA_CLBLAST", true);
                     break;
                 case BlasType.Blis:
@@ -25,7 +25,7 @@ namespace LlamaCpp.Net.Build.Extensions
                 case BlasType.None:
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(blasType), "Unknown BLAS type");
             }
         }
 
@@ -67,7 +67,8 @@ namespace LlamaCpp.Net.Build.Extensions
             {
                 BlasType.CuBlas => "cuBLAS",
                 BlasType.OpenBlas => "OpenBLAS",
-                BlasType.CLBlast => "CLBlast",
+                BlasType.OpenBlasIntel => "OpenBLAS-Intel",
+                BlasType.ClBlast => "CLBlast",
                 BlasType.Blis => "BLIS",
                 _ => "NoBlas"
             };

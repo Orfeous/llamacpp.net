@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace LlamaCpp.Net.Native
+namespace LlamaCpp.Net.Native.Models
 {
     /// <summary>
     ///    LLama token data array

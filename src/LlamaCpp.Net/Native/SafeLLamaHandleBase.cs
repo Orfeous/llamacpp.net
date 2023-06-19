@@ -11,7 +11,7 @@ namespace LlamaCpp.Net.Native
         /// <summary>
         /// todo
         /// </summary>
-        internal protected SafeLLamaHandleBase() : base(IntPtr.Zero, ownsHandle: true) { }
+        protected internal SafeLLamaHandleBase() : base(IntPtr.Zero, ownsHandle: true) { }
 
         /// <summary>
         /// todo

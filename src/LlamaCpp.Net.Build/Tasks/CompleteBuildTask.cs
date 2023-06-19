@@ -1,9 +1,4 @@
-﻿using Cake.Common;
-using Cake.Core;
-using Cake.Core.Diagnostics;
-using Cake.Core.IO;
-using Cake.Frosting;
-using LlamaCpp.Net.Build.Tasks.Cmake;
+﻿using Cake.Frosting;
 
 namespace LlamaCpp.Net.Build.Tasks
 {

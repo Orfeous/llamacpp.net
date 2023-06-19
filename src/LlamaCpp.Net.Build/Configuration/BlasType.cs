@@ -5,7 +5,7 @@
         None,
         OpenBlas,
         CuBlas,
-        CLBlast,
+        ClBlast,
         Blis
     }
 }
