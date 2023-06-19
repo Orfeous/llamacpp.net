@@ -25,7 +25,7 @@ namespace LlamaCpp.Net.Build.Extensions
                 case BlasType.None:
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(blasType), "Unknown BLAS type");
+                    throw new ArgumentOutOfRangeException(nameof(settings.BlasType), "Unknown BLAS type");
             }
         }
 

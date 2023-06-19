@@ -6,6 +6,8 @@
         OpenBlas,
         CuBlas,
         ClBlast,
-        Blis
+        Blis,
+        CLBlast,
+        OpenBlasIntel
     }
 }
