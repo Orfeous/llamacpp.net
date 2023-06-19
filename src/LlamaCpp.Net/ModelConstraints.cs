@@ -1,5 +1,8 @@
-﻿using LlamaCpp.Net.Native;
+﻿using LlamaCpp.Net.Configuration;
+using LlamaCpp.Net.Native;
 using LlamaCpp.Net.Native.Models;
+using LlamaCpp.Net.Samplers;
+using LlamaCpp.Net.Samplers.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,77 +12,50 @@ namespace LlamaCpp.Net
     internal sealed class ModelConstraints
     {
         private readonly SafeLLamaContextHandle _contextHandle;
-        private readonly int _nlToken;
+        private readonly int _newLineToken;
         private readonly int _contextSize;
 
 
-        public ModelConstraints(SafeLLamaContextHandle contextHandle, int nlToken, int contextSize)
+        public ModelConstraints(SafeLLamaContextHandle contextHandle)
         {
             _contextHandle = contextHandle;
-            _nlToken = nlToken;
-            _contextSize = contextSize;
+            _newLineToken = LlamaNative.llama_token_nl();
+            _contextSize = _contextHandle.llama_n_ctx();
         }
-
 
 
         public void ApplyConstraints(TokenDataArray candidatesP, IEnumerable<int> lastTokens,
             Span<float> logits,
-            int repeatLastTokensCount = 64, float repeatPenalty = 1.1f, float alphaFrequency = .0f,
-            float alphaPresence = .0f,
-            bool penalizeNl = true
-            )
+            InferenceOptions inferenceOptions,
+            float alphaFrequency = .0f,
+            float alphaPresence = .0f)
         {
-            var nlLogit = logits[_nlToken];
-
             var lt = lastTokens.ToList();
             var lastTokensCount = lt.Count;
-            var lastNRepeat = Math.Min(Math.Min(lastTokensCount, repeatLastTokensCount), _contextSize);
+            var lastNRepeat = Math.Min(Math.Min(lastTokensCount, inferenceOptions.RepeatLastTokensCount), _contextSize);
 
 
-            SampleRepetitionPenalty(_contextHandle, candidatesP,
-                lt.Skip(lastTokensCount - lastNRepeat).ToArray(),
-                (ulong)lastNRepeat, repeatPenalty);
-            SampleFrequencyAndPresencePenalties(_contextHandle, candidatesP,
-                lt.Skip(lastTokensCount - lastNRepeat).ToArray(),
-                (ulong)lastNRepeat, alphaFrequency, alphaPresence);
+            var tokens = lt.Skip(lastTokensCount - lastNRepeat).ToArray();
 
-
-            if (!penalizeNl)
+            var samplers = new ISampler[]
             {
-                logits[_nlToken] = nlLogit;
+                new RepetitionPenaltySampler(_contextHandle, tokens,
+                    (ulong)lastNRepeat, inferenceOptions.RepetitionPenalty),
+                new FrequencyAndPresencePenaltySampler(_contextHandle, tokens,
+                    (ulong)lastNRepeat, alphaFrequency, alphaPresence)
+            };
+            foreach (var sampler in samplers)
+            {
+                sampler.Sample(candidatesP);
             }
 
 
-        }
+            var newLineLogit = logits[_newLineToken];
 
-        private static unsafe void SampleRepetitionPenalty(SafeLLamaContextHandle ctx,
-            TokenDataArray candidates,
-            int[] lastTokens, ulong lastTokensSize, float penalty)
-        {
-            var handle = candidates.data.Pin();
-            var st = new TokenDataArrayNative
+            if (!inferenceOptions.PenalizeNewLine)
             {
-                data = new IntPtr(handle.Pointer),
-                size = candidates.size,
-                sorted = candidates.sorted
-            };
-            ctx.llama_sample_repetition_penalty(new IntPtr(&st), lastTokens, lastTokensSize, penalty);
-        }
-
-        private static unsafe void SampleFrequencyAndPresencePenalties(SafeLLamaContextHandle ctx,
-            TokenDataArray candidates, int[] lastTokens, ulong lastTokensSize, float alphaFrequency,
-            float alphaPresence)
-        {
-            var handle = candidates.data.Pin();
-            var st = new TokenDataArrayNative
-            {
-                data = new IntPtr(handle.Pointer),
-                size = candidates.size,
-                sorted = candidates.sorted
-            };
-            ctx.llama_sample_frequency_and_presence_penalties(new IntPtr(&st), lastTokens,
-                lastTokensSize,
-                alphaFrequency, alphaPresence);
+                logits[_newLineToken] = newLineLogit;
+            }
         }
     }
 }

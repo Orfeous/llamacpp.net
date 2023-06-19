@@ -7,6 +7,7 @@ using LlamaCpp.Net.Native.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -21,7 +22,7 @@ namespace LlamaCpp.Net
         private readonly ModelConstraints _constraints;
         private readonly SafeLLamaContextHandle _contextHandle;
         private readonly Encoding _encoding = Encoding.UTF8;
-        private readonly int _eosToken;
+        private readonly int _endOfSequenceToken;
         private readonly ILogger<LanguageModel> _logger;
 
         /// <summary>
@@ -90,11 +91,9 @@ namespace LlamaCpp.Net
 
             _contextHandle = handle;
 
-            _eosToken = LlamaNative.llama_token_eos();
-            var nlToken = LlamaNative.llama_token_nl();
-            var contextSize = _contextHandle.llama_n_ctx();
+            _endOfSequenceToken = LlamaNative.llama_token_eos();
 
-            _constraints = new ModelConstraints(_contextHandle, nlToken, contextSize);
+            _constraints = new ModelConstraints(_contextHandle);
         }
 
 
@@ -164,10 +163,12 @@ namespace LlamaCpp.Net
                 var candidatesP = GetCandidates(vocabSize, logits);
 
 
-                _constraints.ApplyConstraints(candidatesP, outputTokens, logits);
+                _constraints.ApplyConstraints(candidatesP, outputTokens, logits, options);
                 var id = Sample(candidatesP);
 
-                if (id == _eosToken)
+                var s = TokenToString(id);
+                Trace.WriteLine(s);
+                if (id == _endOfSequenceToken)
                 {
                     Console.WriteLine("EOS");
                     break;

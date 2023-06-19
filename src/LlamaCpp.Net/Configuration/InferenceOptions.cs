@@ -23,5 +23,19 @@
         /// The number of threads to use
         /// </summary>
         public int Threads { get; init; } = 4;
+        /// <summary>
+        /// How much to penalize repetition
+        /// </summary>
+        public float RepetitionPenalty { get; init; } = 1.1f;
+
+        /// <summary>
+        /// Whether to penalize newlines
+        /// </summary>
+        public bool PenalizeNewLine { get; init; } = true;
+
+        /// <summary>
+        ///  The number of tokens to repeat
+        /// </summary>
+        public int RepeatLastTokensCount { get; init; } = 64;
     }
 }

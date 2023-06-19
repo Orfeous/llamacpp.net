@@ -251,21 +251,21 @@ namespace LlamaCpp.Net.Native
         internal static extern IntPtr llama_token_to_str(this SafeLLamaContextHandle ctx, llama_token token);
 
         /// <summary>
-        /// todo
+        /// Returns the beginning of sequence token
         /// </summary>
         /// <returns></returns>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
         internal static extern llama_token llama_token_bos();
 
         /// <summary>
-        /// todo
+        /// Returns the end of sequence token
         /// </summary>
         /// <returns></returns>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
         internal static extern llama_token llama_token_eos();
 
         /// <summary>
-        /// todo
+        /// Returns the new line token
         /// </summary>
         /// <returns></returns>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
