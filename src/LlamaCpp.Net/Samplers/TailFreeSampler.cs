@@ -4,6 +4,9 @@ using System;
 
 namespace LlamaCpp.Net.Samplers;
 
+/// <summary>
+/// Tail Free Sampling described in https://www.trentonbricken.com/Tail-Free-Sampling/.
+/// </summary>
 internal sealed class TailFreeSampler : AbstractSampler
 {
     private readonly int _k;

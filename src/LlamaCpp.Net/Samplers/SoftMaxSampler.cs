@@ -4,6 +4,9 @@ using System;
 
 namespace LlamaCpp.Net.Samplers;
 
+/// <summary>
+/// Sorts candidate tokens by their logits in descending order and calculate probabilities based on logits.
+/// </summary>
 internal sealed class SoftMaxSampler : AbstractSampler
 {
     protected override void Sample(SafeLLamaContextHandle context, IntPtr intPtr)

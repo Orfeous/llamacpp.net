@@ -4,6 +4,9 @@ using System;
 
 namespace LlamaCpp.Net.Samplers;
 
+/// <summary>
+/// Top-K sampling described in academic paper "The Curious Case of Neural Text Degeneration" https://arxiv.org/abs/1904.09751
+/// </summary>
 internal sealed class TopKSampler : AbstractSampler
 {
     private readonly int _k;
