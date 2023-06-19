@@ -1,11 +1,11 @@
-﻿using LlamaCpp.Net.Native;
+﻿using System;
+using LlamaCpp.Net.Native;
 using LlamaCpp.Net.Native.Models;
-using System;
 
 namespace LlamaCpp.Net.Samplers.Abstractions;
 
 /// <summary>
-///    Abstract sampler class
+///     Abstract sampler class
 /// </summary>
 internal abstract class AbstractSampler : ISampler
 {

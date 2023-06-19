@@ -3,7 +3,7 @@
 namespace LlamaCpp.Net.Samplers.Abstractions;
 
 /// <summary>
-/// A wrapper for c++ sampler methods.
+///     A wrapper for c++ sampler methods.
 /// </summary>
 internal interface ISampler
 {

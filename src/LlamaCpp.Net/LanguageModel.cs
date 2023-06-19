@@ -4,6 +4,7 @@ using LlamaCpp.Net.Exceptions;
 using LlamaCpp.Net.Extensions;
 using LlamaCpp.Net.Native;
 using LlamaCpp.Net.Native.Models;
+using LlamaCpp.Net.Samplers;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -164,8 +165,9 @@ namespace LlamaCpp.Net
 
 
                 _constraints.ApplyConstraints(candidatesP, outputTokens, logits, options);
-                var id = Sample(candidatesP);
 
+                TemperatureSampler.CreateInstance(_contextHandle, 1.0f).Sample(candidatesP);
+                var id = _contextHandle.SampleToken(candidatesP);
                 var s = TokenToString(id);
                 Trace.WriteLine(s);
                 if (id == _endOfSequenceToken)
@@ -218,13 +220,7 @@ namespace LlamaCpp.Net
             result = evalResult == 0;
         }
 
-        private int Sample(TokenDataArray st)
-        {
-            _contextHandle.SampleTemperature(st, 1.0f);
 
-            var id = _contextHandle.SampleToken(st);
-            return id;
-        }
 
 
         private static unsafe Span<float> GetLogits(SafeLLamaContextHandle contextHandle, int length)

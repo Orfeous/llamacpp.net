@@ -39,9 +39,9 @@ namespace LlamaCpp.Net
 
             var samplers = new ISampler[]
             {
-                new RepetitionPenaltySampler(_contextHandle, tokens,
+                RepetitionPenaltySampler.CreateInstance(_contextHandle, tokens,
                     (ulong)lastNRepeat, inferenceOptions.RepetitionPenalty),
-                new FrequencyAndPresencePenaltySampler(_contextHandle, tokens,
+                FrequencyAndPresencePenaltySampler.CreateInstance(_contextHandle, tokens,
                     (ulong)lastNRepeat, alphaFrequency, alphaPresence)
             };
             foreach (var sampler in samplers)
