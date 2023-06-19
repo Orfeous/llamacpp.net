@@ -33,7 +33,12 @@ namespace LlamaCpp.Net.Build
             BuildConfiguration = context.Argument("build-configuration", "Release");
             OpenClVersion = context.Argument("opencl-version", "2023.04.17");
             // settings
-            BuildSettings = new List<BuildSettings>
+            BuildSettings = GetBuildSettings();
+        }
+
+        private static List<BuildSettings> GetBuildSettings()
+        {
+            var list = new List<BuildSettings>
             {
                 new MsvcBuildSettings
                 {
@@ -43,8 +48,21 @@ namespace LlamaCpp.Net.Build
                     BlasType =
                         BlasType.CuBlas,
                     EnableKQuants = false,
-                }
+                },
+                new MsvcBuildSettings
+                {
+                    Platform = "X64",
+                    BuildConfiguration = "Release",
+                    Avx512Support = Avx512Support.Avx512 | Avx512Support.Vbmi | Avx512Support.Vnni,
+                    BlasType =
+                        BlasType.CuBlas,
+                    EnableKQuants = true,
+                },
+
             };
+
+
+            return list;
         }
 
         public DirectoryPath LlamaCppNetTestDirectory { get; set; }
