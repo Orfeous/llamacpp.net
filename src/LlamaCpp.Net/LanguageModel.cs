@@ -2,6 +2,7 @@
 using LlamaCpp.Net.Configuration;
 using LlamaCpp.Net.Exceptions;
 using LlamaCpp.Net.Extensions;
+using LlamaCpp.Net.Models;
 using LlamaCpp.Net.Native;
 using LlamaCpp.Net.Native.Models;
 using LlamaCpp.Net.Samplers;
@@ -14,6 +15,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace LlamaCpp.Net;
 
@@ -132,17 +134,38 @@ public class LanguageModel : ILanguageModel
     /// <param name="cancellationToken">The cancellation token to use.</param>
     /// <returns>An enumerable of the inferred tokens as strings.</returns>
     /// <inheritdoc />
-    public IEnumerable<string> Infer(string input, InferenceOptions? options = null,
+    public IAsyncEnumerable<string> InferAsync(string input, InferenceOptions? options = null,
         CancellationToken cancellationToken = default)
     {
+        var result = new AsyncInferenceResult();
         options ??= InferenceOptions.Default;
 
-        var inputTokens = Tokenize(input).ToArray();
+        Task.Run(() => { GenerateModelOutput(input, options, s => { result.Append(s); }); }, cancellationToken)
+            .ContinueWith(_ => { result.Complete(); }, cancellationToken);
 
+        return result.ToAsyncEnumerable(cancellationToken);
+    }
+    /// <inheritdoc />
+    public IEnumerable<string> Infer(string input, InferenceOptions? options = null)
+    {
+        var opts = options ?? InferenceOptions.Default;
+        return this.GenerateModelOutput(input, opts);
+    }
+
+
+    /// <summary>
+    ///    Infers the next tokens given an input string.
+    /// </summary>
+    /// <param name="options"></param>
+    /// <param name="input"></param>
+    /// <param name="inferenceCallback"></param>
+    /// <returns></returns>
+    private List<string> GenerateModelOutput(string input, InferenceOptions options, Action<string>? inferenceCallback = null)
+    {
+        var inputTokens = Tokenize(input).ToArray();
 
         var outputTokens = new List<int>();
         outputTokens.AddRange(inputTokens);
-
         for (var i = 0; i < options.MaxNumberOfTokens; i++)
         {
             var tokens = outputTokens.ToArray();
@@ -167,8 +190,9 @@ public class LanguageModel : ILanguageModel
             }
 
             outputTokens.Add(id);
-        }
 
+            inferenceCallback?.Invoke(s);
+        }
 
         return outputTokens.Select(TokenToString).ToList();
     }

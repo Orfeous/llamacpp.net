@@ -1,11 +1,11 @@
-﻿using System.Diagnostics;
-using System.Text;
-using FluentAssertions;
+﻿using FluentAssertions;
 using LlamaCpp.Net.Abstractions;
 using LlamaCpp.Net.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using NUnit.Framework;
+using System.Diagnostics;
+using System.Text;
 #pragma warning disable CA1707 // Identifiers should not contain underscores
 
 namespace LlamaCpp.Net.Test
