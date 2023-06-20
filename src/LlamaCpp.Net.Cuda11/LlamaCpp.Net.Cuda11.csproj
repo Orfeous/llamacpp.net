@@ -1,6 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <Title>LlamaCpp.Net.Cuda11</Title>
-        <Description>C#/.NET binding of llama.cpp - Cuda11 GPU inference library</Description>
-    </PropertyGroup>
-</Project>
