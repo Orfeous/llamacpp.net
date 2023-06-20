@@ -44,6 +44,14 @@ public interface ILanguageModel : IDisposable
     /// <param name="options">The options for the inference</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>The inferred output</returns>
-    IEnumerable<string> Infer(string input, InferenceOptions? options = null,
+    IAsyncEnumerable<string> InferAsync(string input, InferenceOptions? options = null,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="input"></param>
+    /// <param name="options"></param>
+    /// <returns></returns>
+    IEnumerable<string> Infer(string input, InferenceOptions? options = null);
 }
