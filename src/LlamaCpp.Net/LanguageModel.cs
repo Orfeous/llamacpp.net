@@ -260,7 +260,6 @@ public class LanguageModel : ILanguageModel
 
     private static void ProgressCallback(float progress, IntPtr ctx)
     {
-        Console.WriteLine($"Progress: {progress}");
     }
 
     /// <summary>
