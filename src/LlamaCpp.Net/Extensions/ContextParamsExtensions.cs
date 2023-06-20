@@ -5,7 +5,7 @@ namespace LlamaCpp.Net.Extensions
 {
     internal static class ContextParamsExtensions
     {
-        internal static void Apply( this LLamaContextParams lparams, LanguageModelOptions options)
+        internal static void Apply(ref this LLamaContextParams lparams, LanguageModelOptions options)
         {
             lparams.n_ctx = options.ContextSize;
             lparams.n_gpu_layers = options.GpuLayerCount;
