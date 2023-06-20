@@ -145,6 +145,7 @@ public class LanguageModel : ILanguageModel
 
         return result.ToAsyncEnumerable(cancellationToken);
     }
+
     /// <inheritdoc />
     public IEnumerable<string> Infer(string input, InferenceOptions? options = null)
     {
@@ -160,8 +161,20 @@ public class LanguageModel : ILanguageModel
     /// <param name="input"></param>
     /// <param name="inferenceCallback"></param>
     /// <returns></returns>
-    private List<string> GenerateModelOutput(string input, InferenceOptions options, Action<string>? inferenceCallback = null)
+    private List<string> GenerateModelOutput(string input, InferenceOptions options,
+        Action<string>? inferenceCallback = null)
     {
+        if (!string.IsNullOrWhiteSpace(Options.PromptPrefix))
+        {
+            input = Options.PromptPrefix + input;
+
+        }
+
+        if (!string.IsNullOrWhiteSpace(Options.PromptSuffix))
+        {
+            input += Options.PromptSuffix;
+        }
+
         var inputTokens = Tokenize(input).ToArray();
 
         var outputTokens = new List<int>();
@@ -179,8 +192,8 @@ public class LanguageModel : ILanguageModel
 
             _constraints.ApplyConstraints(candidatesP, outputTokens, logits, options);
 
-            TemperatureSampler.CreateInstance(_contextHandle, 1.0f).Sample(candidatesP);
-            var id = _contextHandle.SampleToken(candidatesP);
+            TemperatureSampler.CreateInstance(_contextHandle, options.Temperature).Sample(candidatesP);
+            var id = _contextHandle.SampleGreedy(candidatesP);
             var s = TokenToString(id);
             Trace.WriteLine(s);
             if (id == _endOfSequenceToken)
