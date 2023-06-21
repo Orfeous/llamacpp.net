@@ -1,4 +1,4 @@
-﻿using LlamaCpp.Net.Native.Models;
+﻿using System;
 
 namespace LlamaCpp.Net.Samplers.Abstractions;
 
@@ -7,5 +7,6 @@ namespace LlamaCpp.Net.Samplers.Abstractions;
 /// </summary>
 internal interface ISampler
 {
-    protected internal void Sample(TokenDataArray candidates);
+
+    protected internal void Sample(IntPtr intPtr);
 }

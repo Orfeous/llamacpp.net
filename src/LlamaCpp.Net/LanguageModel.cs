@@ -5,11 +5,9 @@ using LlamaCpp.Net.Extensions;
 using LlamaCpp.Net.Models;
 using LlamaCpp.Net.Native;
 using LlamaCpp.Net.Native.Models;
-using LlamaCpp.Net.Samplers;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -18,6 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace LlamaCpp.Net;
+#pragma warning disable CA1848
 
 /// <inheritdoc />
 public class LanguageModel : ILanguageModel
@@ -27,6 +26,9 @@ public class LanguageModel : ILanguageModel
     private readonly Encoding _encoding = Encoding.UTF8;
     private readonly int _endOfSequenceToken;
     private readonly ILogger<LanguageModel> _logger;
+    private readonly int _vocabSize;
+    private readonly int _newLineToken;
+    private readonly Dictionary<int, string> _tokenCache;
 
     /// <summary>
     ///     The constructor for the language model
@@ -51,9 +53,13 @@ public class LanguageModel : ILanguageModel
         else
         {
             if (!string.IsNullOrWhiteSpace(options.LoraAdapterPath))
+            {
                 if (File.Exists(options.LoraAdapterPath) == false)
+                {
                     throw new FileNotFoundException($"Lora adapter file {options.LoraAdapterPath} not found",
                         options.LoraAdapterPath);
+                }
+            }
         }
 
         Options = options;
@@ -67,10 +73,12 @@ public class LanguageModel : ILanguageModel
         IntPtr context;
         try
         {
+            _logger.LogDebug("Initializing model from file {ModelPath}", modelPath);
             context = LlamaNative.llama_init_from_file(modelPath, contextParams);
         }
         catch (SEHException e)
         {
+            _logger.LogError(e, "Failed to initialize model from file {ModelPath}", modelPath);
             throw new ModelFailedInitializationException(modelPath, e);
         }
 
@@ -79,13 +87,28 @@ public class LanguageModel : ILanguageModel
         var handle = new SafeLLamaContextHandle(context);
 
         if (!string.IsNullOrWhiteSpace(options.LoraAdapterPath))
+        {
+            _logger.LogDebug("Initializing Lora adapter from file {LoraAdapterPath}", options.LoraAdapterPath);
             InitializeLora(handle, modelPath, options.LoraAdapterPath, options.LoraThreads);
+        }
 
         _contextHandle = handle;
 
         _endOfSequenceToken = LlamaNative.llama_token_eos();
+        _vocabSize = _contextHandle.llama_n_vocab();
+        _newLineToken = LlamaNative.llama_token_nl();
 
-        _constraints = new ModelConstraints(_contextHandle);
+        _logger.LogDebug("Initializing constraints");
+        _constraints = new ModelConstraints(_contextHandle, logger);
+
+        this._tokenCache = new Dictionary<int, string>(_vocabSize);
+
+        _logger.LogDebug("Caching tokens");
+        for (var i = 0; i < _vocabSize; i++)
+        {
+            var token = _contextHandle.llama_token_to_str(i);
+            _tokenCache.Add(i, token.PtrToString(_encoding));
+        }
     }
 
 
@@ -100,15 +123,25 @@ public class LanguageModel : ILanguageModel
     /// <inheritdoc />
     public List<int> Tokenize(string text)
     {
+        _logger.LogDebug("Tokenizing text {Text}", text);
+
         var tokens = new int[text.Length + 1];
 
         var numberOfTokens = _contextHandle.llama_tokenize(text, tokens, tokens.Length, true);
 
-        if (numberOfTokens == 0) throw new TokenizationFailedException(text);
+        if (numberOfTokens == 0)
+        {
+            _logger.LogError("Failed to tokenize text {Text}", text);
+            throw new TokenizationFailedException(text);
+        }
 
         Array.Resize(ref tokens, numberOfTokens);
 
-        return tokens.Take(numberOfTokens).ToList();
+        var result = tokens.Take(numberOfTokens).ToList();
+
+        _logger.LogDebug("Tokenized text {Text} to {Tokens}", text, result);
+
+        return result;
     }
 
 
@@ -122,8 +155,17 @@ public class LanguageModel : ILanguageModel
     /// <inheritdoc />
     public string TokenToString(int token)
     {
+        if (_tokenCache.TryGetValue(token, out var toString))
+        {
+            return toString;
+        }
+
+        _logger.LogDebug("Converting token {Token} to string", token);
         var ptr = _contextHandle.llama_token_to_str(token);
-        return ptr.PtrToString(_encoding);
+        var s = ptr.PtrToString(_encoding);
+
+        _tokenCache[token] = s;
+        return _tokenCache[token];
     }
 
     /// <summary>
@@ -140,8 +182,17 @@ public class LanguageModel : ILanguageModel
         var result = new AsyncInferenceResult();
         options ??= InferenceOptions.Default;
 
-        Task.Run(() => { GenerateModelOutput(input, options, s => { result.Append(s); }); }, cancellationToken)
-            .ContinueWith(_ => { result.Complete(); }, cancellationToken);
+        Task.Run(() =>
+            {
+                _logger.LogDebug("Starting async inference for input {Input}", input);
+
+                GenerateModelOutput(input, options, s => { result.Append(s); });
+            }, cancellationToken)
+            .ContinueWith(_ =>
+            {
+                _logger.LogDebug("Async inference for input {Input} completed", input);
+                result.Complete();
+            }, cancellationToken);
 
         return result.ToAsyncEnumerable(cancellationToken);
     }
@@ -149,8 +200,12 @@ public class LanguageModel : ILanguageModel
     /// <inheritdoc />
     public IEnumerable<string> Infer(string input, InferenceOptions? options = null)
     {
+        _logger.LogDebug("Starting inference for input {Input}", input);
         var opts = options ?? InferenceOptions.Default;
-        return this.GenerateModelOutput(input, opts);
+        var result = this.GenerateModelOutput(input, opts);
+
+        _logger.LogDebug("Inference for input {Input} completed", input);
+        return result;
     }
 
 
@@ -164,10 +219,14 @@ public class LanguageModel : ILanguageModel
     private List<string> GenerateModelOutput(string input, InferenceOptions options,
         Action<string>? inferenceCallback = null)
     {
+        // for some reason, the models like it better if we add a space before the first token
+        // silly models
+
+        _logger.LogDebug("Generating model output for input {Input}", input);
+        input = " " + input;
         if (!string.IsNullOrWhiteSpace(Options.PromptPrefix))
         {
             input = Options.PromptPrefix + input;
-
         }
 
         if (!string.IsNullOrWhiteSpace(Options.PromptSuffix))
@@ -176,57 +235,48 @@ public class LanguageModel : ILanguageModel
         }
 
         var inputTokens = Tokenize(input).ToArray();
+        var logits = GetLogits(_contextHandle, _vocabSize);
 
-        var outputTokens = new List<int>();
-        outputTokens.AddRange(inputTokens);
+        var lastTokens = new List<int>();
+        lastTokens.AddRange(inputTokens);
+        var evaluatedTokens = 0;
         for (var i = 0; i < options.MaxNumberOfTokens; i++)
         {
-            var tokens = outputTokens.ToArray();
-            TryEvaluate(options, tokens, out var evalResult);
-            if (!evalResult) break;
-
-            var vocabSize = GetVocab(out var logits);
-
-            var candidatesP = GetCandidates(vocabSize, logits);
+            var tokens = lastTokens.ToArray();
+            evaluatedTokens = Evaluate(options, tokens, evaluatedTokens);
 
 
-            _constraints.ApplyConstraints(candidatesP, outputTokens, logits, options);
+            var candidatesP = GetCandidates(_vocabSize, logits);
 
-            TemperatureSampler.CreateInstance(_contextHandle, options.Temperature).Sample(candidatesP);
-            var id = _contextHandle.SampleGreedy(candidatesP);
-            var s = TokenToString(id);
-            Trace.WriteLine(s);
-            if (id == _endOfSequenceToken)
+
+            var selectedToken = _constraints.ApplyConstraints(candidatesP, lastTokens, logits, options);
+            if (selectedToken == _endOfSequenceToken)
             {
-                Console.WriteLine("EOS");
+                _logger.LogDebug("End of sequence token found");
                 break;
             }
 
-            outputTokens.Add(id);
+            if (options.TreatNewLineAsEndOfText)
+            {
+                if (selectedToken == _newLineToken)
+                {
+                    _logger.LogDebug("New line token found");
+                    break;
+                }
+            }
 
-            inferenceCallback?.Invoke(s);
+            lastTokens.Add(selectedToken);
+
+            if (inferenceCallback != null)
+            {
+                var s = TokenToString(selectedToken);
+                inferenceCallback?.Invoke(s);
+            }
         }
 
-        return outputTokens.Select(TokenToString).ToList();
+        return lastTokens.Select(TokenToString).ToList();
     }
 
-    /// <summary>
-    ///     Gets the vocabulary size and logits for the current language model.
-    /// </summary>
-    /// <param name="logits">A span of floats representing the logits for each token in the vocabulary.</param>
-    /// <param name="logitBias">An optional dictionary of token IDs and their corresponding bias values to add to the logits.</param>
-    /// <returns>The size of the vocabulary.</returns>
-    private int GetVocab(out Span<float> logits, Dictionary<int, float>? logitBias = null)
-    {
-        var vocabSize = _contextHandle.llama_n_vocab();
-        logits = GetLogits(_contextHandle, vocabSize);
-
-        if (logitBias is null) return vocabSize;
-
-        foreach (var (key, value) in logitBias) logits[key] += value;
-
-        return vocabSize;
-    }
 
     /// <summary>
     ///     Returns an array of token candidates based on the given logits.
@@ -249,12 +299,21 @@ public class LanguageModel : ILanguageModel
     /// </summary>
     /// <param name="options">The inference options to use.</param>
     /// <param name="tokens">The tokens to evaluate.</param>
-    /// <param name="result">The evaluation result.</param>
-    private void TryEvaluate(InferenceOptions options, int[] tokens, out bool result)
+    /// <param name="evaluatedTokens"></param>
+    private int Evaluate(InferenceOptions options, int[] tokens, int evaluatedTokens)
     {
-        var evalResult = _contextHandle.llama_eval(tokens, tokens.Length, tokens.Length,
-            options.Threads);
-        result = evalResult == 0;
+        var total = tokens.Length;
+
+        if (_contextHandle.llama_eval(tokens, total, evaluatedTokens,
+                options.Threads) != 0)
+        {
+            throw new ArgumentException("Evaluation failed ");
+        }
+
+        evaluatedTokens += tokens.Length;
+
+
+        return evaluatedTokens;
     }
 
 
@@ -302,3 +361,4 @@ public class LanguageModel : ILanguageModel
         if (isDisposing) _contextHandle.Dispose();
     }
 }
+#pragma warning restore CA1848

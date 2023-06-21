@@ -1,4 +1,5 @@
-﻿using LlamaCpp.Net.Native;
+﻿using LlamaCpp.Net.Configuration;
+using LlamaCpp.Net.Native;
 using LlamaCpp.Net.Samplers.Abstractions;
 using System;
 
@@ -18,19 +19,15 @@ internal sealed class TypicalSampler : AbstractSampler
     private readonly int _k;
     private readonly ulong _minKeep;
 
-    private TypicalSampler(SafeLLamaContextHandle context, int k, ulong minKeep) : base(context)
+    private TypicalSampler(SafeLLamaContextHandle context, InferenceOptions options) : base(context)
     {
-        _k = k;
-        _minKeep = minKeep;
+        _k = options.LocalTypicalK;
+        _minKeep = options.MinKeep;
+
     }
 
-    public static TypicalSampler CreateInstance(SafeLLamaContextHandle context, int k, ulong minKeep)
+    public override void Sample(IntPtr intPtr)
     {
-        return new TypicalSampler(context, k, minKeep);
-    }
-
-    protected override void Sample(SafeLLamaContextHandle context, IntPtr intPtr)
-    {
-        context.llama_sample_typical(intPtr, _k, _minKeep);
+        _context.llama_sample_typical(intPtr, _k, _minKeep);
     }
 }

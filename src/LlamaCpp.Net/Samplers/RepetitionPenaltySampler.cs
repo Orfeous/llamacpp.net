@@ -1,4 +1,5 @@
-﻿using LlamaCpp.Net.Native;
+﻿using LlamaCpp.Net.Configuration;
+using LlamaCpp.Net.Native;
 using LlamaCpp.Net.Samplers.Abstractions;
 using System;
 
@@ -14,22 +15,17 @@ internal sealed class RepetitionPenaltySampler : AbstractSampler
     private readonly ulong _lastTokensSize;
     private readonly float _penalty;
 
-    private RepetitionPenaltySampler(SafeLLamaContextHandle context, int[] lastTokens, ulong lastTokensSize,
-        float penalty) : base(context)
+
+    public RepetitionPenaltySampler(SafeLLamaContextHandle context, int[] lastTokens, InferenceOptions inferenceOptions) : base(context)
     {
         _lastTokens = lastTokens;
-        _lastTokensSize = lastTokensSize;
-        _penalty = penalty;
+        _lastTokensSize = inferenceOptions.RepetitionLastN;
+        _penalty = inferenceOptions.RepetitionPenalty;
     }
 
-    public static RepetitionPenaltySampler CreateInstance(SafeLLamaContextHandle context, int[] lastTokens,
-        ulong lastTokensSize, float penalty)
-    {
-        return new RepetitionPenaltySampler(context, lastTokens, lastTokensSize, penalty);
-    }
 
-    protected override void Sample(SafeLLamaContextHandle context, IntPtr intPtr)
+    public override void Sample(IntPtr intPtr)
     {
-        context.llama_sample_repetition_penalty(intPtr, _lastTokens, _lastTokensSize, _penalty);
+        _context.llama_sample_repetition_penalty(intPtr, _lastTokens, _lastTokensSize, _penalty);
     }
 }

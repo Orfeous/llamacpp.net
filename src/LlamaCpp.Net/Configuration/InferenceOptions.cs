@@ -11,6 +11,40 @@ public record InferenceOptions
     public static InferenceOptions Default => new InferenceOptions();
 
     /// <summary>
+    /// Inference options for having a conversation with the model
+    /// </summary>
+    public static InferenceOptions Chat => Default with
+    {
+        MaxNumberOfTokens = 200,
+        Temperature = 0.8f,
+        RepetitionPenalty = 1.1f,
+        TopK = 0,
+        TopP = 0.7f
+    };
+
+    /// <summary>
+    /// Inference options for getting precise results from the model
+    /// </summary>
+    public static InferenceOptions Precise => Default with
+    {
+        Temperature = 0.7f,
+        RepetitionPenalty = 1.1f,
+        TopK = 40,
+        TopP = 0.1f
+    };
+
+    /// <summary>
+    /// 
+    /// </summary>
+
+    public float TopP { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public int TopK { get; set; }
+
+    /// <summary>
     ///     The number of tokens to generate
     ///     -1 means to generate until the model decides to stop
     ///     Do note that the model may generate less tokens than this number when a stop token is generated
@@ -51,9 +85,9 @@ public record InferenceOptions
     public bool PenalizeNewLine { get; init; } = true;
 
     /// <summary>
-    ///     The number of tokens to repeat
+    ///     The number of tokens to look back 
     /// </summary>
-    public int RepeatLastTokensCount { get; init; } = 64;
+    public int TokenLookback { get; init; } = 2;
 
     /// <summary>
     ///     The presence of the alpha parameter. Alpha controls the degree of randomness in the model's output.
@@ -80,4 +114,50 @@ public record InferenceOptions
     ///     Used by the temperature sampler to control the randomness of the model's output.
     /// </remarks>
     public float Temperature { get; set; } = 0.8f;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public bool TreatNewLineAsEndOfText { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public ulong MinKeep { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public int TailFreeZ { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public int LocalTypicalK { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public SamplingMethod SamplingMethod { get; set; }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public enum SamplingMethod
+{
+    /// <summary>
+    /// Random sampling
+    /// </summary>
+    Default,
+    /// <summary>
+    /// Mirostat sampling
+    /// </summary>
+    Mirostat,
+
+    /// <summary>
+    /// Mirosat V2 sampling
+    /// </summary>
+    MirostatV2
+
 }

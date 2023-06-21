@@ -1,4 +1,5 @@
-﻿using LlamaCpp.Net.Native;
+﻿using LlamaCpp.Net.Configuration;
+using LlamaCpp.Net.Native;
 using LlamaCpp.Net.Samplers.Abstractions;
 using System;
 
@@ -20,19 +21,15 @@ internal sealed class TopKSampler : AbstractSampler
     private readonly int _k;
     private readonly ulong _minKeep;
 
-    private TopKSampler(SafeLLamaContextHandle context, int k, ulong minKeep) : base(context)
+    public TopKSampler(SafeLLamaContextHandle context, InferenceOptions options, ulong i) : base(context)
     {
-        _k = k;
-        _minKeep = minKeep;
+        _k = options.TopK;
+        _minKeep = i;
     }
 
-    public static TopKSampler CreateInstance(SafeLLamaContextHandle context, int k, ulong minKeep)
-    {
-        return new TopKSampler(context, k, minKeep);
-    }
 
-    protected override void Sample(SafeLLamaContextHandle context, IntPtr intPtr)
+    public override void Sample(IntPtr intPtr)
     {
-        context.llama_sample_top_k(intPtr, _k, _minKeep);
+        _context.llama_sample_top_k(intPtr, _k, _minKeep);
     }
 }

@@ -13,13 +13,8 @@ internal sealed class SoftMaxSampler : AbstractSampler
     {
     }
 
-    protected override void Sample(SafeLLamaContextHandle context, IntPtr intPtr)
+    public override void Sample(IntPtr intPtr)
     {
-        context.llama_sample_softmax(intPtr);
-    }
-
-    public static SoftMaxSampler CreateInstance(SafeLLamaContextHandle context)
-    {
-        return new SoftMaxSampler(context);
+        _context.llama_sample_softmax(intPtr);
     }
 }

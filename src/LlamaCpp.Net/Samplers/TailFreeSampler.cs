@@ -1,4 +1,5 @@
-﻿using LlamaCpp.Net.Native;
+﻿using LlamaCpp.Net.Configuration;
+using LlamaCpp.Net.Native;
 using LlamaCpp.Net.Samplers.Abstractions;
 using System;
 
@@ -19,19 +20,15 @@ internal sealed class TailFreeSampler : AbstractSampler
     private readonly int _z;
     private readonly ulong _minKeep;
 
-    private TailFreeSampler(ref SafeLLamaContextHandle context, int z, ulong minKeep) : base(context)
+    private TailFreeSampler(SafeLLamaContextHandle context, InferenceOptions options) : base(context)
     {
-        _z = z;
-        _minKeep = minKeep;
+        _z = options.TailFreeZ;
+        _minKeep = options.MinKeep;
     }
 
-    public static TailFreeSampler CreateInstance(ref SafeLLamaContextHandle context, int k, ulong minKeep)
-    {
-        return new TailFreeSampler(ref context, k, minKeep);
-    }
 
-    protected override void Sample(SafeLLamaContextHandle context, IntPtr intPtr)
+    public override void Sample(IntPtr intPtr)
     {
-        context.llama_sample_tail_free(intPtr, _z, _minKeep);
+        _context.llama_sample_tail_free(intPtr, _z, _minKeep);
     }
 }
