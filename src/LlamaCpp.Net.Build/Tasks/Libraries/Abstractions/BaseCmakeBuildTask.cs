@@ -4,26 +4,17 @@ using Cake.Core.IO;
 using Cake.Frosting;
 using LlamaCpp.Net.Build.Configuration;
 
-namespace LlamaCpp.Net.Build.Tasks.Cmake.Msvc
+namespace LlamaCpp.Net.Build.Tasks.Libraries.Abstractions
 {
-    [TaskName("Cmake.Msvc.Build")]
-    [IsDependentOn(typeof(ConfigureTask))]
-    public sealed class BuildTask : FrostingTask<BuildContext>
+    public abstract class BaseCmakeBuildTask : FrostingTask<BuildContext>
     {
-        public override void Run(BuildContext context)
-        {
-            foreach (var setting in context.MsvcBuildSettings)
-            {
-                Run(context, setting);
-            }
-        }
 
-        private static void Run(BuildContext context, MsvcBuildSettings setting)
+        protected void Run(BuildContext context, BuildSettings setting, DependencyInfo dependency)
         {
             var processParameterBuilder = new ProcessArgumentBuilder();
 
             processParameterBuilder.Append("--build");
-            processParameterBuilder.AppendQuoted(context.GetOutputDirectory(setting).FullPath);
+            processParameterBuilder.AppendQuoted(dependency.GetOutputDirectory(setting).FullPath);
             processParameterBuilder.Append("--parallel");
             processParameterBuilder.Append("--config ");
             processParameterBuilder.AppendQuoted(setting.BuildConfiguration);
@@ -32,18 +23,13 @@ namespace LlamaCpp.Net.Build.Tasks.Cmake.Msvc
             var process = context.StartProcess("cmake",
                 new ProcessSettings
                 {
-                    WorkingDirectory = context.LlamaBuildDirectory,
+                    WorkingDirectory = dependency.BuildPath,
                     Arguments = processParameterBuilder.Render()
                 });
             if (process != 0)
             {
                 throw new CakeException("Cmake build failed");
             }
-        }
-
-        public override bool ShouldRun(BuildContext context)
-        {
-            return context.IsRunningOnWindows();
         }
     }
 }

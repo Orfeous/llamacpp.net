@@ -1,7 +1,6 @@
 ﻿using Cake.Common;
 using Cake.Core;
 using Cake.Core.Diagnostics;
-using Cake.Core.IO;
 using Cake.Frosting;
 
 namespace LlamaCpp.Net.Build.Tasks.Dependencies
@@ -32,7 +31,8 @@ namespace LlamaCpp.Net.Build.Tasks.Dependencies
                     context.WingetInstall("Git.Git");
                 }
             }
-            if(context.IsRunningOnLinux()){
+            if (context.IsRunningOnLinux())
+            {
 
                 var sb = new System.Text.StringBuilder();
 
@@ -71,14 +71,6 @@ namespace LlamaCpp.Net.Build.Tasks.Dependencies
             context.Log.Error($"Could not find any of the following: {string.Join(", ", args)}");
 
             return false;
-        }
-    }
-
-    public static class CakeContextExtensions
-    {
-        public static void WingetInstall(this ICakeContext context, string packageName)
-        {
-            context.StartProcess("winget", new ProcessSettings { Arguments = "install " + packageName });
         }
     }
 }

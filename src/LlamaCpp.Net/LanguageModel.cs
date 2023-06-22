@@ -191,6 +191,8 @@ public class LanguageModel : ILanguageModel
             .ContinueWith(_ =>
             {
                 _logger.LogDebug("Async inference for input {Input} completed", input);
+
+                _contextHandle.llama_print_timings();
                 result.Complete();
             }, cancellationToken);
 
