@@ -33,7 +33,7 @@ namespace Llama.Net.Examples.ConsoleChat
                 })
                 .ConfigureLogging(logging =>
                 {
-                    logging.SetMinimumLevel(LogLevel.Trace);
+                    logging.SetMinimumLevel(LogLevel.Information);
                     logging.AddConsole();
                 }).Build();
 
@@ -59,7 +59,6 @@ namespace Llama.Net.Examples.ConsoleChat
                     Console.ForegroundColor = ConsoleColor.White;
                 }
 
-                Console.WriteLine();
             }
         }
     }

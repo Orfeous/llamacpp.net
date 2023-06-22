@@ -30,6 +30,9 @@ public class LanguageModel : ILanguageModel
     private readonly int _newLineToken;
     private readonly Dictionary<int, string> _tokenCache;
 
+    private int _evaluatedTokens;
+    private readonly int _contextSize;
+
     /// <summary>
     ///     The constructor for the language model
     /// </summary>
@@ -39,6 +42,7 @@ public class LanguageModel : ILanguageModel
     /// <exception cref="FileNotFoundException"></exception>
     public LanguageModel(string modelPath, ILogger<LanguageModel> logger, LanguageModelOptions? options = null)
     {
+        _evaluatedTokens = 0;
         _logger = logger;
         ModelPath = modelPath;
 
@@ -97,7 +101,7 @@ public class LanguageModel : ILanguageModel
         _endOfSequenceToken = LlamaNative.llama_token_eos();
         _vocabSize = _contextHandle.llama_n_vocab();
         _newLineToken = LlamaNative.llama_token_nl();
-
+        _contextSize = _contextHandle.llama_n_ctx();
         _logger.LogDebug("Initializing constraints");
         _constraints = new ModelConstraints(_contextHandle, logger);
 
@@ -238,14 +242,14 @@ public class LanguageModel : ILanguageModel
 
         var inputTokens = Tokenize(input).ToArray();
         var logits = GetLogits(_contextHandle, _vocabSize);
-
         var lastTokens = new List<int>();
+
         lastTokens.AddRange(inputTokens);
-        var evaluatedTokens = 0;
         for (var i = 0; i < options.MaxNumberOfTokens; i++)
         {
             var tokens = lastTokens.ToArray();
-            evaluatedTokens = Evaluate(options, tokens, evaluatedTokens);
+
+            Evaluate(options, tokens);
 
 
             var candidatesP = GetCandidates(_vocabSize, logits);
@@ -301,21 +305,25 @@ public class LanguageModel : ILanguageModel
     /// </summary>
     /// <param name="options">The inference options to use.</param>
     /// <param name="tokens">The tokens to evaluate.</param>
-    /// <param name="evaluatedTokens"></param>
-    private int Evaluate(InferenceOptions options, int[] tokens, int evaluatedTokens)
+    private void Evaluate(InferenceOptions options, int[] tokens)
     {
         var total = tokens.Length;
 
-        if (_contextHandle.llama_eval(tokens, total, 0,
+        var past = _evaluatedTokens;
+
+        if (past > 200)
+        {
+            past = 200;
+
+        }
+
+        if (_contextHandle.llama_eval(tokens, total, past,
                 options.Threads) != 0)
         {
             throw new ArgumentException("Evaluation failed ");
         }
 
-        evaluatedTokens += tokens.Length;
-
-
-        return evaluatedTokens;
+        _evaluatedTokens += tokens.Length;
     }
 
 
