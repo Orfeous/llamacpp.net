@@ -304,7 +304,7 @@ public class LanguageModel : ILanguageModel
     {
         var total = tokens.Length;
 
-        if (_contextHandle.llama_eval(tokens, total, evaluatedTokens,
+        if (_contextHandle.llama_eval(tokens, total, 0,
                 options.Threads) != 0)
         {
             throw new ArgumentException("Evaluation failed ");
