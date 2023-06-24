@@ -54,4 +54,5 @@ public interface ILanguageModel : IDisposable
     /// <param name="options"></param>
     /// <returns></returns>
     IEnumerable<string> Infer(string input, InferenceOptions? options = null);
+
 }

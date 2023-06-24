@@ -10,11 +10,11 @@ public record LanguageModelOptions
     /// </summary>
     public static LanguageModelOptions Default => new LanguageModelOptions
     {
-        ContextSize = 1024,
-        GpuLayerCount = 24,
+        ContextSize = 512,
+        GpuLayerCount = 0,
         Seed = -1,
         UseFp16Memory = false,
-        UseMemoryLock = false,
+        UseMemoryLock = true,
         EmbeddingMode = false
     };
 
@@ -72,4 +72,13 @@ public record LanguageModelOptions
     /// </summary>
     public string PromptSuffix { get; init; } = string.Empty;
 
+    /// <summary>
+    /// 
+    /// </summary>
+    public string? InitialPrompt { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public int Threads { get; set; } = 12;
 }

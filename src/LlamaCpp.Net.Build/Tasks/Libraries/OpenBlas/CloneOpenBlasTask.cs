@@ -1,7 +1,8 @@
 ﻿using Cake.Common.IO;
 using Cake.Frosting;
+using LlamaCpp.Net.Build.Tasks.Libraries.Git;
 
-namespace LlamaCpp.Net.Build.Tasks.Libraries.Git;
+namespace LlamaCpp.Net.Build.Tasks.Libraries.OpenBlas;
 
 [TaskName("Git.CloneOpenBlas")]
 public class CloneOpenBlasTask : CloneTask
@@ -15,6 +16,6 @@ public class CloneOpenBlasTask : CloneTask
 
     public override bool ShouldRun(BuildContext context)
     {
-        return ShouldRun(context, context.ClBlastDependency);
+        return ShouldRun(context, context.OpenBlasDependency);
     }
 }

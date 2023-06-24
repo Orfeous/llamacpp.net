@@ -68,10 +68,21 @@ public class BuildContext : FrostingContext
             SourcePath = RepositoryRoot.Combine("lib").Combine("OpenCl"),
             BuildPath = TmpDir.Combine("OpenCl").Combine("build")
         };
+
+        BlisDependency = new DependencyInfo
+        {
+            Name = "Blis",
+            RepositoryUrl = "https://github.com/flame/blis",
+            SourcePath = RepositoryRoot.Combine("lib").Combine("Blis"),
+            BuildPath = TmpDir.Combine("Blis").Combine("build"),
+            DesiredCommit = "6b894c30b9bb2c2518848d74e4c8d96844f77f24"
+        };
         var repo = new Repository(RepositoryRoot.FullPath);
 
         Authors = repo.Commits.Select(commit => commit.Author.Name).Distinct();
     }
+
+    public DependencyInfo BlisDependency { get; set; }
 
     public IEnumerable<string> Authors { get; set; }
 

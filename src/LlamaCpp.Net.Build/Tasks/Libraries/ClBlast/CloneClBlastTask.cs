@@ -1,7 +1,8 @@
 ﻿using Cake.Common.IO;
 using Cake.Frosting;
+using LlamaCpp.Net.Build.Tasks.Libraries.Git;
 
-namespace LlamaCpp.Net.Build.Tasks.Libraries.Git;
+namespace LlamaCpp.Net.Build.Tasks.Libraries.ClBlast;
 
 [TaskName("Git.CloneClBlast")]
 public class CloneClBlastTask : CloneTask

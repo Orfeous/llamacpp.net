@@ -53,11 +53,6 @@ public record InferenceOptions
 
 
     /// <summary>
-    ///     The number of threads to use
-    /// </summary>
-    public int Threads { get; init; } = 4;
-
-    /// <summary>
     ///     The RepetitionPenalty parameter helps prevent the model from generating repetitive or monotonous text.
     ///     A higher value (e.g., 1.5) will penalize repetitions more strongly,
     ///     while a lower value (e.g., 0.9) will be more lenient. The default value is 1.1.
@@ -139,25 +134,4 @@ public record InferenceOptions
     /// 
     /// </summary>
     public SamplingMethod SamplingMethod { get; set; }
-}
-
-/// <summary>
-/// 
-/// </summary>
-public enum SamplingMethod
-{
-    /// <summary>
-    /// Random sampling
-    /// </summary>
-    Default,
-    /// <summary>
-    /// Mirostat sampling
-    /// </summary>
-    Mirostat,
-
-    /// <summary>
-    /// Mirosat V2 sampling
-    /// </summary>
-    MirostatV2
-
 }

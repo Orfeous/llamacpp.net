@@ -19,9 +19,12 @@ namespace Llama.Net.Examples.ConsoleChat
         {
             var modelOptions = LanguageModelOptions.Default with
             {
-                PromptPrefix = "User:",
-                PromptSuffix = "\n\n Response:",
-                GpuLayerCount = 60
+                PromptSuffix = "\n\n### Response:",
+                GpuLayerCount = 10,
+                ContextSize = 2048,
+                Threads = 24,
+
+                UseFp16Memory = false
             };
             var inferenceOptions = InferenceOptions.Chat;
             var host = new HostBuilder()
@@ -39,6 +42,7 @@ namespace Llama.Net.Examples.ConsoleChat
 
             var model = host.Services.GetRequiredService<ILanguageModel>();
 
+            model.PrintSystemInfo();
 
             var prompt = "";
             while (prompt != "/stop")
@@ -52,7 +56,7 @@ namespace Llama.Net.Examples.ConsoleChat
                     continue;
                 }
 
-                await foreach (var text in model.InferAsync(prompt, inferenceOptions with { SamplingMethod = SamplingMethod.Mirostat }))
+                await foreach (var text in model.InferAsync(prompt, inferenceOptions with { SamplingMethod = SamplingMethod.Mirostat, MaxNumberOfTokens = 1000 }))
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.Write(text);
