@@ -5,6 +5,8 @@ using LlamaCpp.Net.Extensions;
 using LlamaCpp.Net.Models;
 using LlamaCpp.Net.Native;
 using LlamaCpp.Net.Native.Models;
+using LlamaCpp.Net.Samplers.Abstractions;
+using LlamaCpp.Net.Samplers.Pipelines;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -21,7 +23,7 @@ namespace LlamaCpp.Net;
 /// <inheritdoc />
 public class LanguageModel : ILanguageModel
 {
-    private readonly ModelConstraints _constraints;
+    private readonly SamplingPipeline _constraints;
     private readonly SafeLLamaContextHandle _contextHandle;
     private readonly Encoding _encoding = Encoding.UTF8;
     private readonly int _endOfSequenceToken;
@@ -37,8 +39,11 @@ public class LanguageModel : ILanguageModel
     /// <param name="modelPath"></param>
     /// <param name="logger"></param>
     /// <param name="options"></param>
+    /// <param name="samplingPipeline"></param>
     /// <exception cref="FileNotFoundException"></exception>
-    public LanguageModel(string modelPath, ILogger<LanguageModel> logger, LanguageModelOptions? options = null)
+    public LanguageModel(string modelPath, ILogger<LanguageModel> logger, LanguageModelOptions? options = null,
+
+        Action<ISamplingPipelineBuilder>? samplingPipeline = null)
     {
         _logger = logger;
         ModelPath = modelPath;
@@ -89,7 +94,18 @@ public class LanguageModel : ILanguageModel
         _vocabSize = _contextHandle.llama_n_vocab();
         var contextSize = _contextHandle.llama_n_ctx();
         _logger.LogDebug("Initializing constraints");
-        _constraints = new ModelConstraints(_contextHandle, logger);
+
+        var samplingPipelineBuilder = new SamplingPipelineBuilder(logger);
+
+        if (samplingPipeline == null)
+        {
+            samplingPipeline = SamplingPipelinePreset.Default;
+
+        }
+        samplingPipeline?.Invoke(samplingPipelineBuilder);
+
+        _constraints = samplingPipelineBuilder.Build(_contextHandle);
+
 
         _tokenCache = new Dictionary<int, string>(_vocabSize);
 
