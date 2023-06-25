@@ -1,14 +1,14 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using Cake.Common.IO;
+﻿using Cake.Common.IO;
 using Cake.Core.Diagnostics;
 using Cake.Core.IO;
 using Cake.Frosting;
 using LlamaCpp.Net.Build.Configuration;
-using LlamaCpp.Net.Build.Tasks.Cmake;
+using LlamaCpp.Net.Build.Tasks.Libraries;
 using NuGet.Packaging;
 using NuGet.Versioning;
+using System;
+using System.IO;
+using System.Linq;
 
 namespace LlamaCpp.Net.Build.Tasks.Packaging
 {
@@ -45,11 +45,11 @@ namespace LlamaCpp.Net.Build.Tasks.Packaging
                         [nameof(setting.EnableKQuants)] = setting.EnableKQuants.ToString(),
                         [nameof(setting.BlasType)] = setting.BlasType.ToString()
                     },
-                    Version = NuGetVersion.Parse(context.GitData.NugetVersion),
+                    Version = NuGetVersion.Parse(context.NugetVersion),
                     Owners = { "LlamaCpp.Net" },
                     TargetFrameworks = { new NuGet.Frameworks.NuGetFramework("netstandard", new Version(2, 1)) }
                 };
-                foreach (var author in context.GitData.Authors)
+                foreach (var author in context.Authors)
                 {
                     package.Authors.Add(author);
                 }
@@ -68,7 +68,7 @@ namespace LlamaCpp.Net.Build.Tasks.Packaging
 
 
                 description += "\n\n" + "This package is generated based on the llama.cpp commit : " +
-                               context.LlamaCppCommitSha;
+                               context.LlamaDependency.DesiredCommit;
 
                 package.Description = description;
 
@@ -77,7 +77,7 @@ namespace LlamaCpp.Net.Build.Tasks.Packaging
                     context.Log.Information($"Packing {id}");
 
 
-                    var buildPath = context.GetOutputDirectory(setting)
+                    var buildPath = context.LlamaDependency.GetOutputDirectory(setting)
                         .Combine("bin")
                         .Combine(setting.BuildConfiguration);
 
@@ -93,10 +93,23 @@ namespace LlamaCpp.Net.Build.Tasks.Packaging
                         stream.CopyTo(memory);
                         memory.Position = 0;
 
+                        var targetPath = "";
+                        if (s is MsvcBuildSettings settings)
+                        {
+                            targetPath = $"runtimes/{settings.Triplet}/native/{filePath.GetFilename().FullPath}";
+
+                        }
+
+                        else
+                        {
+                            targetPath = $"runtimes/native/{filePath.GetFilename().FullPath}";
+
+                        }
+
                         var packageFile = new PhysicalPackageFile(memory)
                         {
                             SourcePath = filePath.FullPath,
-                            TargetPath = $"runtimes/{setting.Platform}/native/{filePath.GetFilename().FullPath}"
+                            TargetPath = targetPath
                         };
 
 
@@ -110,6 +123,11 @@ namespace LlamaCpp.Net.Build.Tasks.Packaging
 
                 package.Save(file);
             }
+        }
+
+        public override bool ShouldRun(BuildContext context)
+        {
+            return false;
         }
     }
 }

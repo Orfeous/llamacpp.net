@@ -1,4 +1,5 @@
-﻿using LlamaCpp.Net.Native;
+﻿using LlamaCpp.Net.Configuration;
+using LlamaCpp.Net.Native;
 using LlamaCpp.Net.Samplers.Abstractions;
 using System;
 
@@ -8,18 +9,14 @@ internal sealed class TemperatureSampler : AbstractSampler
 {
     private readonly float _temperature;
 
-    private TemperatureSampler(SafeLLamaContextHandle context, float temperature) : base(context)
+    public TemperatureSampler(SafeLLamaContextHandle context, InferenceOptions options) : base(context)
     {
-        _temperature = temperature;
+        _temperature = options.Temperature;
     }
 
-    public static TemperatureSampler CreateInstance(SafeLLamaContextHandle context, float temperature)
-    {
-        return new TemperatureSampler(context, temperature);
-    }
 
-    protected override void Sample(SafeLLamaContextHandle context, IntPtr intPtr)
+    public override void Sample(IntPtr intPtr)
     {
-        context.llama_sample_temperature(intPtr, _temperature);
+        _context.llama_sample_temperature(intPtr, _temperature);
     }
 }

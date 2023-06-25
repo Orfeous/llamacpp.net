@@ -1,33 +1,10 @@
-﻿using System;
-using Cake.Core.IO;
-using LlamaCpp.Net.Build.Configuration;
+﻿using LlamaCpp.Net.Build.Configuration;
+using System;
 
 namespace LlamaCpp.Net.Build.Extensions
 {
     public static class BlasExtensions
     {
-        public static void AddBlasType(this ProcessArgumentBuilder processParameterBuilder, BuildSettings settings)
-        {
-            switch (settings.BlasType)
-            {
-                case BlasType.CuBlas:
-                    processParameterBuilder.AppendCmakeOption("LLAMA_CUBLAS", true);
-                    break;
-                case BlasType.OpenBlas:
-                    processParameterBuilder.AppendCmakeOption("LLAMA_BLAS", true);
-                    processParameterBuilder.AppendCmakeOption("LLAMA_BLAS_VENDOR", settings.OpenBlasVendor.ToVendor());
-                    break;
-                case BlasType.ClBlast:
-                    processParameterBuilder.AppendCmakeOption("LLAMA_CLBLAST", true);
-                    break;
-                case BlasType.Blis:
-                    throw new NotSupportedException("BLIS is not supported at this time.");
-                case BlasType.None:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(settings.BlasType), "Unknown BLAS type");
-            }
-        }
 
         public static string ToVendor(this OpenBlasVendor vendor)
         {

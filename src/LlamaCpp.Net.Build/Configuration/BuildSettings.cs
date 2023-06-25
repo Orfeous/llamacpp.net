@@ -1,14 +1,12 @@
-﻿using System;
-using Cake.Core;
-using Cake.Core.IO;
+﻿using Cake.Core.IO;
 using LlamaCpp.Net.Build.Extensions;
+using System;
 
 namespace LlamaCpp.Net.Build.Configuration
 {
     public abstract record BuildSettings
     {
         public string? FriendlyName { get; init; }
-        public string Platform { get; init; } = "x64";
 
         public DirectoryPath BuildPath => GetDirectoryPath();
         public BlasType BlasType { get; init; }
@@ -22,7 +20,7 @@ namespace LlamaCpp.Net.Build.Configuration
 
         public abstract string CompilerType { get; }
         public string BuildConfiguration { get; set; } = "Release";
-
+        public string Triplet { get; set; } = "x64-windows";
         public string PackageName()
         {
             var packageName = "LlamaCpp.Net.Runtime";
@@ -56,7 +54,7 @@ namespace LlamaCpp.Net.Build.Configuration
             return packageName;
         }
 
-        public DirectoryPath GetDirectoryPath()
+        public virtual DirectoryPath GetDirectoryPath()
 
         {
             if (!string.IsNullOrWhiteSpace(FriendlyName))
@@ -66,9 +64,9 @@ namespace LlamaCpp.Net.Build.Configuration
 
             var path = PackageName();
 
-            var directoryPath = new DirectoryPath(path);
+            var directoryPath = new DirectoryPath(path).Combine(Triplet);
 
-            return directoryPath.Combine(Platform);
+            return directoryPath;
         }
 
         public string GetName()
@@ -106,66 +104,5 @@ namespace LlamaCpp.Net.Build.Configuration
 
         public OpenBlasVendor OpenBlasVendor { get; set; }
 
-        public void Apply(ProcessArgumentBuilder processParameterBuilder)
-        {
-            processParameterBuilder.Append("-A ");
-            processParameterBuilder.Append(Platform);
-
-            processParameterBuilder.AddBlasType(this);
-
-            processParameterBuilder.AppendCmakeOption("LLAMA_STANDALONE", Standalone);
-            if (EnableKQuants)
-            {
-                processParameterBuilder.AppendCmakeOption("LLAMA_K_QUANTS", true);
-            }
-
-            if (EnableLinkTimeOptimization)
-            {
-                processParameterBuilder.AppendCmakeOption("LLAMA_LTO", true);
-            }
-
-            if (Avx512Support != Avx512Support.None)
-            {
-                processParameterBuilder.AppendCmakeOption("LLAMA_AVX512", true);
-
-                if (Avx512Support.HasFlag(Avx512Support.Vbmi))
-                {
-                    processParameterBuilder.AppendCmakeOption("LLAMA_AVX512_VBMI", true);
-                }
-
-                if (Avx512Support.HasFlag(Avx512Support.Vnni))
-                {
-                    processParameterBuilder.AppendCmakeOption("LLAMA_AVX512_VNNI", true);
-                }
-            }
-        }
-    }
-
-    public enum OpenBlasVendor
-    {
-        Generic,
-        Acml,
-        AcmlGpu,
-        AcmlMp,
-        Aocl,
-        AoclMt,
-        Arm,
-        ArmIlp64,
-        ArmIlp64Mp,
-        ArmMp,
-        Atlas,
-        Intel1032,
-        Intel1064Dyn,
-        Intel1064Ilp,
-        Intel1064IlpSeq,
-        Intel1064Lp,
-        Intel1064LpSeq,
-        Nvhpc,
-        OpenBlas,
-        PhiPack,
-        Scsl,
-        ScslMp,
-        Sgimath,
-        SunPerf,
     }
 }

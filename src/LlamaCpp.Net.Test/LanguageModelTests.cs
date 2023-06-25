@@ -100,6 +100,8 @@ namespace LlamaCpp.Net.Test
 
             s.Should().Contain("cat", "because the answer is cat");
         }
+
+
     }
 }
 #pragma warning restore CA1707 // Identifiers should not contain underscores

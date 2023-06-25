@@ -1,13 +1,8 @@
-﻿using System.Runtime.InteropServices;
-using System;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace LlamaCpp.Net.Native
 {
-    /// <summary>
-    /// todo
-    /// </summary>
-    public delegate void LlamaProgressCallback(float progress, IntPtr ctx);
-
     /// <summary>
     /// todo
     /// </summary>

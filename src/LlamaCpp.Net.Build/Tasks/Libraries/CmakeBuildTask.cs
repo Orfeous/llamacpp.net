@@ -1,7 +1,7 @@
 ﻿using Cake.Frosting;
-using LlamaCpp.Net.Build.Tasks.Cmake.Msvc;
+using LlamaCpp.Net.Build.Tasks.Libraries.Llama.Cmake;
 
-namespace LlamaCpp.Net.Build.Tasks.Cmake
+namespace LlamaCpp.Net.Build.Tasks.Libraries
 {
     [TaskName("Cmake.Build")]
     [TaskDescription("Builds the C++ project")]
