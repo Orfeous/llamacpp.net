@@ -16,21 +16,18 @@ internal sealed class FrequencyAndPresencePenaltySampler : ISampler
     /// </summary>
     private readonly float _alphaPresence;
 
-    private readonly int[] _lastTokens;
-    private readonly ulong _lastTokensSize;
 
     public FrequencyAndPresencePenaltySampler(float alphaFrequency, float alphaPresence)
     {
-        _lastTokens = Array.Empty<int>();
-        _lastTokensSize = 0;
         _alphaFrequency = alphaFrequency;
         _alphaPresence = alphaPresence;
     }
 
 
-    public void Sample(SafeLLamaContextHandle context, IntPtr intPtr)
+    public void Sample(SafeLLamaContextHandle context, IntPtr intPtr, int[] currentOutput)
     {
-        context.llama_sample_frequency_and_presence_penalties(intPtr, _lastTokens, _lastTokensSize,
+
+        context.llama_sample_frequency_and_presence_penalties(intPtr, currentOutput, (ulong)currentOutput.Length,
             _alphaFrequency, _alphaPresence);
     }
 }

@@ -10,21 +10,18 @@ namespace LlamaCpp.Net.Samplers;
 /// </summary>
 internal sealed class RepetitionPenaltySampler : ISampler
 {
-    private readonly int[] _lastTokens;
-    private readonly ulong _lastTokensSize;
     private readonly float _penalty;
 
 
-    public RepetitionPenaltySampler(ulong repetitionLastN, float repetitionPenalty)
+    public RepetitionPenaltySampler(float repetitionPenalty)
     {
-        _lastTokens = Array.Empty<int>();
-        _lastTokensSize = repetitionLastN;
         _penalty = repetitionPenalty;
     }
 
 
-    public void Sample(SafeLLamaContextHandle context, IntPtr intPtr)
+    public void Sample(SafeLLamaContextHandle context, IntPtr intPtr, int[] currentOutput)
     {
-        context.llama_sample_repetition_penalty(intPtr, _lastTokens, _lastTokensSize, _penalty);
+
+        context.llama_sample_repetition_penalty(intPtr, currentOutput, (ulong)currentOutput.Length, _penalty);
     }
 }

@@ -16,7 +16,7 @@ internal sealed class TopPSampler : ISampler
     }
 
 
-    public void Sample(SafeLLamaContextHandle context, IntPtr intPtr)
+    public void Sample(SafeLLamaContextHandle context, IntPtr intPtr, int[] currentOutput)
     {
         context.llama_sample_top_p(intPtr, _p, _minKeep);
     }

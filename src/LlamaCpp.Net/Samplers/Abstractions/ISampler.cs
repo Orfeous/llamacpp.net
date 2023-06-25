@@ -8,5 +8,5 @@ namespace LlamaCpp.Net.Samplers.Abstractions;
 /// </summary>
 internal interface ISampler
 {
-    protected internal void Sample(SafeLLamaContextHandle context, IntPtr intPtr);
+    protected internal void Sample(SafeLLamaContextHandle context, IntPtr intPtr, int[] currentOutput);
 }

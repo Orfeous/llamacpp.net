@@ -1,5 +1,5 @@
-﻿using System;
-using LlamaCpp.Net.Samplers.Abstractions;
+﻿using LlamaCpp.Net.Samplers.Abstractions;
+using System;
 
 namespace LlamaCpp.Net.Samplers.Pipelines;
 
@@ -19,7 +19,7 @@ public class SamplingPipelinePreset
     /// </summary>
     public static Action<ISamplingPipelineBuilder> Chat =>
         builder => builder.AddTemperatureSampler(0.8f)
-            //.AddRepetitionPenaltySampler(1.1f)
+            .AddRepetitionPenaltySampler(1.1f)
             .AddTopPSampler(0.7f, 200)
             .AddTopKSampler(0, 200);
 
@@ -28,7 +28,7 @@ public class SamplingPipelinePreset
     /// </summary>
     public static Action<ISamplingPipelineBuilder> Precise =>
         builder => builder.AddTemperatureSampler(0.7f)
-            //.AddRepetitionPenaltySampler(1.1f)
+            .AddRepetitionPenaltySampler(1.1f)
             .AddTopPSampler(0.1f, 200)
             .AddTopKSampler(40, 200);
 }

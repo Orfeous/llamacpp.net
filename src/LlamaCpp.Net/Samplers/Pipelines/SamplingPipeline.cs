@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using LlamaCpp.Net.Configuration;
+﻿using LlamaCpp.Net.Configuration;
 using LlamaCpp.Net.Native;
 using LlamaCpp.Net.Native.Models;
 using LlamaCpp.Net.Samplers.Abstractions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace LlamaCpp.Net.Samplers.Pipelines;
 
@@ -32,9 +32,11 @@ internal sealed unsafe class SamplingPipeline
     /// </summary>
     /// <param name="candidatesP">The token candidates to apply constraints to.</param>
     /// <param name="logits">The logits for each token.</param>
+    /// <param name="currentOutput"></param>
     /// <param name="inferenceOptions">The inference options to use for applying constraints.</param>
     public int ApplyConstraints(TokenDataArray candidatesP,
         Span<float> logits,
+        int[] currentOutput,
         InferenceOptions inferenceOptions)
     {
         // Pin the data array to prevent the garbage collector from moving it around
@@ -49,12 +51,21 @@ internal sealed unsafe class SamplingPipeline
         };
         var ptr = new IntPtr(&st);
 
+        // create a subset of currentOutput that only contains the last n tokens
+        // this is used to apply the frequency penalty
+        var n = 300;
+
+        var currentOutputSet = currentOutput.Length > n
+            ? currentOutput[^n..]
+            : currentOutput;
+
+
 
         if (_samplers.Any())
         {
             foreach (var sampler in _samplers)
             {
-                sampler.Sample(_contextHandle, ptr);
+                sampler.Sample(_contextHandle, ptr, currentOutputSet);
             }
         }
 

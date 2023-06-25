@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using LlamaCpp.Net.Native;
+﻿using LlamaCpp.Net.Native;
 using LlamaCpp.Net.Samplers.Abstractions;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 
 namespace LlamaCpp.Net.Samplers.Pipelines;
 
@@ -62,9 +62,9 @@ internal sealed class SamplingPipelineBuilder : ISamplingPipelineBuilder
         return this;
     }
 
-    public ISamplingPipelineBuilder AddRepetitionPenaltySampler(ulong repetitionLastN, float penalty)
+    public ISamplingPipelineBuilder AddRepetitionPenaltySampler(float penalty)
     {
-        _samplers.Add(new RepetitionPenaltySampler(repetitionLastN, penalty));
+        _samplers.Add(new RepetitionPenaltySampler(penalty));
 
         return this;
     }

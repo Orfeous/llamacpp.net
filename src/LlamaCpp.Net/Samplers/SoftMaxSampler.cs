@@ -11,7 +11,7 @@ internal sealed class SoftMaxSampler : ISampler
     {
     }
 
-    public void Sample(SafeLLamaContextHandle context, IntPtr intPtr)
+    public void Sample(SafeLLamaContextHandle context, IntPtr intPtr, int[] currentOutput)
     {
         context.llama_sample_softmax(intPtr);
     }

@@ -17,7 +17,7 @@ internal sealed class TailFreeSampler : ISampler
     }
 
 
-    public void Sample(SafeLLamaContextHandle context, IntPtr intPtr)
+    public void Sample(SafeLLamaContextHandle context, IntPtr intPtr, int[] currentOutput)
     {
         context.llama_sample_tail_free(intPtr, _z, _minKeep);
     }

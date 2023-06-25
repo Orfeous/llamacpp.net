@@ -14,7 +14,7 @@ internal sealed class TemperatureSampler : ISampler
     }
 
 
-    public void Sample(SafeLLamaContextHandle context, IntPtr intPtr)
+    public void Sample(SafeLLamaContextHandle context, IntPtr intPtr, int[] currentOutput)
     {
         context.llama_sample_temperature(intPtr, _temperature);
     }

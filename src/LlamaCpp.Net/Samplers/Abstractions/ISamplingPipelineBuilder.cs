@@ -75,20 +75,13 @@ public interface ISamplingPipelineBuilder
     ///     Apply repetition penalty to the candidates
     ///     Repetition penalty described in CTRL academic paper https://arxiv.org/abs/1909.05858, with negative logit fix.
     /// </summary>
-    /// <param name="repetitionLastN">
-    ///     The RepetitionLastN parameter controls the number of previous tokens to consider when applying the repetition
-    ///     A larger value will make the model look further back in history when checking for repetitions, while a smaller
-    ///     value will make the model more... forgetful.
-    ///     A zero value will disable the repetition penalty, while a value of -1 will make the model consider all previous
-    ///     tokens when checking for repetitions (within the context window).
-    /// </param>
     /// <param name="penalty">
     ///     The RepetitionPenalty parameter helps prevent the model from generating repetitive or monotonous text.
     ///     A higher value (e.g., 1.5) will penalize repetitions more strongly,
     ///     while a lower value (e.g., 0.9) will be more lenient.
     /// </param>
     /// <returns></returns>
-    ISamplingPipelineBuilder AddRepetitionPenaltySampler(ulong repetitionLastN, float penalty);
+    ISamplingPipelineBuilder AddRepetitionPenaltySampler(float penalty);
 
 
     /// <summary>
