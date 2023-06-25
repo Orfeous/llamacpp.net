@@ -218,14 +218,6 @@ public class LanguageModel : ILanguageModel
     }
 
     /// <summary>
-    ///     Prints system info to the log.
-    /// </summary>
-    public void PrintSystemInfo()
-    {
-        LlamaNative.llama_print_system_info();
-    }
-
-    /// <summary>
     ///     Initializes the token cache so that we can quickly look up tokens by their index
     ///     this reduces the number of calls to the native library
     /// </summary>
