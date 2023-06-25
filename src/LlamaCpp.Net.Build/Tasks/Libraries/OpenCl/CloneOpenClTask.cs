@@ -1,10 +1,8 @@
 ﻿using Cake.Common.IO;
-using Cake.Frosting;
-using LlamaCpp.Net.Build.Tasks.Libraries.Git;
+using LlamaCpp.Net.Build.Tasks.Libraries.Abstractions;
 
 namespace LlamaCpp.Net.Build.Tasks.Libraries.OpenCl;
 
-[TaskName("Git.OpenCl")]
 public class CloneOpenClTask : CloneTask
 {
     public override void Run(BuildContext context)

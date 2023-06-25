@@ -7,7 +7,7 @@ using LlamaCpp.Net.Build.Tasks.Dependencies;
 
 namespace LlamaCpp.Net.Build.Tasks.Dotnet
 {
-    [TaskName("Dotnet.Test")]
+
     [IsDependentOn(typeof(DownloadTestModelTask))]
     public sealed class TestTask : FrostingTask<BuildContext>
     {
@@ -17,12 +17,16 @@ namespace LlamaCpp.Net.Build.Tasks.Dotnet
             context.DotNetBuild(context.LlamaCppNetTestDirectory.FullPath,
                 new DotNetBuildSettings
                 {
-                    Configuration = context.BuildConfiguration, NoRestore = true, NoIncremental = true
+                    Configuration = context.BuildConfiguration,
+                    NoRestore = true,
+                    NoIncremental = true
                 });
             context.DotNetTest(context.LlamaCppNetTestDirectory.FullPath,
                 new DotNetTestSettings
                 {
-                    Configuration = context.BuildConfiguration, NoRestore = true, NoBuild = true
+                    Configuration = context.BuildConfiguration,
+                    NoRestore = true,
+                    NoBuild = true
                 });
         }
     }

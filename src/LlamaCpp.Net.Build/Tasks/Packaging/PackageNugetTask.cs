@@ -3,7 +3,7 @@ using Cake.Core.Diagnostics;
 using Cake.Core.IO;
 using Cake.Frosting;
 using LlamaCpp.Net.Build.Configuration;
-using LlamaCpp.Net.Build.Tasks.Libraries;
+using LlamaCpp.Net.Build.Tasks.Libraries.Llama;
 using NuGet.Packaging;
 using NuGet.Versioning;
 using System;
@@ -12,8 +12,8 @@ using System.Linq;
 
 namespace LlamaCpp.Net.Build.Tasks.Packaging
 {
-    [TaskName("PackageNuget")]
-    [IsDependentOn(typeof(CmakeBuildTask))]
+
+    [IsDependentOn(typeof(BuildLlamaTask))]
     public class PackageNugetTask : FrostingTask<BuildContext>
     {
         public override void Run(BuildContext context)

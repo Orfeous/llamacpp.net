@@ -5,7 +5,7 @@ using Cake.Frosting;
 
 namespace LlamaCpp.Net.Build.Tasks.Dependencies
 {
-    [TaskName("Dependencies.Install")]
+    
     public class InstallDependenciesTask : FrostingTask<BuildContext>
     {
         public override void Run(BuildContext context)

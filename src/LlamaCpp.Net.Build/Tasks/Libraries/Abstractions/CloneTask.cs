@@ -4,7 +4,7 @@ using Cake.Frosting;
 using LibGit2Sharp;
 using System;
 
-namespace LlamaCpp.Net.Build.Tasks.Libraries.Git;
+namespace LlamaCpp.Net.Build.Tasks.Libraries.Abstractions;
 
 public abstract class CloneTask : FrostingTask<BuildContext>
 {

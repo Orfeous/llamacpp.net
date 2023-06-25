@@ -4,7 +4,7 @@ using Cake.Frosting;
 
 namespace LlamaCpp.Net.Build.Tasks.Dotnet
 {
-    [TaskName("Dotnet.Restore")]
+
     public sealed class RestoreTask : FrostingTask<BuildContext>
     {
         public override void Run(BuildContext context)

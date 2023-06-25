@@ -5,7 +5,7 @@ using Cake.Frosting;
 
 namespace LlamaCpp.Net.Build.Tasks.Dependencies
 {
-    [TaskName("Dependencies.TestModel")]
+    
     [IsDependeeOf(typeof(InstallDependenciesTask))]
     public class DownloadTestModelTask : FrostingTask<BuildContext>
     {

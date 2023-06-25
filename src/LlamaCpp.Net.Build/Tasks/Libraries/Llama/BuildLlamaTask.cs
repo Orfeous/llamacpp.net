@@ -1,62 +1,32 @@
 ﻿using Cake.Common;
-using Cake.Core.Diagnostics;
-using Cake.Core.IO;
-using Cake.Frosting;
 using LlamaCpp.Net.Build.Configuration;
 using LlamaCpp.Net.Build.Extensions;
 using System;
 
-namespace LlamaCpp.Net.Build.Tasks.Libraries.Llama.Cmake
+namespace LlamaCpp.Net.Build.Tasks.Libraries.Llama
 {
-
-
-
-    [TaskName("Cmake.Msvc.Configure")]
-    [IsDependentOn(typeof(CleanTask))]
-    [IsDependentOn(typeof(CloneLlamaTask))]
-    public sealed class ConfigureTask : FrostingTask<BuildContext>
+    public sealed class BuildLlamaTask : Abstractions.BaseCmakeBuildTask
     {
         public override void Run(BuildContext context)
         {
             foreach (var setting in context.MsvcBuildSettings)
             {
-                context.Log.Information($"Configuring {setting.BuildPath.FullPath}");
-
-                Run(context, setting);
+                Run(context, setting, context.LlamaDependency);
             }
         }
 
-        private static void Run(BuildContext context, MsvcBuildSettings setting)
-        {
-            var cmakeOptions = new CmakeOptions
-            {
-                Options =
-                {
-                    ["BUILD_SHARED_LIBS"] = true,
-                    ["LLAMA_ALL_WARNINGS"] = true,
-                    ["LLAMA_ALL_WARNINGS_3RD_PARTY"] = true,
-                    ["LLAMA_CUDA_DMMV_F16"] = true
-
-                },
-                SourcePath = context.LlamaDependency.SourcePath.FullPath,
-                BuildPath = context.LlamaDependency.GetOutputDirectory(setting).FullPath,
-                Generator = context.MsvcGenerator,
-            };
-
-
-            Apply(cmakeOptions, setting);
-
-            var arguments = cmakeOptions.Render();
-            context.StartProcess("cmake", new ProcessSettings { Arguments = arguments });
-        }
 
         public override bool ShouldRun(BuildContext context)
         {
             return context.IsRunningOnWindows();
         }
 
-        private static void Apply(CmakeOptions options, MsvcBuildSettings buildSettings)
+        protected override void Configure(CmakeOptions options, BuildSettings buildSettings)
         {
+            options.Options["BUILD_SHARED_LIBS"] = true;
+            options.Options["LLAMA_ALL_WARNINGS"] = true;
+            options.Options["LLAMA_ALL_WARNINGS_3RD_PARTY"] = true;
+            options.Options["LLAMA_CUDA_DMMV_F16"] = true;
             options.Options["LLAMA_STANDALONE"] = buildSettings.Standalone;
 
 

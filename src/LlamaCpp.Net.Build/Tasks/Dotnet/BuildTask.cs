@@ -4,7 +4,7 @@ using Cake.Frosting;
 
 namespace LlamaCpp.Net.Build.Tasks.Dotnet
 {
-    [TaskName("Dotnet.Build")]
+
     [IsDependentOn(typeof(RestoreTask))]
     public sealed class BuildTask : FrostingTask<BuildContext>
     {
@@ -13,7 +13,9 @@ namespace LlamaCpp.Net.Build.Tasks.Dotnet
             context.DotNetBuild(context.LlamaCppNetDirectory.FullPath,
                 new DotNetBuildSettings
                 {
-                    Configuration = context.BuildConfiguration, NoRestore = true, NoIncremental = true
+                    Configuration = context.BuildConfiguration,
+                    NoRestore = true,
+                    NoIncremental = true
                 });
         }
     }
