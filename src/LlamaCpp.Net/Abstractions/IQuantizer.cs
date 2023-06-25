@@ -1,4 +1,5 @@
 ﻿using LlamaCpp.Net.Exceptions;
+using LlamaCpp.Net.Models;
 
 namespace LlamaCpp.Net.Abstractions;
 

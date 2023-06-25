@@ -1,7 +1,8 @@
-﻿using LlamaCpp.Net.Native;
+﻿using LlamaCpp.Net.Models;
+using LlamaCpp.Net.Native;
 using Riok.Mapperly.Abstractions;
 
-namespace LlamaCpp.Net;
+namespace LlamaCpp.Net.Mappers;
 
 /// <summary>
 /// </summary>

@@ -1,25 +1,27 @@
 ﻿using LlamaCpp.Net.Configuration;
 using LlamaCpp.Net.Native;
 using LlamaCpp.Net.Native.Models;
-using LlamaCpp.Net.Samplers;
 using LlamaCpp.Net.Samplers.Abstractions;
-using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace LlamaCpp.Net
+namespace LlamaCpp.Net.Samplers.Pipelines
 {
     /// <summary>
     /// Represents a set of constraints that can be applied to token candidates based on the last tokens and inference options.
     /// </summary>
-    internal sealed unsafe class ModelConstraints
+    internal sealed unsafe class SamplingPipeline
     {
         private readonly SafeLLamaContextHandle _contextHandle;
+        private readonly IList<ISampler> _samplers;
         private readonly int _newLineToken;
 
 
-        public ModelConstraints(SafeLLamaContextHandle contextHandle, ILogger logger)
+        public SamplingPipeline(SafeLLamaContextHandle contextHandle, IList<ISampler> samplers)
         {
             _contextHandle = contextHandle;
+            _samplers = samplers;
             _newLineToken = LlamaNative.llama_token_nl();
         }
 
@@ -47,10 +49,12 @@ namespace LlamaCpp.Net
             var ptr = new IntPtr(&st);
 
 
-            var samplers = Array.Empty<ISampler>();
-            foreach (var sampler in samplers)
+            if (_samplers.Any())
             {
-                sampler.Sample(ptr);
+                foreach (var sampler in _samplers)
+                {
+                    sampler.Sample(_contextHandle, ptr);
+                }
             }
 
 
@@ -63,7 +67,6 @@ namespace LlamaCpp.Net
 
             var mu = 0.0f;
 
-            new TemperatureSampler(_contextHandle, inferenceOptions).Sample(ptr);
             return inferenceOptions.SamplingMethod switch
             {
                 SamplingMethod.Mirostat => _contextHandle.llama_sample_token_mirostat(ptr, 1, 1, 100, &mu),
