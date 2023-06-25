@@ -4,11 +4,7 @@ using System;
 
 namespace LlamaCpp.Net.Samplers;
 
-/// <summary>
-///     Apply frequency and presence penalties to the candidates
-///     described in OpenAI API https://platform.openai.com/docs/api-reference/parameter-details.
-/// </summary>
-internal sealed class FrequencyAndPresencePenaltySampler : AbstractSampler
+internal sealed class FrequencyAndPresencePenaltySampler : ISampler
 {
     /// <summary>
     ///     The frequency penalty coefficient
@@ -20,22 +16,18 @@ internal sealed class FrequencyAndPresencePenaltySampler : AbstractSampler
     /// </summary>
     private readonly float _alphaPresence;
 
-    private readonly int[] _lastTokens;
-    private readonly ulong _lastTokensSize;
 
-    public FrequencyAndPresencePenaltySampler(SafeLLamaContextHandle context, int[] lastTokens,
-        ulong lastTokensSize, float alphaFrequency, float alphaPresence) : base(context)
+    public FrequencyAndPresencePenaltySampler(float alphaFrequency, float alphaPresence)
     {
-        _lastTokens = lastTokens;
-        _lastTokensSize = lastTokensSize;
         _alphaFrequency = alphaFrequency;
         _alphaPresence = alphaPresence;
     }
 
 
-    public override void Sample(IntPtr intPtr)
+    public void Sample(SafeLLamaContextHandle context, IntPtr intPtr, int[] currentOutput)
     {
-        _context.llama_sample_frequency_and_presence_penalties(intPtr, _lastTokens, _lastTokensSize,
+
+        context.llama_sample_frequency_and_presence_penalties(intPtr, currentOutput, (ulong)currentOutput.Length,
             _alphaFrequency, _alphaPresence);
     }
 }
