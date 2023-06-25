@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LlamaCpp.Net.Native;
+using System;
 
 namespace LlamaCpp.Net.Samplers.Abstractions;
 
@@ -7,6 +8,5 @@ namespace LlamaCpp.Net.Samplers.Abstractions;
 /// </summary>
 internal interface ISampler
 {
-
-    protected internal void Sample(IntPtr intPtr);
+    protected internal void Sample(SafeLLamaContextHandle context, IntPtr intPtr, int[] currentOutput);
 }

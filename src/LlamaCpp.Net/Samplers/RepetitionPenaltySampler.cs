@@ -1,5 +1,4 @@
-﻿using LlamaCpp.Net.Configuration;
-using LlamaCpp.Net.Native;
+﻿using LlamaCpp.Net.Native;
 using LlamaCpp.Net.Samplers.Abstractions;
 using System;
 
@@ -9,23 +8,20 @@ namespace LlamaCpp.Net.Samplers;
 ///     Apply repetition penalty to the candidates
 ///     Repetition penalty described in CTRL academic paper https://arxiv.org/abs/1909.05858, with negative logit fix.
 /// </summary>
-internal sealed class RepetitionPenaltySampler : AbstractSampler
+internal sealed class RepetitionPenaltySampler : ISampler
 {
-    private readonly int[] _lastTokens;
-    private readonly ulong _lastTokensSize;
     private readonly float _penalty;
 
 
-    public RepetitionPenaltySampler(SafeLLamaContextHandle context, int[] lastTokens, InferenceOptions inferenceOptions) : base(context)
+    public RepetitionPenaltySampler(float repetitionPenalty)
     {
-        _lastTokens = lastTokens;
-        _lastTokensSize = inferenceOptions.RepetitionLastN;
-        _penalty = inferenceOptions.RepetitionPenalty;
+        _penalty = repetitionPenalty;
     }
 
 
-    public override void Sample(IntPtr intPtr)
+    public void Sample(SafeLLamaContextHandle context, IntPtr intPtr, int[] currentOutput)
     {
-        _context.llama_sample_repetition_penalty(intPtr, _lastTokens, _lastTokensSize, _penalty);
+
+        context.llama_sample_repetition_penalty(intPtr, currentOutput, (ulong)currentOutput.Length, _penalty);
     }
 }

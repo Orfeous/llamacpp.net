@@ -1,6 +1,7 @@
 ﻿using LlamaCpp.Net;
 using LlamaCpp.Net.Abstractions;
 using LlamaCpp.Net.Configuration;
+using LlamaCpp.Net.Samplers.Pipelines;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -26,13 +27,14 @@ namespace Llama.Net.Examples.ConsoleChat
 
                 UseFp16Memory = false
             };
-            var inferenceOptions = InferenceOptions.Chat;
             var host = new HostBuilder()
                 .ConfigureServices(services =>
                 {
                     services.AddSingleton<ILanguageModel>(s =>
                         new LanguageModel(_modelPath, s.GetRequiredService<ILogger<LanguageModel>>(),
-                            modelOptions));
+                            modelOptions, SamplingPipelinePreset.Default
+                        )
+                    );
                 })
                 .ConfigureLogging(logging =>
                 {
@@ -42,7 +44,7 @@ namespace Llama.Net.Examples.ConsoleChat
 
             var model = host.Services.GetRequiredService<ILanguageModel>();
 
-            model.PrintSystemInfo();
+            var inferenceOptions = InferenceOptions.Default;
 
             var prompt = "";
             while (prompt != "/stop")
