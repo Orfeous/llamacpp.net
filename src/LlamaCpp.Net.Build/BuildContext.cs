@@ -2,7 +2,6 @@
 using Cake.Common.IO;
 using Cake.Common.Tools.GitVersion;
 using Cake.Core;
-using Cake.Core.Diagnostics;
 using Cake.Core.IO;
 using Cake.Frosting;
 using LibGit2Sharp;
@@ -86,21 +85,10 @@ public class BuildContext : FrostingContext
 
         this.Version = this.GitVersion(new GitVersionSettings()
         {
-
         });
-
-        // print all version variants
-
-        this.Log.Information("Version: {0}", Version.NuGetVersion);
-        this.Log.Information("Version: {0}", Version.SemVer);
-        this.Log.Information("Version: {0}", Version.FullSemVer);
-        this.Log.Information("Version: {0}", Version.MajorMinorPatch);
-        this.Log.Information("Version: {0}", Version.MajorMinorPatch + Version.PreReleaseTag);
-
     }
 
     public GitVersion Version { get; set; }
-
 
 
     public DirectoryPath ArtifactsDirectory { get; set; }
@@ -151,7 +139,6 @@ public class BuildContext : FrostingContext
         {
             new MsvcBuildSettings
             {
-
                 Triplet = "x86_64-pc-windows-msvc",
                 BuildConfiguration = "Release",
                 Avx512Support = Avx512Support.Avx512 | Avx512Support.Vbmi | Avx512Support.Vnni,
@@ -176,6 +163,4 @@ public class BuildContext : FrostingContext
 
         return directoryPath;
     }
-
-
 }
