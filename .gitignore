@@ -402,5 +402,4 @@ FodyWeavers.xsd
 /runtimes/
 /models/
 lib/
-/tools/.store/gitversion.tool/5.12.0
-/tools/dotnet-gitversion.exe
+/tools/
