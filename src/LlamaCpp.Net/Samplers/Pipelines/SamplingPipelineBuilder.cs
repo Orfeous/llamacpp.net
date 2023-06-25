@@ -1,28 +1,25 @@
-﻿using LlamaCpp.Net.Native;
+﻿using System.Collections.Generic;
+using LlamaCpp.Net.Native;
 using LlamaCpp.Net.Samplers.Abstractions;
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
 
 namespace LlamaCpp.Net.Samplers.Pipelines;
 
 /// <summary>
-/// Builds a <see cref="SamplingPipeline"/> instance.
+///     Builds a <see cref="SamplingPipeline" /> instance.
 /// </summary>
 internal sealed class SamplingPipelineBuilder : ISamplingPipelineBuilder
 {
     private readonly ILogger _logger;
-    private IList<ISampler> _samplers = new List<ISampler>();
+    private readonly IList<ISampler> _samplers = new List<ISampler>();
 
     /// <summary>
-    /// 
     /// </summary>
     /// <param name="logger"></param>
     public SamplingPipelineBuilder(ILogger logger)
     {
         _logger = logger;
     }
-
-
 
 
     public ISamplingPipelineBuilder AddTemperatureSampler(float temperature)

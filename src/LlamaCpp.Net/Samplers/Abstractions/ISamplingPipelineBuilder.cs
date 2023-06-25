@@ -1,7 +1,6 @@
 ﻿namespace LlamaCpp.Net.Samplers.Abstractions;
 
 /// <summary>
-/// 
 /// </summary>
 public interface ISamplingPipelineBuilder
 {
@@ -19,7 +18,6 @@ public interface ISamplingPipelineBuilder
     /// <summary>
     ///     Sorts candidate tokens by their logits in descending order and calculate probabilities based on logits.
     /// </summary>
-    /// 
     ISamplingPipelineBuilder AddSoftMaxSampler();
 
     /// <summary>
@@ -85,7 +83,7 @@ public interface ISamplingPipelineBuilder
     ///     tokens when checking for repetitions (within the context window).
     /// </param>
     /// <param name="penalty">
-    ///      The RepetitionPenalty parameter helps prevent the model from generating repetitive or monotonous text.
+    ///     The RepetitionPenalty parameter helps prevent the model from generating repetitive or monotonous text.
     ///     A higher value (e.g., 1.5) will penalize repetitions more strongly,
     ///     while a lower value (e.g., 0.9) will be more lenient.
     /// </param>
@@ -97,7 +95,15 @@ public interface ISamplingPipelineBuilder
     ///     Apply frequency and presence penalties to the candidates
     ///     described in OpenAI API https://platform.openai.com/docs/api-reference/parameter-details.
     /// </summary>
-    /// <param name="alphaFrequency">The frequency of the alpha parameter. Alpha controls the degree of randomness in the model's output. A reasonable value for this parameter is between 0.1 and 1, with 1 being the most random.</param>">
-    /// <param name="alphaPresence">The presence of the alpha parameter. Alpha controls the degree of randomness in the model's output. A reasonable value for this parameter is between 0.1 and 1, with 1 being the most random.</param>">
+    /// <param name="alphaFrequency">
+    ///     The frequency of the alpha parameter. Alpha controls the degree of randomness in the
+    ///     model's output. A reasonable value for this parameter is between 0.1 and 1, with 1 being the most random.
+    /// </param>
+    /// ">
+    /// <param name="alphaPresence">
+    ///     The presence of the alpha parameter. Alpha controls the degree of randomness in the model's
+    ///     output. A reasonable value for this parameter is between 0.1 and 1, with 1 being the most random.
+    /// </param>
+    /// ">
     ISamplingPipelineBuilder AddFrequencyAndPresencePenaltySampler(float alphaFrequency, float alphaPresence);
 }

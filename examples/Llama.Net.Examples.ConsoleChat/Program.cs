@@ -31,13 +31,9 @@ namespace Llama.Net.Examples.ConsoleChat
                 .ConfigureServices(services =>
                 {
                     services.AddSingleton<ILanguageModel>(s =>
-
-
-
                         new LanguageModel(_modelPath, s.GetRequiredService<ILogger<LanguageModel>>(),
                             modelOptions, SamplingPipelinePreset.Default
-                            )
-
+                        )
                     );
                 })
                 .ConfigureLogging(logging =>
