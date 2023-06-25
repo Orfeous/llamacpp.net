@@ -53,7 +53,7 @@ internal sealed unsafe class SamplingPipeline
 
         // create a subset of currentOutput that only contains the last n tokens
         // this is used to apply the frequency penalty
-        var n = 300;
+        var n = inferenceOptions.RepetitionLookback;
 
         var currentOutputSet = currentOutput.Length > n
             ? currentOutput[^n..]

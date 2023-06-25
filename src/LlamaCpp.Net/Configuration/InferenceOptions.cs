@@ -31,4 +31,9 @@ public record InferenceOptions
     /// 
     /// </summary>
     public SamplingMethod SamplingMethod { get; set; }
+
+    /// <summary>
+    /// When using one of the repetition penalty samplers, this value is used to determine how far to look back.
+    /// </summary>
+    public int RepetitionLookback { get; set; } = 10;
 }
