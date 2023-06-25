@@ -201,13 +201,6 @@ public class LanguageModel : ILanguageModel
         return result;
     }
 
-    /// <summary>
-    ///     Prints system info to the log.
-    /// </summary>
-    public void PrintSystemInfo()
-    {
-        LlamaNative.llama_print_system_info();
-    }
 
     /// <summary>
     ///     Initializes the token cache so that we can quickly look up tokens by their index
@@ -410,6 +403,8 @@ public class LanguageModel : ILanguageModel
             _contextHandle.Dispose();
         }
     }
+
+
 }
 
 #pragma warning restore CA1848
