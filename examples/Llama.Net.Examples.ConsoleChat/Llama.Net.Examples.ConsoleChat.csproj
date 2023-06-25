@@ -31,7 +31,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\LlamaCpp.Net.Cpu\LlamaCpp.Net.Cpu.csproj" />
     <ProjectReference Include="..\..\src\LlamaCpp.Net\LlamaCpp.Net.csproj" />
   </ItemGroup>
 

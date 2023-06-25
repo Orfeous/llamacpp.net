@@ -42,8 +42,6 @@ namespace Llama.Net.Examples.ConsoleChat
 
             var model = host.Services.GetRequiredService<ILanguageModel>();
 
-            model.PrintSystemInfo();
-
             var prompt = "";
             while (prompt != "/stop")
             {
