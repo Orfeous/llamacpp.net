@@ -3,31 +3,75 @@ using Cake.Core.Diagnostics;
 using Cake.Core.IO;
 using Cake.Frosting;
 using LlamaCpp.Net.Build.Configuration;
+using LlamaCpp.Net.Build.Tasks.Dotnet;
 using LlamaCpp.Net.Build.Tasks.Libraries.Llama;
 using NuGet.Packaging;
 using NuGet.Versioning;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace LlamaCpp.Net.Build.Tasks.Packaging
 {
-
     [IsDependentOn(typeof(BuildLlamaTask))]
-    public class PackageNugetTask : FrostingTask<BuildContext>
+    [IsDependentOn(typeof(PublishTask))]
+    public class PackageNugetTask : AsyncFrostingTask<BuildContext>
     {
-        public override void Run(BuildContext context)
+        public override async Task RunAsync(BuildContext context)
         {
             var nugetTemp = context.TmpDir.Combine("nuget");
 
+            var artifactDirectory = context.VersionedArtifactsDirectory;
             context.EnsureDirectoryExists(nugetTemp);
 
-            context.CleanDirectory(nugetTemp);
 
-            PackageRuntimes(context, nugetTemp);
+            context.EnsureDirectoryExists(artifactDirectory);
+
+            var runtimePackages = PackageRuntimes(context, nugetTemp);
+
+            await CollectRuntimePackages(context, runtimePackages, artifactDirectory);
+
+            var corePackage = context.TmpDir.Combine("nuget")
+                .CombineWithFilePath($"LlamaCpp.Net.{context.Version.NuGetVersion}.nupkg");
+
+            var corePackagePath = context.VersionedArtifactsDirectory.CombineWithFilePath("LlamaCpp.Net.nupkg");
+
+
+            context.CopyFile(corePackage, corePackagePath);
         }
 
-        private static void PackageRuntimes(BuildContext context, DirectoryPath nugetTemp)
+        private static async Task CollectRuntimePackages(BuildContext context, IEnumerable<FilePath> runtimePackages,
+            DirectoryPath artifactDirectory)
+        {
+            foreach (var package in runtimePackages)
+            {
+                context.Log.Information($"Collecting {package}");
+
+                while (true)
+                {
+                    // Wait for the file to be released
+
+                    try
+                    {
+                        await using var stream = File.OpenRead(package.FullPath);
+                        break;
+                    }
+                    catch (IOException)
+                    {
+                        context.Log.Information($"Waiting for {package} to be released...");
+                        await Task.Delay(100);
+                    }
+                }
+
+
+                var filePath = artifactDirectory.CombineWithFilePath(package.GetFilename());
+                context.CopyFile(package, filePath);
+            }
+        }
+
+        private static IEnumerable<FilePath> PackageRuntimes(BuildContext context, DirectoryPath nugetTemp)
         {
             foreach (var groups in context.BuildSettings.GroupBy(settings => settings.PackageName()))
             {
@@ -45,7 +89,8 @@ namespace LlamaCpp.Net.Build.Tasks.Packaging
                         [nameof(setting.EnableKQuants)] = setting.EnableKQuants.ToString(),
                         [nameof(setting.BlasType)] = setting.BlasType.ToString()
                     },
-                    Version = NuGetVersion.Parse(context.NugetVersion),
+                    Version = NuGetVersion.Parse(context.Version.NuGetVersion),
+
                     Owners = { "LlamaCpp.Net" },
                     TargetFrameworks = { new NuGet.Frameworks.NuGetFramework("netstandard", new Version(2, 1)) }
                 };
@@ -97,13 +142,11 @@ namespace LlamaCpp.Net.Build.Tasks.Packaging
                         if (s is MsvcBuildSettings settings)
                         {
                             targetPath = $"runtimes/{settings.Triplet}/native/{filePath.GetFilename().FullPath}";
-
                         }
 
                         else
                         {
                             targetPath = $"runtimes/native/{filePath.GetFilename().FullPath}";
-
                         }
 
                         var packageFile = new PhysicalPackageFile(memory)
@@ -117,17 +160,21 @@ namespace LlamaCpp.Net.Build.Tasks.Packaging
                     }
                 }
 
-                var nuspecPath = nugetTemp.Combine($"{id}.nupkg");
+                var nuspecPath = nugetTemp.CombineWithFilePath($"{id}.nupkg");
 
-                using var file = File.Create(nuspecPath.FullPath);
+                using (var file = File.Create(nuspecPath.FullPath))
+                {
+                    package.Save(file);
+                }
 
-                package.Save(file);
+
+                yield return nuspecPath;
             }
         }
 
         public override bool ShouldRun(BuildContext context)
         {
-            return false;
+            return true;
         }
     }
 }

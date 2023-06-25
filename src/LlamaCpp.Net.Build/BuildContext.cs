@@ -1,6 +1,8 @@
 ﻿using Cake.Common;
 using Cake.Common.IO;
+using Cake.Common.Tools.GitVersion;
 using Cake.Core;
+using Cake.Core.Diagnostics;
 using Cake.Core.IO;
 using Cake.Frosting;
 using LibGit2Sharp;
@@ -20,6 +22,7 @@ public class BuildContext : FrostingContext
 
         TmpDir = RepositoryRoot.Combine("tmp");
         RuntimeDirectory = RepositoryRoot.Combine("runtimes");
+        ArtifactsDirectory = RepositoryRoot.Combine("artifacts");
 
         LlamaCppNetDirectory = RepositoryRoot.Combine("src").Combine("LlamaCpp.Net");
         LlamaCppNetTestDirectory = RepositoryRoot.Combine("src").Combine("LlamaCpp.Net.Test");
@@ -80,7 +83,29 @@ public class BuildContext : FrostingContext
         var repo = new Repository(RepositoryRoot.FullPath);
 
         Authors = repo.Commits.Select(commit => commit.Author.Name).Distinct();
+
+        this.Version = this.GitVersion(new GitVersionSettings()
+        {
+
+        });
+
+        // print all version variants
+
+        this.Log.Information("Version: {0}", Version.NuGetVersion);
+        this.Log.Information("Version: {0}", Version.SemVer);
+        this.Log.Information("Version: {0}", Version.FullSemVer);
+        this.Log.Information("Version: {0}", Version.MajorMinorPatch);
+        this.Log.Information("Version: {0}", Version.MajorMinorPatch + Version.PreReleaseTag);
+
     }
+
+    public GitVersion Version { get; set; }
+
+
+
+    public DirectoryPath ArtifactsDirectory { get; set; }
+
+    public DirectoryPath VersionedArtifactsDirectory => ArtifactsDirectory.Combine(Version.NuGetVersion);
 
     public DependencyInfo BlisDependency { get; set; }
 
@@ -119,7 +144,6 @@ public class BuildContext : FrostingContext
     public DirectoryPath RuntimeDirectory { get; }
     public DirectoryPath ModelDirectory { get; set; }
     public string OpenClVersion { get; }
-    public string NugetVersion { get; set; } = "1.0.0";
 
     private static List<BuildSettings> GetBuildSettings()
     {

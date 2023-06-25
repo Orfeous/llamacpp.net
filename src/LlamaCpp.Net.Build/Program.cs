@@ -1,4 +1,5 @@
 using Cake.Frosting;
+using System;
 
 namespace LlamaCpp.Net.Build
 {
@@ -8,6 +9,7 @@ namespace LlamaCpp.Net.Build
         {
             return new CakeHost()
                 .UseContext<BuildContext>()
+                .InstallTool(new Uri("dotnet:?package=GitVersion.Tool"))
                 .Run(args);
         }
     }

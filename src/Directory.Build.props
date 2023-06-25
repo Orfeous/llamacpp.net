@@ -9,21 +9,14 @@
         <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
         <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
-        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
         <AnalysisLevel>latest-recommended</AnalysisLevel>
         <WarningLevel>4</WarningLevel>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <ContinousIntegrationBuild>true</ContinousIntegrationBuild>
 
     </PropertyGroup>
     <!-- /Library -->
 
-    <!-- Version -->
-    <PropertyGroup>
-        <Version>0.0.1</Version>
-        <PackageVersion>$(Version)-alpha</PackageVersion>
-        <AssemblyVersion>$(Version).0</AssemblyVersion>
-        <FileVersion>$(Version).0</FileVersion>
-    </PropertyGroup>
-    <!-- /Version -->
 
     <!-- Package -->
     <PropertyGroup>
