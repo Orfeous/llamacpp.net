@@ -38,8 +38,8 @@ jobs:
       # Caching these should make the build significantly quicker
       - name: Cache External Libraries
         uses: actions/cache@v3
-        id: extlibs
         with:
+          key: extlibs
           path: |
             .\lib\ClBlast
             .\lib\llama.cpp
@@ -48,8 +48,8 @@ jobs:
       # Caching these should make the build significantly quicker
       - name: Cache External Libraries
         uses: actions/cache@v3
-        id: extlibstmp
         with:
+          key: extlibstmp
           path: |
             .\tmp\ClBlast
             .\tmp\llama.cpp
