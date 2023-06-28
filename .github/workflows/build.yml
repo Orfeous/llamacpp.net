@@ -26,8 +26,6 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
-      - name: Display dotnet version
-        run: dotnet --version
 
       # Setup cuda
       - uses: Jimver/cuda-toolkit@v0.2.10
@@ -36,6 +34,20 @@ jobs:
           cuda: '12.1.0'
       - name: Display cuda version
         run: nvcc -V
+
+      # Caching these should make the build significantly quicker
+      - name: Cache External Libraries
+        uses: actions/cache@v3
+        with:
+          path: |
+            .\lib\ClBlast
+            .\lib\llama.cpp
+            .\lib\OpenBlas
+            .\lib\OpenCl
+            .\tmp\ClBlast
+            .\tmp\llama.cpp
+            .\tmp\OpenBlas
+            .\tmp\OpenCl
 
       # Cake Build dependencies
       - name: Cake Build dependencies
