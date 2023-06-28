@@ -28,22 +28,29 @@ jobs:
           dotnet-version: ${{ matrix.dotnet-version }}
 
       # Setup cuda
-      - uses: Jimver/cuda-toolkit@v0.2.10
-        id: cuda-toolkit
-        with:
-          cuda: '12.1.0'
-      - name: Display cuda version
-        run: nvcc -V
+      # - uses: Jimver/cuda-toolkit@v0.2.10
+      #   id: cuda-toolkit
+      #   with:
+      #     cuda: '12.1.0'
+      # - name: Display cuda version
+      #   run: nvcc -V
 
       # Caching these should make the build significantly quicker
       - name: Cache External Libraries
         uses: actions/cache@v3
+        id: extlibs
         with:
           path: |
             .\lib\ClBlast
             .\lib\llama.cpp
             .\lib\OpenBlas
             .\lib\OpenCl
+      # Caching these should make the build significantly quicker
+      - name: Cache External Libraries
+        uses: actions/cache@v3
+        id: extlibstmp
+        with:
+          path: |
             .\tmp\ClBlast
             .\tmp\llama.cpp
             .\tmp\OpenBlas
