@@ -36,3 +36,11 @@ jobs:
           cuda: '12.1.0'
       - name: Display cuda version
         run: nvcc -V
+
+      # Cake Build dependencies
+      - name: Cake Build dependencies
+        run: .\build.ps1 -t Default
+
+      # Cake build nuget package
+      - name: Build nuget
+        run: .\build.ps1 -t Dotnet.Build
