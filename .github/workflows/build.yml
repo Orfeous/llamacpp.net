@@ -28,12 +28,11 @@ jobs:
           dotnet-version: ${{ matrix.dotnet-version }}
 
       # Setup cuda
-      # - uses: Jimver/cuda-toolkit@v0.2.10
-      #   id: cuda-toolkit
-      #   with:
-      #     cuda: '12.1.0'
-      # - name: Display cuda version
-      #   run: nvcc -V
+      - uses: Jimver/cuda-toolkit@v0.2.10
+        id: cuda-toolkit
+        with:
+          cuda: '12.1.0'
+          method: local
 
       # Caching these should make the build significantly quicker
       - name: Cache External Libraries
