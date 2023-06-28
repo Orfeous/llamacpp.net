@@ -40,6 +40,7 @@ jobs:
         uses: actions/cache@v3
         with:
           key: extlibs
+          enableCrossOsArchive: true
           path: |
             .\lib\ClBlast
             .\lib\llama.cpp
@@ -63,3 +64,12 @@ jobs:
       # Cake build nuget package
       - name: Build nuget
         run: .\build.ps1 -t Dotnet.Build
+
+      - name: Setup Github nuget repo
+        if: startsWith(github.ref, 'refs/heads/release')
+        # run: nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}}
+        run: dotnet nuget add source --username Orfeous --password ${{ secrets.NUGET_SECRET }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Orfeous/index.json"
+
+      - name: Publish Github Nuget
+        if:
+        run: dotnet nuget push "src\LlamaCpp.Net\bin\Release\LlamaCpp.Net.*.nupkg" --api-key ${{ secrets.NUGET_SECRET }} --source "github"
