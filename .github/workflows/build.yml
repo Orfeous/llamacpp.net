@@ -68,5 +68,7 @@ jobs:
         run: dotnet nuget add source --username Orfeous --password ${{ secrets.NUGET_SECRET }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Orfeous/index.json"
 
       - name: Publish Github Nuget
-        # run: nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}}
         run: dotnet nuget push "src\LlamaCpp.Net\bin\Release\LlamaCpp.Net.*.nupkg" --api-key ${{ secrets.NUGET_SECRET }} --source "github"
+
+      # - name: Publish Nuget.org
+      #   run: nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}}
