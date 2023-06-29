@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Llama.Net.Examples.ConsoleChat
+namespace LlamaCpp.Net.Examples.ConsoleChat
 {
     internal class Program
     {

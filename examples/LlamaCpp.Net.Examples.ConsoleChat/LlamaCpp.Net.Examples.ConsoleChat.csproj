@@ -5,7 +5,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <StartupObject>Llama.Net.Examples.ConsoleChat.Program</StartupObject>
+    <StartupObject>LlamaCpp.Net.Examples.ConsoleChat.Program</StartupObject>
     <ApplicationIcon>llama-glyph-256.ico</ApplicationIcon>
     <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
     <ErrorReport>none</ErrorReport>
