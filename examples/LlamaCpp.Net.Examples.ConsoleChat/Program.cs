@@ -1,23 +1,20 @@
-﻿using LlamaCpp.Net;
-using LlamaCpp.Net.Abstractions;
+﻿using LlamaCpp.Net.Abstractions;
 using LlamaCpp.Net.Configuration;
 using LlamaCpp.Net.Samplers.Pipelines;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Llama.Net.Examples.ConsoleChat
+namespace LlamaCpp.Net.Examples.ConsoleChat
 {
     internal class Program
     {
-        private static readonly string _modelDirectory = @"D:\source\repos\llamacpp.net\models";
-
-        //private static readonly string _modelDirectory = Path.Combine(AppContext.BaseDirectory, "models");
-        private static readonly string _modelName = "wizardLM-7B.ggmlv3.q4_0.bin";
-        private static readonly string _modelPath = Path.Combine(_modelDirectory, _modelName);
-
         static async Task Main(string[] args)
         {
+            if (args.Length != 1) { Console.WriteLine("Please provide the model's full path as an argument"); Environment.Exit(1); }
+            if (string.IsNullOrWhiteSpace(args[0])) { Console.WriteLine("Please provide the model's full path as an argument"); Environment.Exit(1); }
+            var _modelPath = args[0];
+
             var modelOptions = LanguageModelOptions.Default with
             {
                 PromptSuffix = "\n\n### Response:",

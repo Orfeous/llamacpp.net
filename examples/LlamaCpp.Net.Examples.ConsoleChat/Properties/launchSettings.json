@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "LlamaCpp.Net.Examples.ConsoleChat": {
+      "commandName": "Project",
+      "commandLineArgs": "d:\\Development\\llamacpp.net\\models\\wizardLM-7B.ggmlv3.q4_0.bin"
+    }
+  }
+}
