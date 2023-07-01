@@ -24,12 +24,12 @@ namespace LlamaCpp.Net;
 /// <inheritdoc />
 public class LanguageModel : ILanguageModel
 {
-    private readonly SamplingPipeline _constraints;
+    private readonly ISamplingPipeline _constraints;
     private readonly Encoding _encoding = Encoding.UTF8;
-    private readonly int _endOfSequenceToken;
+    private static int EndOfSequenceToken => LlamaNative.llama_token_eos();
     private readonly ILlamaInstance _instance;
     private readonly ILogger<LanguageModel> _logger;
-    private readonly Dictionary<int, string> _tokenCache;
+    private readonly Dictionary<int, string> _tokenCache = new();
     private readonly int _vocabSize;
 
     private int[] _embeds = Array.Empty<int>();
@@ -57,7 +57,6 @@ public class LanguageModel : ILanguageModel
         options ??= LanguageModelOptions.Default;
 
         Options = options;
-        Threads = options.Threads;
 
         var contextParams = GetContextParams(options);
 
@@ -68,7 +67,6 @@ public class LanguageModel : ILanguageModel
         }
 
 
-        _endOfSequenceToken = LlamaNative.llama_token_eos();
         _vocabSize = _instance.GetVocabSize();
 
         _constraints = BuildSamplingPipeline(samplingPipeline);
@@ -81,9 +79,21 @@ public class LanguageModel : ILanguageModel
         LoadInitialPrompt(options);
     }
 
+    internal LanguageModel(ISamplingPipeline constraints, ILlamaInstance instance, ILogger<LanguageModel> logger, string modelPath, LanguageModelOptions options)
+    {
+        _constraints = constraints;
+        _instance = instance;
+        _logger = logger;
+        ModelPath = modelPath;
+        Options = LanguageModelOptions.Default;
+        _vocabSize = _instance.GetVocabSize();
+
+    }
+
+
     /// <summary>
     /// </summary>
-    private int Threads { get; }
+    private int Threads => Options.Threads;
 
 
     /// <inheritdoc />
@@ -135,10 +145,10 @@ public class LanguageModel : ILanguageModel
         }
 
         _logger.LogDebug("Converting token {Token} to string", token);
-        var ptr = _instance.TokenToStr(token);
-        var s = ptr.PtrToString(_encoding);
 
-        _tokenCache[token] = s;
+
+
+        _tokenCache[token] = _instance.TokenToString(token, _encoding);
         return _tokenCache[token];
     }
 
@@ -218,8 +228,8 @@ public class LanguageModel : ILanguageModel
         _logger.LogDebug("Caching tokens");
         for (var i = 0; i < _vocabSize; i++)
         {
-            var token = _instance.TokenToStr(i);
-            _tokenCache.Add(i, token.PtrToString(_encoding));
+            var token = _instance.TokenToString(i, _encoding);
+            _tokenCache.Add(i, token);
         }
     }
 
@@ -278,7 +288,7 @@ public class LanguageModel : ILanguageModel
             var id = _constraints.ApplyConstraints(candidates, logits, currentOutput, options);
 
 
-            if (id == _endOfSequenceToken)
+            if (id == EndOfSequenceToken)
             {
                 break;
             }

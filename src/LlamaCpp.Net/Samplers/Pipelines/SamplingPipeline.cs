@@ -9,11 +9,8 @@ using System.Linq;
 
 namespace LlamaCpp.Net.Samplers.Pipelines;
 
-/// <summary>
-///     Represents a set of constraints that can be applied to token candidates based on the last tokens and inference
-///     options.
-/// </summary>
-internal sealed unsafe class SamplingPipeline
+/// <inheritdoc />
+internal sealed unsafe class SamplingPipeline : ISamplingPipeline
 {
     private readonly ILlamaInstance _contextHandle;
     private readonly int _newLineToken;
@@ -28,13 +25,7 @@ internal sealed unsafe class SamplingPipeline
     }
 
 
-    /// <summary>
-    ///     Applies constraints to the given token candidates based on the last tokens and inference options.
-    /// </summary>
-    /// <param name="candidatesP">The token candidates to apply constraints to.</param>
-    /// <param name="logits">The logits for each token.</param>
-    /// <param name="currentOutput"></param>
-    /// <param name="inferenceOptions">The inference options to use for applying constraints.</param>
+    /// <inheritdoc />
     public int ApplyConstraints(TokenDataArray candidatesP,
         Span<float> logits,
         int[] currentOutput,
@@ -88,4 +79,24 @@ internal sealed unsafe class SamplingPipeline
             _ => throw new ArgumentOutOfRangeException(nameof(candidatesP))
         };
     }
+}
+
+/// <summary>
+///     Represents a set of constraints that can be applied to token candidates based on the last tokens and inference
+///     options.
+/// </summary>
+internal interface ISamplingPipeline
+{
+
+    /// <summary>
+    ///     Applies constraints to the given token candidates based on the last tokens and inference options.
+    /// </summary>
+    /// <param name="candidatesP">The token candidates to apply constraints to.</param>
+    /// <param name="logits">The logits for each token.</param>
+    /// <param name="currentOutput"></param>
+    /// <param name="inferenceOptions">The inference options to use for applying constraints.</param>
+    public int ApplyConstraints(TokenDataArray candidatesP,
+        Span<float> logits,
+        int[] currentOutput,
+        InferenceOptions inferenceOptions);
 }

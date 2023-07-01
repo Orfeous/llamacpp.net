@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace LlamaCpp.Net.Native.Abstractions;
 
@@ -49,4 +50,5 @@ internal interface ILlamaInstance : IDisposable
     int SampleTokenGreedy(IntPtr candidates);
     int SampleToken(IntPtr candidates);
     IntPtr TokenToStr(int token);
+    string TokenToString(int token, Encoding encoding);
 }

@@ -1,7 +1,9 @@
 ﻿using LlamaCpp.Net.Exceptions;
 using LlamaCpp.Net.Native.Abstractions;
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace LlamaCpp.Net.Native.API;
 
@@ -200,5 +202,51 @@ internal unsafe class LlamaInstance : ILlamaInstance
     public IntPtr TokenToStr(int token)
     {
         return LlamaNative.llama_token_to_str(_contextHandle, token);
+    }
+
+    public string TokenToString(int token, Encoding encoding)
+    {
+        var ptr = TokenToStr(token);
+        var s = PtrToString(ptr, encoding);
+
+        return s;
+    }
+    /// <summary>
+    ///    Converts a stringPointer to a string
+    /// </summary>
+    /// <param name="stringPointer"></param>
+    /// <param name="encoding"></param>
+    /// <returns></returns>
+    private static unsafe string PtrToString(IntPtr stringPointer, Encoding encoding)
+    {
+#if NET6_0_OR_GREATER
+            if(encoding == Encoding.UTF8)
+            {
+                return Marshal.PtrToStringUTF8(stringPointer);
+            }
+            else if(encoding == Encoding.Unicode)
+            {
+                return Marshal.PtrToStringUni(stringPointer);
+            }
+            else
+            {
+                return Marshal.PtrToStringAuto(stringPointer);
+            }
+#else
+        var tp = (byte*)stringPointer.ToPointer();
+        List<byte> bytes = new List<byte>();
+        while (true)
+        {
+            var c = *tp++;
+            if (c == '\0')
+            {
+                break;
+            }
+
+            bytes.Add(c);
+        }
+
+        return encoding.GetString(bytes.ToArray());
+#endif
     }
 }

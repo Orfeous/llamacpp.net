@@ -1,66 +1,129 @@
 ﻿using FluentAssertions;
-using LlamaCpp.Net.Abstractions;
 using LlamaCpp.Net.Configuration;
+using LlamaCpp.Net.Exceptions;
+using LlamaCpp.Net.Native.Abstractions;
+using LlamaCpp.Net.Samplers.Pipelines;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
 using NUnit.Framework;
 using System.Text;
-
-#pragma warning disable CA1707 // Identifiers should not contain underscores
 
 namespace LlamaCpp.Net.Tests;
 
 [TestFixture]
 public class LanguageModelTests
 {
-    public static ILanguageModel CreateInstance()
+    private MockRepository _repository;
+    private Mock<ISamplingPipeline> _samplingPipelineMock;
+    private Mock<ILlamaInstance> _instanceMock;
+    private Logger<LanguageModel> _logger;
+
+    [SetUp]
+    public void Setup()
     {
-        var modelFileName = "wizardLM-7B.ggmlv3.q4_0.bin";
-        var modelPath = Path.Join(Constants.ModelDirectory, modelFileName);
-        modelPath = Path.GetFullPath(modelPath);
-        return new LanguageModel(modelPath, new Logger<LanguageModel>(new NullLoggerFactory()),
-            LanguageModelOptions.Default);
+        this._repository = new MockRepository(MockBehavior.Strict);
+
+        this._samplingPipelineMock = this._repository.Create<ISamplingPipeline>();
+        this._instanceMock = this._repository.Create<ILlamaInstance>();
+
+        this._instanceMock.Setup(x => x.GetVocabSize())
+            .Returns(10);
+        this._logger = new Logger<LanguageModel>(new NullLoggerFactory());
+    }
+
+
+    public LanguageModel CreateModel()
+    {
+        return new LanguageModel(_samplingPipelineMock.Object,
+            _instanceMock.Object,
+            _logger,
+            Path.Join(Constants.ModelDirectory, "wizardLM-7B.ggmlv3.q4_0.bin"),
+            LanguageModelOptions.Default
+        );
+    }
+
+
+    [Test]
+    public void Tokenize_ReturnsListOfTokens_WhenTextIsValid()
+    {
+        // Arrange
+        var text = "This is a test.";
+        var expectedTokens = new List<int> { 1, 2, 3, 4, 5 };
+
+        _instanceMock.Setup(x => x.Tokenize(text, It.IsAny<int[]>(), It.IsAny<int>(), true))
+            .Returns(expectedTokens.Count);
+
+        _instanceMock.Setup(instance => instance.TokenToString(It.IsAny<int>(), It.IsAny<Encoding>()))
+            .Returns("{token}");
+
+
+        var languageModel = CreateModel();
+
+        // Act
+        var tokens = languageModel.Tokenize(text);
+
+        // Assert
+
+        expectedTokens.Should().BeEquivalentTo(new int[] { 1, 2, 3, 4, 5 });
     }
 
     [Test]
-    public void CanLoadModel()
+    public void Tokenize_ThrowsTokenizationFailedException_WhenTextCannotBeTokenized()
     {
-        var instance = CreateInstance();
+        // Arrange
+        var text = "This is a test.";
 
-        Assert.NotNull(instance);
+
+        _instanceMock.Setup(x => x.Tokenize(text, It.IsAny<int[]>(), It.IsAny<int>(), true))
+            .Returns(0);
+
+        _instanceMock.Setup(instance => instance.TokenToString(It.IsAny<int>(), It.IsAny<Encoding>()))
+            .Returns("{token}");
+        var languageModel = CreateModel();
+        // Act & Assert
+        Assert.Throws<TokenizationFailedException>(() => languageModel.Tokenize(text));
     }
 
     [Test]
-    public void Tokenize_Should_ReturnExpectedTokens()
+    public void TokenToString_ReturnsStringRepresentationOfToken_WhenTokenIsValid()
     {
-        var instance = CreateInstance();
+        // Arrange
+        var token = 1;
+        var expectedString = "This";
 
-        var input = "This is a test";
+        _instanceMock.Setup(x => x.TokenToStr(token))
+            .Returns(new IntPtr(1));
+        _instanceMock.Setup(instance => instance.TokenToString(It.IsAny<int>(), It.IsAny<Encoding>())).Returns("This");
 
-        var tokens = instance.Tokenize(input);
+        var languageModel = CreateModel();
+        // Act
+        var tokenString = languageModel.TokenToString(token);
 
-        Assert.NotNull(tokens);
-        Assert.IsNotEmpty(tokens);
+        // Assert
 
-        var expectedTokens = new[] { 1, 4013, 338, 263, 1243 };
-        tokens.Should().BeEquivalentTo(expectedTokens);
+        expectedString.Should().BeEquivalentTo(tokenString);
     }
 
     [Test]
-    public void TokenToString_Should_ReturnExpectedString()
+    public void TokenToString_ReturnsCachedStringRepresentationOfToken_WhenTokenHasBeenConvertedBefore()
     {
-        var instance = CreateInstance();
-        var input = "This is a test";
-        var tokens = instance.Tokenize(input);
+        // Arrange
+        var token = 1;
+        var expectedString = "This";
 
-        var sb = new StringBuilder();
-        foreach (var token in tokens)
-        {
-            sb.Append(instance.TokenToString(token));
-        }
+        _instanceMock.Setup(instance => instance.TokenToString(It.IsAny<int>(), It.IsAny<Encoding>())).Returns("This");
 
+        var languageModel = CreateModel();
 
-        sb.ToString().Should().Be(input);
+        languageModel.TokenToString(token);
+
+        // Act
+        var tokenString = languageModel.TokenToString(token);
+
+        // Assert
+
+        expectedString.Should().BeEquivalentTo(tokenString);
+        _instanceMock.Verify(x => x.TokenToString(token, It.IsAny<Encoding>()), Times.Once);
     }
 }
-#pragma warning restore CA1707 // Identifiers should not contain underscores
