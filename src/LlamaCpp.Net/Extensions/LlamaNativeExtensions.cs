@@ -1,4 +1,4 @@
-﻿using LlamaCpp.Net.Native;
+﻿using LlamaCpp.Net.Native.Abstractions;
 using LlamaCpp.Net.Native.Models;
 using System;
 
@@ -15,7 +15,7 @@ namespace LlamaCpp.Net.Extensions
         /// <param name="ctx"></param>
         /// <param name="candidates"></param>
         /// <returns></returns>
-        internal static unsafe int SampleToken(this SafeLLamaContextHandle ctx, TokenDataArray candidates)
+        internal static unsafe int SampleToken(this ILlamaInstance ctx, TokenDataArray candidates)
         {
             var handle = candidates.data.Pin();
             var st = new TokenDataArrayNative
@@ -24,7 +24,7 @@ namespace LlamaCpp.Net.Extensions
                 size = candidates.size,
                 sorted = candidates.sorted
             };
-            return ctx.llama_sample_token(new IntPtr(&st));
+            return ctx.SampleToken(new IntPtr(&st));
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace LlamaCpp.Net.Extensions
         /// Maximum cross-entropy. This value is initialized to be twice the target cross-entropy (`2 * tau`) and is updated in the algorithm based on the error between the target and observed surprisal.
         /// </param>
         /// <returns></returns>
-        internal static unsafe int SampleMirostat(this SafeLLamaContextHandle ctx, TokenDataArray candidates, float tau,
+        internal static unsafe int SampleMirostat(this ILlamaInstance ctx, TokenDataArray candidates, float tau,
             float eta, int m, float* mu)
         {
             var handle = candidates.data.Pin();
@@ -59,7 +59,7 @@ namespace LlamaCpp.Net.Extensions
                 size = candidates.size,
                 sorted = candidates.sorted
             };
-            return ctx.llama_sample_token_mirostat(new IntPtr(&st), tau, eta, m, mu);
+            return ctx.SampleTokenMirostat(new IntPtr(&st), tau, eta, m, mu);
         }
 
         ///  <summary>
@@ -79,7 +79,7 @@ namespace LlamaCpp.Net.Extensions
         ///  Maximum cross-entropy. This value is initialized to be twice the target cross-entropy (`2 * tau`) and is updated in the algorithm based on the error between the target and observed surprisal.
         ///  </param>
         ///  <returns></returns>
-        internal static unsafe int SampleMirostatV2(this SafeLLamaContextHandle ctx, TokenDataArray candidates,
+        internal static unsafe int SampleMirostatV2(this ILlamaInstance ctx, TokenDataArray candidates,
             float tau,
             float eta, float* mu)
         {
@@ -90,7 +90,7 @@ namespace LlamaCpp.Net.Extensions
                 size = candidates.size,
                 sorted = candidates.sorted
             };
-            return ctx.llama_sample_token_mirostat_v2(new IntPtr(&st), tau, eta, mu);
+            return ctx.SampleTokenMirostatV2(new IntPtr(&st), tau, eta, mu);
         }
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace LlamaCpp.Net.Extensions
         /// <param name="ctx"></param>
         /// <param name="candidates"></param>
         /// <returns></returns>
-        internal static unsafe int SampleGreedy(this SafeLLamaContextHandle ctx, TokenDataArray candidates)
+        internal static unsafe int SampleGreedy(this ILlamaInstance ctx, TokenDataArray candidates)
         {
             var handle = candidates.data.Pin();
             var st = new TokenDataArrayNative
@@ -108,7 +108,7 @@ namespace LlamaCpp.Net.Extensions
                 size = candidates.size,
                 sorted = candidates.sorted
             };
-            return ctx.llama_sample_token_greedy(new IntPtr(&st));
+            return ctx.SampleTokenGreedy(new IntPtr(&st));
         }
     }
 }

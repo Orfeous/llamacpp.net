@@ -1,5 +1,6 @@
 ﻿using LlamaCpp.Net.Configuration;
 using LlamaCpp.Net.Native;
+using LlamaCpp.Net.Native.Abstractions;
 using LlamaCpp.Net.Native.Models;
 using LlamaCpp.Net.Samplers.Abstractions;
 using System;
@@ -8,18 +9,15 @@ using System.Linq;
 
 namespace LlamaCpp.Net.Samplers.Pipelines;
 
-/// <summary>
-///     Represents a set of constraints that can be applied to token candidates based on the last tokens and inference
-///     options.
-/// </summary>
-internal sealed unsafe class SamplingPipeline
+/// <inheritdoc />
+internal sealed unsafe class SamplingPipeline : ISamplingPipeline
 {
-    private readonly SafeLLamaContextHandle _contextHandle;
+    private readonly ILlamaInstance _contextHandle;
     private readonly int _newLineToken;
     private readonly IList<ISampler> _samplers;
 
 
-    public SamplingPipeline(SafeLLamaContextHandle contextHandle, IList<ISampler> samplers)
+    public SamplingPipeline(ILlamaInstance contextHandle, IList<ISampler> samplers)
     {
         _contextHandle = contextHandle;
         _samplers = samplers;
@@ -27,13 +25,7 @@ internal sealed unsafe class SamplingPipeline
     }
 
 
-    /// <summary>
-    ///     Applies constraints to the given token candidates based on the last tokens and inference options.
-    /// </summary>
-    /// <param name="candidatesP">The token candidates to apply constraints to.</param>
-    /// <param name="logits">The logits for each token.</param>
-    /// <param name="currentOutput"></param>
-    /// <param name="inferenceOptions">The inference options to use for applying constraints.</param>
+    /// <inheritdoc />
     public int ApplyConstraints(TokenDataArray candidatesP,
         Span<float> logits,
         int[] currentOutput,
@@ -81,10 +73,30 @@ internal sealed unsafe class SamplingPipeline
 
         return inferenceOptions.SamplingMethod switch
         {
-            SamplingMethod.Mirostat => _contextHandle.llama_sample_token_mirostat(ptr, 1, 1, 100, &mu),
-            SamplingMethod.MirostatV2 => _contextHandle.llama_sample_token_mirostat_v2(ptr, 1, 1, &mu),
-            SamplingMethod.Default => _contextHandle.llama_sample_token(ptr),
+            SamplingMethod.Mirostat => _contextHandle.SampleTokenMirostat(ptr, 1, 1, 100, &mu),
+            SamplingMethod.MirostatV2 => _contextHandle.SampleTokenMirostatV2(ptr, 1, 1, &mu),
+            SamplingMethod.Default => _contextHandle.SampleToken(ptr),
             _ => throw new ArgumentOutOfRangeException(nameof(candidatesP))
         };
     }
+}
+
+/// <summary>
+///     Represents a set of constraints that can be applied to token candidates based on the last tokens and inference
+///     options.
+/// </summary>
+internal interface ISamplingPipeline
+{
+
+    /// <summary>
+    ///     Applies constraints to the given token candidates based on the last tokens and inference options.
+    /// </summary>
+    /// <param name="candidatesP">The token candidates to apply constraints to.</param>
+    /// <param name="logits">The logits for each token.</param>
+    /// <param name="currentOutput"></param>
+    /// <param name="inferenceOptions">The inference options to use for applying constraints.</param>
+    public int ApplyConstraints(TokenDataArray candidatesP,
+        Span<float> logits,
+        int[] currentOutput,
+        InferenceOptions inferenceOptions);
 }

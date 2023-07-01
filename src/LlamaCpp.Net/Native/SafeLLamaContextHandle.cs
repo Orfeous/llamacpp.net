@@ -5,25 +5,31 @@ namespace LlamaCpp.Net.Native
     /// <summary>
     /// todo
     /// </summary>
-    internal sealed class SafeLLamaContextHandle : SafeLLamaHandleBase
+    internal sealed unsafe class SafeLLamaContextHandle : SafeLLamaHandleBase
     {
         /// <summary>
         /// todo
         /// </summary>
-        internal SafeLLamaContextHandle() { }
+        internal SafeLLamaContextHandle()
+        {
+        }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="handle"></param>
         /// <param name="ownsHandle"></param>
-        internal SafeLLamaContextHandle(IntPtr handle, bool ownsHandle) : base(handle, ownsHandle) { }
+        internal SafeLLamaContextHandle(IntPtr handle, bool ownsHandle) : base(handle, ownsHandle)
+        {
+        }
 
         /// <summary>
         /// todo
         /// </summary>
         /// <param name="handle"></param>
-        internal SafeLLamaContextHandle(IntPtr handle) : base(handle) { }
+        internal SafeLLamaContextHandle(IntPtr handle) : base(handle)
+        {
+        }
 
         /// <summary>
         /// todo
@@ -35,5 +41,7 @@ namespace LlamaCpp.Net.Native
             SetHandle(IntPtr.Zero);
             return true;
         }
+
+
     }
 }

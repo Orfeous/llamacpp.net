@@ -1,4 +1,4 @@
-﻿using LlamaCpp.Net.Native;
+﻿using LlamaCpp.Net.Native.Abstractions;
 using LlamaCpp.Net.Samplers.Abstractions;
 using System;
 
@@ -11,8 +11,8 @@ internal sealed class SoftMaxSampler : ISampler
     {
     }
 
-    public void Sample(SafeLLamaContextHandle context, IntPtr intPtr, int[] currentOutput)
+    public void Sample(ILlamaInstance context, IntPtr intPtr, int[] currentOutput)
     {
-        context.llama_sample_softmax(intPtr);
+        context.SampleSoftmax(intPtr);
     }
 }
