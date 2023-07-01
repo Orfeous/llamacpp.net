@@ -1,6 +1,7 @@
 using FluentAssertions;
 using LlamaCpp.Net.Extensions;
 using NUnit.Framework;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace LlamaCpp.Net.Tests.Extensions;
@@ -13,9 +14,9 @@ public class PointerExtensionsTests
         // Arrange
         var expected = "Hello, world!";
         var bytes = Encoding.UTF8.GetBytes(expected);
-        var ptr = System.Runtime.InteropServices.Marshal.AllocHGlobal(bytes.Length + 1);
-        System.Runtime.InteropServices.Marshal.Copy(bytes, 0, ptr, bytes.Length);
-        System.Runtime.InteropServices.Marshal.WriteByte(ptr + bytes.Length, 0);
+        var ptr = Marshal.AllocHGlobal(bytes.Length + 1);
+        Marshal.Copy(bytes, 0, ptr, bytes.Length);
+        Marshal.WriteByte(ptr + bytes.Length, 0);
 
         // Act
         var actual = ptr.PtrToString(Encoding.UTF8);
@@ -24,7 +25,7 @@ public class PointerExtensionsTests
         actual.Should().Be(expected);
 
         // Cleanup
-        System.Runtime.InteropServices.Marshal.FreeHGlobal(ptr);
+        Marshal.FreeHGlobal(ptr);
     }
 
     [Test]
@@ -33,9 +34,9 @@ public class PointerExtensionsTests
         // Arrange
         var expected = "Hello, world!";
         var bytes = Encoding.Unicode.GetBytes(expected);
-        var ptr = System.Runtime.InteropServices.Marshal.AllocHGlobal(bytes.Length + 2);
-        System.Runtime.InteropServices.Marshal.Copy(bytes, 0, ptr, bytes.Length);
-        System.Runtime.InteropServices.Marshal.WriteInt16(ptr + bytes.Length, 0);
+        var ptr = Marshal.AllocHGlobal(bytes.Length + 2);
+        Marshal.Copy(bytes, 0, ptr, bytes.Length);
+        Marshal.WriteInt16(ptr + bytes.Length, 0);
 
         // Act
         var actual = ptr.PtrToString(Encoding.Unicode);
@@ -47,7 +48,7 @@ public class PointerExtensionsTests
 
 
         // Cleanup
-        System.Runtime.InteropServices.Marshal.FreeHGlobal(ptr);
+        Marshal.FreeHGlobal(ptr);
     }
 
     [Test]
@@ -56,9 +57,9 @@ public class PointerExtensionsTests
         // Arrange
         var expected = "Hello, world!";
         var bytes = Encoding.Default.GetBytes(expected);
-        var ptr = System.Runtime.InteropServices.Marshal.AllocHGlobal(bytes.Length + 1);
-        System.Runtime.InteropServices.Marshal.Copy(bytes, 0, ptr, bytes.Length);
-        System.Runtime.InteropServices.Marshal.WriteByte(ptr + bytes.Length, 0);
+        var ptr = Marshal.AllocHGlobal(bytes.Length + 1);
+        Marshal.Copy(bytes, 0, ptr, bytes.Length);
+        Marshal.WriteByte(ptr + bytes.Length, 0);
 
         // Act
         var actual = ptr.PtrToString(Encoding.Default);
@@ -67,6 +68,6 @@ public class PointerExtensionsTests
         actual.Should().Be(expected);
 
         // Cleanup
-        System.Runtime.InteropServices.Marshal.FreeHGlobal(ptr);
+        Marshal.FreeHGlobal(ptr);
     }
 }
