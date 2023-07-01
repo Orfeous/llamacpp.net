@@ -11,22 +11,6 @@ using System.Text;
 
 namespace LlamaCpp.Net.Tests
 {
-    [SetUpFixture]
-    public class SetupTrace
-    {
-        [OneTimeSetUp]
-        public void StartTest()
-        {
-            Trace.Listeners.Add(new ConsoleTraceListener());
-        }
-
-        [OneTimeTearDown]
-        public void EndTest()
-        {
-            Trace.Flush();
-        }
-    }
-
     [TestFixture]
     public class LanguageModelTests
     {
