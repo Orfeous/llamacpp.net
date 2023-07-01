@@ -87,7 +87,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="n_threads"></param>
         /// <returns>Returns 0 on success</returns>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern int llama_apply_lora_from_file(this SafeLLamaContextHandle ctx, string path_lora, string path_base_model, int n_threads);
+        internal static extern int llama_apply_lora_from_file(SafeLLamaContextHandle ctx, string path_lora, string path_base_model, int n_threads);
 
         /// <summary>
         /// Returns the number of tokens in the KV cache
@@ -95,7 +95,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="ctx"></param>
         /// <returns></returns>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern int llama_get_kv_cache_token_count(this SafeLLamaContextHandle ctx);
+        internal static extern int llama_get_kv_cache_token_count(SafeLLamaContextHandle ctx);
 
         /// <summary>
         /// Sets the current rng seed.
@@ -103,7 +103,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="ctx"></param>
         /// <param name="seed"></param>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void llama_set_rng_seed(this SafeLLamaContextHandle ctx, int seed);
+        internal static extern void llama_set_rng_seed(SafeLLamaContextHandle ctx, int seed);
 
         /// <summary>
         /// Returns the maximum size in bytes of the state (rng, logits, embedding
@@ -112,7 +112,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="ctx"></param>
         /// <returns></returns>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern ulong llama_get_state_size(this SafeLLamaContextHandle ctx);
+        internal static extern ulong llama_get_state_size(SafeLLamaContextHandle ctx);
 
         /// <summary>
         /// Copies the state to the specified destination address.
@@ -123,7 +123,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="dest"></param>
         /// <returns></returns>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern ulong llama_copy_state_data(this SafeLLamaContextHandle ctx, byte[] dest);
+        internal static extern ulong llama_copy_state_data(SafeLLamaContextHandle ctx, byte[] dest);
 
         /// <summary>
         /// Set the state reading from the specified address
@@ -133,7 +133,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="src"></param>
         /// <returns></returns>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern ulong llama_set_state_data(this SafeLLamaContextHandle ctx, byte[] src);
+        internal static extern ulong llama_set_state_data(SafeLLamaContextHandle ctx, byte[] src);
 
         /// <summary>
         /// Load session file
@@ -145,7 +145,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="n_token_count_out"></param>
         /// <returns></returns>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern bool llama_load_session_file(this SafeLLamaContextHandle ctx, string path_session, llama_token[] tokens_out, ulong n_token_capacity, ulong* n_token_count_out);
+        internal static extern bool llama_load_session_file(SafeLLamaContextHandle ctx, string path_session, llama_token[] tokens_out, ulong n_token_capacity, ulong* n_token_count_out);
 
         /// <summary>
         /// Save session file
@@ -156,7 +156,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="n_token_count"></param>
         /// <returns></returns>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern bool llama_save_session_file(this SafeLLamaContextHandle ctx, string path_session, llama_token[] tokens, ulong n_token_count);
+        internal static extern bool llama_save_session_file(SafeLLamaContextHandle ctx, string path_session, llama_token[] tokens, ulong n_token_count);
 
         /// <summary>
         /// Run the llama inference to obtain the logits and probabilities for the next token.
@@ -170,7 +170,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="n_threads"></param>
         /// <returns>Returns 0 on success</returns>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern int llama_eval(this SafeLLamaContextHandle ctx, llama_token[] tokens, int n_tokens, int n_past, int n_threads);
+        internal static extern int llama_eval(SafeLLamaContextHandle ctx, llama_token[] tokens, int n_tokens, int n_past, int n_threads);
 
         /// <summary>
         /// todo
@@ -182,7 +182,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="n_threads"></param>
         /// <returns></returns>
         [DllImport(LibraryLoader.NativeLibraryName, EntryPoint = "llama_eval", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern int llama_eval_with_pointer(this SafeLLamaContextHandle ctx, llama_token* tokens, int n_tokens, int n_past, int n_threads);
+        internal static extern int llama_eval_with_pointer(SafeLLamaContextHandle ctx, llama_token* tokens, int n_tokens, int n_past, int n_threads);
 
         /// <summary>
         /// todo
@@ -194,7 +194,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="add_bos"></param>
         /// <returns></returns>
         [DllImport(LibraryLoader.NativeLibraryName, EntryPoint = "llama_tokenize", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern int llama_tokenize(this SafeLLamaContextHandle ctx, string text, llama_token[] tokens, int n_max_tokens, bool add_bos);
+        internal static extern int llama_tokenize(SafeLLamaContextHandle ctx, string text, llama_token[] tokens, int n_max_tokens, bool add_bos);
 
         /// <summary>
         /// todo
@@ -202,7 +202,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="ctx"></param>
         /// <returns></returns>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern int llama_n_vocab(this SafeLLamaContextHandle ctx);
+        internal static extern int llama_n_vocab(SafeLLamaContextHandle ctx);
 
         /// <summary>
         /// todo
@@ -210,7 +210,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="ctx"></param>
         /// <returns></returns>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern int llama_n_ctx(this SafeLLamaContextHandle ctx);
+        internal static extern int llama_n_ctx(SafeLLamaContextHandle ctx);
 
         /// <summary>
         /// 
@@ -218,7 +218,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="ctx"></param>
         /// <returns></returns>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern int llama_n_embd(this SafeLLamaContextHandle ctx);
+        internal static extern int llama_n_embd(SafeLLamaContextHandle ctx);
 
         /// <summary>
         /// Token logits obtained from the last call to llama_eval()
@@ -230,7 +230,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="ctx"></param>
         /// <returns></returns>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern float* llama_get_logits(this SafeLLamaContextHandle ctx);
+        internal static extern float* llama_get_logits(SafeLLamaContextHandle ctx);
 
         /// <summary>
         /// Get the embeddings for the input
@@ -239,7 +239,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="ctx"></param>
         /// <returns></returns>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern float* llama_get_embeddings(this SafeLLamaContextHandle ctx);
+        internal static extern float* llama_get_embeddings(SafeLLamaContextHandle ctx);
 
         /// <summary>
         /// Token Id -> String. Uses the vocabulary in the provided context
@@ -248,7 +248,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="token"></param>
         /// <returns>Pointer to a string.</returns>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern IntPtr llama_token_to_str(this SafeLLamaContextHandle ctx, llama_token token);
+        internal static extern IntPtr llama_token_to_str(SafeLLamaContextHandle ctx, llama_token token);
 
         /// <summary>
         /// Returns the beginning of sequence token
@@ -276,14 +276,14 @@ namespace LlamaCpp.Net.Native
         /// </summary>
         /// <param name="ctx"></param>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void llama_print_timings(this SafeLLamaContextHandle ctx);
+        internal static extern void llama_print_timings(SafeLLamaContextHandle ctx);
 
         /// <summary>
         /// todo
         /// </summary>
         /// <param name="ctx"></param>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void llama_reset_timings(this SafeLLamaContextHandle ctx);
+        internal static extern void llama_reset_timings(SafeLLamaContextHandle ctx);
 
         /// <summary>
         /// Print system information
@@ -312,7 +312,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="capacity"></param>
         /// <returns></returns>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern int llama_get_vocab(this SafeLLamaContextHandle ctx, string[] strings, float[] scores, int capacity);
+        internal static extern int llama_get_vocab(SafeLLamaContextHandle ctx, string[] strings, float[] scores, int capacity);
 
         /// <summary>
         /// Repetition penalty described in CTRL academic paper https://arxiv.org/abs/1909.05858, with negative logit fix.
@@ -323,7 +323,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="last_tokens_size"></param>
         /// <param name="penalty"></param>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void llama_sample_repetition_penalty(this SafeLLamaContextHandle ctx, IntPtr candidates, llama_token[] last_tokens, ulong last_tokens_size, float penalty);
+        internal static extern void llama_sample_repetition_penalty(SafeLLamaContextHandle ctx, IntPtr candidates, llama_token[] last_tokens, ulong last_tokens_size, float penalty);
 
         /// <summary>
         /// Frequency and presence penalties described in OpenAI API https://platform.openai.com/docs/api-reference/parameter-details.
@@ -335,7 +335,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="alpha_frequency"></param>
         /// <param name="alpha_presence"></param>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void llama_sample_frequency_and_presence_penalties(this SafeLLamaContextHandle ctx, IntPtr candidates, llama_token[] last_tokens, ulong last_tokens_size, float alpha_frequency, float alpha_presence);
+        internal static extern void llama_sample_frequency_and_presence_penalties(SafeLLamaContextHandle ctx, IntPtr candidates, llama_token[] last_tokens, ulong last_tokens_size, float alpha_frequency, float alpha_presence);
 
         /// <summary>
         /// Sorts candidate tokens by their logits in descending order and calculate probabilities based on logits.
@@ -343,7 +343,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="ctx"></param>
         /// <param name="candidates">Pointer to TokenDataArray</param>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void llama_sample_softmax(this SafeLLamaContextHandle ctx, IntPtr candidates);
+        internal static extern void llama_sample_softmax(SafeLLamaContextHandle ctx, IntPtr candidates);
 
         /// <summary>
         /// Top-K sampling described in academic paper "The Curious Case of Neural Text Degeneration" https://arxiv.org/abs/1904.09751
@@ -353,7 +353,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="k"></param>
         /// <param name="min_keep"></param>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void llama_sample_top_k(this SafeLLamaContextHandle ctx, IntPtr candidates, int k, ulong min_keep);
+        internal static extern void llama_sample_top_k(SafeLLamaContextHandle ctx, IntPtr candidates, int k, ulong min_keep);
 
         /// <summary>
         /// Nucleus sampling described in academic paper "The Curious Case of Neural Text Degeneration" https://arxiv.org/abs/1904.09751
@@ -363,7 +363,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="p"></param>
         /// <param name="min_keep"></param>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void llama_sample_top_p(this SafeLLamaContextHandle ctx, IntPtr candidates, float p, ulong min_keep);
+        internal static extern void llama_sample_top_p(SafeLLamaContextHandle ctx, IntPtr candidates, float p, ulong min_keep);
 
         /// <summary>
         /// Tail Free Sampling described in https://www.trentonbricken.com/Tail-Free-Sampling/.
@@ -373,7 +373,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="z"></param>
         /// <param name="min_keep"></param>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void llama_sample_tail_free(this SafeLLamaContextHandle ctx, IntPtr candidates, float z, ulong min_keep);
+        internal static extern void llama_sample_tail_free(SafeLLamaContextHandle ctx, IntPtr candidates, float z, ulong min_keep);
 
         /// <summary>
         /// Locally Typical Sampling implementation described in the paper https://arxiv.org/abs/2202.00666.
@@ -383,7 +383,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="p"></param>
         /// <param name="min_keep"></param>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void llama_sample_typical(this SafeLLamaContextHandle ctx, IntPtr candidates, float p, ulong min_keep);
+        internal static extern void llama_sample_typical(SafeLLamaContextHandle ctx, IntPtr candidates, float p, ulong min_keep);
 
         /// <summary>
         /// todo
@@ -392,7 +392,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="candidates"></param>
         /// <param name="temp"></param>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void llama_sample_temperature(this SafeLLamaContextHandle ctx, IntPtr candidates, float temp);
+        internal static extern void llama_sample_temperature(SafeLLamaContextHandle ctx, IntPtr candidates, float temp);
 
         /// <summary>
         /// Mirostat 1.0 algorithm described in the paper https://arxiv.org/abs/2007.14966. Uses tokens instead of words.
@@ -401,11 +401,11 @@ namespace LlamaCpp.Net.Native
         /// <param name="candidates">A vector of `llama_token_data` containing the candidate tokens, their probabilities (p), and log-odds (logit) for the current position in the generated text.</param>
         /// <param name="tau">The target cross-entropy (or surprise) value you want to achieve for the generated text. A higher value corresponds to more surprising or less predictable text, while a lower value corresponds to less surprising or more predictable text.</param>
         /// <param name="eta">The learning rate used to update `mu` based on the error between the target and observed surprisal of the sampled word. A larger learning rate will cause `mu` to be updated more quickly, while a smaller learning rate will result in slower updates.</param>
-        /// <param name="m">The number of tokens considered in the estimation of `s_hat`. This is an arbitrary value that is used to calculate `s_hat`, which in turn helps to calculate the value of `k`. In the paper, they use `m = 100`, but you can experiment with different values to see how it affects the performance of the algorithm.</param>
-        /// <param name="mu">Maximum cross-entropy. This value is initialized to be twice the target cross-entropy (`2 * tau`) and is updated in the algorithm based on the error between the target and observed surprisal.</param>
+        /// <param name="m">The number of tokens considered in the estimation of `s_hat`.  is an arbitrary value that is used to calculate `s_hat`, which in turn helps to calculate the value of `k`. In the paper, they use `m = 100`, but you can experiment with different values to see how it affects the performance of the algorithm.</param>
+        /// <param name="mu">Maximum cross-entropy.  value is initialized to be twice the target cross-entropy (`2 * tau`) and is updated in the algorithm based on the error between the target and observed surprisal.</param>
         /// <returns></returns>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern llama_token llama_sample_token_mirostat(this SafeLLamaContextHandle ctx, IntPtr candidates, float tau, float eta, int m, float* mu);
+        internal static extern llama_token llama_sample_token_mirostat(SafeLLamaContextHandle ctx, IntPtr candidates, float tau, float eta, int m, float* mu);
 
         /// <summary>
         /// Mirostat 2.0 algorithm described in the paper https://arxiv.org/abs/2007.14966. Uses tokens instead of words.
@@ -414,10 +414,10 @@ namespace LlamaCpp.Net.Native
         /// <param name="candidates">A vector of `llama_token_data` containing the candidate tokens, their probabilities (p), and log-odds (logit) for the current position in the generated text.</param>
         /// <param name="tau">The target cross-entropy (or surprise) value you want to achieve for the generated text. A higher value corresponds to more surprising or less predictable text, while a lower value corresponds to less surprising or more predictable text.</param>
         /// <param name="eta">The learning rate used to update `mu` based on the error between the target and observed surprisal of the sampled word. A larger learning rate will cause `mu` to be updated more quickly, while a smaller learning rate will result in slower updates.</param>
-        /// <param name="mu">Maximum cross-entropy. This value is initialized to be twice the target cross-entropy (`2 * tau`) and is updated in the algorithm based on the error between the target and observed surprisal.</param>
+        /// <param name="mu">Maximum cross-entropy.  value is initialized to be twice the target cross-entropy (`2 * tau`) and is updated in the algorithm based on the error between the target and observed surprisal.</param>
         /// <returns></returns>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern llama_token llama_sample_token_mirostat_v2(this SafeLLamaContextHandle ctx, IntPtr candidates, float tau, float eta, float* mu);
+        internal static extern llama_token llama_sample_token_mirostat_v2(SafeLLamaContextHandle ctx, IntPtr candidates, float tau, float eta, float* mu);
 
         /// <summary>
         /// Selects the token with the highest probability.
@@ -426,7 +426,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="candidates">Pointer to TokenDataArray</param>
         /// <returns></returns>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern llama_token llama_sample_token_greedy(this SafeLLamaContextHandle ctx, IntPtr candidates);
+        internal static extern llama_token llama_sample_token_greedy(SafeLLamaContextHandle ctx, IntPtr candidates);
 
         /// <summary>
         /// Randomly selects a token from the candidates based on their probabilities.
@@ -435,7 +435,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="candidates">Pointer to TokenDataArray</param>
         /// <returns></returns>
         [DllImport(LibraryLoader.NativeLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern llama_token llama_sample_token(this SafeLLamaContextHandle ctx, IntPtr candidates);
+        internal static extern llama_token llama_sample_token(SafeLLamaContextHandle ctx, IntPtr candidates);
 
         /// <summary>
         /// Returns 0 on success

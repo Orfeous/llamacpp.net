@@ -1,4 +1,4 @@
-﻿using LlamaCpp.Net.Native;
+﻿using LlamaCpp.Net.Native.Abstractions;
 using LlamaCpp.Net.Samplers.Abstractions;
 using System;
 
@@ -16,8 +16,8 @@ internal sealed class TypicalSampler : ISampler
 
     }
 
-    public void Sample(SafeLLamaContextHandle context, IntPtr intPtr, int[] currentOutput)
+    public void Sample(ILlamaInstance context, IntPtr intPtr, int[] currentOutput)
     {
-        context.llama_sample_typical(intPtr, _k, _minKeep);
+        context.SampleTypical(intPtr, _k, _minKeep);
     }
 }

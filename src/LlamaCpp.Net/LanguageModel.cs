@@ -4,6 +4,7 @@ using LlamaCpp.Net.Exceptions;
 using LlamaCpp.Net.Extensions;
 using LlamaCpp.Net.Models;
 using LlamaCpp.Net.Native;
+using LlamaCpp.Net.Native.Abstractions;
 using LlamaCpp.Net.Native.Models;
 using LlamaCpp.Net.Samplers.Abstractions;
 using LlamaCpp.Net.Samplers.Pipelines;
@@ -24,7 +25,7 @@ namespace LlamaCpp.Net;
 public class LanguageModel : ILanguageModel
 {
     private readonly SamplingPipeline _constraints;
-    private readonly SafeLLamaContextHandle _contextHandle;
+    private readonly ILlamaInstance _contextHandle;
     private readonly Encoding _encoding = Encoding.UTF8;
     private readonly int _endOfSequenceToken;
     private readonly ILogger<LanguageModel> _logger;
@@ -42,7 +43,6 @@ public class LanguageModel : ILanguageModel
     /// <param name="samplingPipeline"></param>
     /// <exception cref="FileNotFoundException"></exception>
     public LanguageModel(string modelPath, ILogger<LanguageModel> logger, LanguageModelOptions? options = null,
-
         Action<ISamplingPipelineBuilder>? samplingPipeline = null)
     {
         _logger = logger;
@@ -83,16 +83,16 @@ public class LanguageModel : ILanguageModel
 
         var handle = new SafeLLamaContextHandle(context);
 
+        _contextHandle = new LlamaInstance(handle);
         if (!string.IsNullOrWhiteSpace(options.LoraAdapterPath))
         {
-            InitializeLora(handle, modelPath, options.LoraAdapterPath, options.LoraThreads);
+            InitializeLora(_contextHandle, modelPath, options.LoraAdapterPath, options.LoraThreads);
         }
 
-        _contextHandle = handle;
 
         _endOfSequenceToken = LlamaNative.llama_token_eos();
-        _vocabSize = _contextHandle.llama_n_vocab();
-        var contextSize = _contextHandle.llama_n_ctx();
+        _vocabSize = _contextHandle.Vocab();
+        var contextSize = _contextHandle.Context();
         _logger.LogDebug("Initializing constraints");
 
         var samplingPipelineBuilder = new SamplingPipelineBuilder(logger);
@@ -100,8 +100,8 @@ public class LanguageModel : ILanguageModel
         if (samplingPipeline == null)
         {
             samplingPipeline = SamplingPipelinePreset.Default;
-
         }
+
         samplingPipeline?.Invoke(samplingPipelineBuilder);
 
         _constraints = samplingPipelineBuilder.Build(_contextHandle);
@@ -134,7 +134,7 @@ public class LanguageModel : ILanguageModel
 
         var tokens = new int[text.Length + 1];
 
-        var numberOfTokens = _contextHandle.llama_tokenize(text, tokens, tokens.Length, true);
+        var numberOfTokens = _contextHandle.Tokenize(text, tokens, tokens.Length, true);
 
         if (numberOfTokens == 0)
         {
@@ -168,7 +168,7 @@ public class LanguageModel : ILanguageModel
         }
 
         _logger.LogDebug("Converting token {Token} to string", token);
-        var ptr = _contextHandle.llama_token_to_str(token);
+        var ptr = _contextHandle.TokenToStr(token);
         var s = ptr.PtrToString(_encoding);
 
         _tokenCache[token] = s;
@@ -199,7 +199,7 @@ public class LanguageModel : ILanguageModel
             {
                 _logger.LogDebug("Async inference for input {Input} completed", input);
 
-                _contextHandle.llama_print_timings();
+                _contextHandle.PrintTimings();
                 result.Complete();
             }, cancellationToken);
 
@@ -226,7 +226,7 @@ public class LanguageModel : ILanguageModel
         _logger.LogDebug("Caching tokens");
         for (var i = 0; i < _vocabSize; i++)
         {
-            var token = _contextHandle.llama_token_to_str(i);
+            var token = _contextHandle.TokenToStr(i);
             _tokenCache.Add(i, token.PtrToString(_encoding));
         }
     }
@@ -301,7 +301,7 @@ public class LanguageModel : ILanguageModel
                 inferenceCallback?.Invoke(s);
             }
 
-            if (_contextHandle.llama_eval(embedsInCurrentBatch, 1, _embeds.Length, Threads) != 0)
+            if (_contextHandle.Eval(embedsInCurrentBatch, 1, _embeds.Length, Threads) != 0)
             {
                 _logger.LogError("Failed to evaluate model");
 
@@ -334,10 +334,10 @@ public class LanguageModel : ILanguageModel
 
         var embeds = new int[input.Length + 1];
 
-        var amountOfTokens = _contextHandle.llama_tokenize(input, embeds, embeds.Length, true);
+        var amountOfTokens = _contextHandle.Tokenize(input, embeds, embeds.Length, true);
         Array.Resize(ref embeds, amountOfTokens);
 
-        if (embeds.Where((t, i) => _contextHandle.llama_eval(new[] { t }, 1, i, Threads) != 0).Any())
+        if (embeds.Where((t, i) => _contextHandle.Eval(new[] { t }, 1, i, Threads) != 0).Any())
         {
             _logger.LogError("Failed to evaluate model");
 
@@ -371,9 +371,9 @@ public class LanguageModel : ILanguageModel
     /// <param name="contextHandle">The handle to the current language model context.</param>
     /// <param name="length">The length of the span to return.</param>
     /// <returns>A span of floats representing the logits for each token in the vocabulary.</returns>
-    private static unsafe Span<float> GetLogits(SafeLLamaContextHandle contextHandle, int length)
+    private static unsafe Span<float> GetLogits(ILlamaInstance contextHandle, int length)
     {
-        var logits = contextHandle.llama_get_logits();
+        var logits = contextHandle.GetLogits();
         return new Span<float>(logits, length);
     }
 
@@ -389,7 +389,7 @@ public class LanguageModel : ILanguageModel
     /// <param name="modelPath">The path to the language model file.</param>
     /// <param name="loraAdapterPath">The path to the LORA adapter file.</param>
     /// <param name="optionsLoraThreads">The number of threads to use for LORA inference.</param>
-    private void InitializeLora(SafeLLamaContextHandle contextHandle, string modelPath,
+    private void InitializeLora(ILlamaInstance contextHandle, string modelPath,
         string loraAdapterPath, int optionsLoraThreads)
     {
         if (File.Exists(loraAdapterPath) == false)
@@ -399,7 +399,7 @@ public class LanguageModel : ILanguageModel
         }
 
         _logger.LogDebug("Initializing Lora adapter from file {LoraAdapterPath}", loraAdapterPath);
-        var r = contextHandle.llama_apply_lora_from_file(loraAdapterPath, modelPath,
+        var r = contextHandle.ApplyLoraFromFile(loraAdapterPath, modelPath,
             optionsLoraThreads);
 
         if (r != 0)

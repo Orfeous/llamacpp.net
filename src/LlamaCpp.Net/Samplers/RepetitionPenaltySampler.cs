@@ -1,4 +1,4 @@
-﻿using LlamaCpp.Net.Native;
+﻿using LlamaCpp.Net.Native.Abstractions;
 using LlamaCpp.Net.Samplers.Abstractions;
 using System;
 
@@ -19,9 +19,9 @@ internal sealed class RepetitionPenaltySampler : ISampler
     }
 
 
-    public void Sample(SafeLLamaContextHandle context, IntPtr intPtr, int[] currentOutput)
+    public void Sample(ILlamaInstance context, IntPtr intPtr, int[] currentOutput)
     {
 
-        context.llama_sample_repetition_penalty(intPtr, currentOutput, (ulong)currentOutput.Length, _penalty);
+        context.SampleRepetitionPenalty(intPtr, currentOutput, (ulong)currentOutput.Length, _penalty);
     }
 }

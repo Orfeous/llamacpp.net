@@ -1,5 +1,6 @@
 ﻿using LlamaCpp.Net.Configuration;
 using LlamaCpp.Net.Native;
+using LlamaCpp.Net.Native.Abstractions;
 using LlamaCpp.Net.Native.Models;
 using LlamaCpp.Net.Samplers.Abstractions;
 using System;
@@ -14,12 +15,12 @@ namespace LlamaCpp.Net.Samplers.Pipelines;
 /// </summary>
 internal sealed unsafe class SamplingPipeline
 {
-    private readonly SafeLLamaContextHandle _contextHandle;
+    private readonly ILlamaInstance _contextHandle;
     private readonly int _newLineToken;
     private readonly IList<ISampler> _samplers;
 
 
-    public SamplingPipeline(SafeLLamaContextHandle contextHandle, IList<ISampler> samplers)
+    public SamplingPipeline(ILlamaInstance contextHandle, IList<ISampler> samplers)
     {
         _contextHandle = contextHandle;
         _samplers = samplers;
@@ -81,9 +82,9 @@ internal sealed unsafe class SamplingPipeline
 
         return inferenceOptions.SamplingMethod switch
         {
-            SamplingMethod.Mirostat => _contextHandle.llama_sample_token_mirostat(ptr, 1, 1, 100, &mu),
-            SamplingMethod.MirostatV2 => _contextHandle.llama_sample_token_mirostat_v2(ptr, 1, 1, &mu),
-            SamplingMethod.Default => _contextHandle.llama_sample_token(ptr),
+            SamplingMethod.Mirostat => _contextHandle.SampleTokenMirostat(ptr, 1, 1, 100, &mu),
+            SamplingMethod.MirostatV2 => _contextHandle.SampleTokenMirostatV2(ptr, 1, 1, &mu),
+            SamplingMethod.Default => _contextHandle.SampleToken(ptr),
             _ => throw new ArgumentOutOfRangeException(nameof(candidatesP))
         };
     }
