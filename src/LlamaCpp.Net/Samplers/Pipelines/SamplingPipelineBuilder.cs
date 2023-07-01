@@ -1,4 +1,4 @@
-﻿using LlamaCpp.Net.Native;
+﻿using LlamaCpp.Net.Native.Abstractions;
 using LlamaCpp.Net.Samplers.Abstractions;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
@@ -77,7 +77,7 @@ internal sealed class SamplingPipelineBuilder : ISamplingPipelineBuilder
     }
 
 
-    internal SamplingPipeline Build(SafeLLamaContextHandle contextHandle)
+    internal SamplingPipeline Build(ILlamaInstance contextHandle)
     {
         return new SamplingPipeline(contextHandle, _samplers);
     }

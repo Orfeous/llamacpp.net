@@ -4,6 +4,8 @@ using LlamaCpp.Net.Exceptions;
 using LlamaCpp.Net.Extensions;
 using LlamaCpp.Net.Models;
 using LlamaCpp.Net.Native;
+using LlamaCpp.Net.Native.Abstractions;
+using LlamaCpp.Net.Native.API;
 using LlamaCpp.Net.Native.Models;
 using LlamaCpp.Net.Samplers.Abstractions;
 using LlamaCpp.Net.Samplers.Pipelines;
@@ -12,7 +14,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,12 +24,12 @@ namespace LlamaCpp.Net;
 /// <inheritdoc />
 public class LanguageModel : ILanguageModel
 {
-    private readonly SamplingPipeline _constraints;
-    private readonly SafeLLamaContextHandle _contextHandle;
+    private readonly ISamplingPipeline _constraints;
     private readonly Encoding _encoding = Encoding.UTF8;
-    private readonly int _endOfSequenceToken;
+    private static int EndOfSequenceToken => LlamaNative.llama_token_eos();
+    private readonly ILlamaInstance _instance;
     private readonly ILogger<LanguageModel> _logger;
-    private readonly Dictionary<int, string> _tokenCache;
+    private readonly Dictionary<int, string> _tokenCache = new();
     private readonly int _vocabSize;
 
     private int[] _embeds = Array.Empty<int>();
@@ -42,7 +43,6 @@ public class LanguageModel : ILanguageModel
     /// <param name="samplingPipeline"></param>
     /// <exception cref="FileNotFoundException"></exception>
     public LanguageModel(string modelPath, ILogger<LanguageModel> logger, LanguageModelOptions? options = null,
-
         Action<ISamplingPipelineBuilder>? samplingPipeline = null)
     {
         _logger = logger;
@@ -57,66 +57,43 @@ public class LanguageModel : ILanguageModel
         options ??= LanguageModelOptions.Default;
 
         Options = options;
-        Threads = options.Threads;
 
-        var contextParams = LlamaNative.llama_context_default_params();
+        var contextParams = GetContextParams(options);
 
-        contextParams.Apply(options);
-        contextParams.progress_callback = ProgressCallback;
-
-        IntPtr context;
-        try
-        {
-            _logger.LogDebug("Initializing model from file {ModelPath}", modelPath);
-            context = LlamaNative.llama_init_from_file(modelPath, contextParams);
-        }
-        catch (SEHException e)
-        {
-            _logger.LogError(e, "Failed to initialize model from file {ModelPath}", modelPath);
-            throw new ModelFailedInitializationException(modelPath, e);
-        }
-
-        if (context == IntPtr.Zero)
-        {
-            throw new ModelFailedInitializationException(modelPath);
-        }
-
-        var handle = new SafeLLamaContextHandle(context);
-
+        _instance = new LlamaInstance(modelPath, contextParams);
         if (!string.IsNullOrWhiteSpace(options.LoraAdapterPath))
         {
-            InitializeLora(handle, modelPath, options.LoraAdapterPath, options.LoraThreads);
+            InitializeLora(_instance, modelPath, options.LoraAdapterPath, options.LoraThreads);
         }
 
-        _contextHandle = handle;
 
-        _endOfSequenceToken = LlamaNative.llama_token_eos();
-        _vocabSize = _contextHandle.llama_n_vocab();
-        var contextSize = _contextHandle.llama_n_ctx();
-        _logger.LogDebug("Initializing constraints");
+        _vocabSize = _instance.GetVocabSize();
 
-        var samplingPipelineBuilder = new SamplingPipelineBuilder(logger);
-
-        if (samplingPipeline == null)
-        {
-            samplingPipeline = SamplingPipelinePreset.Default;
-
-        }
-        samplingPipeline?.Invoke(samplingPipelineBuilder);
-
-        _constraints = samplingPipelineBuilder.Build(_contextHandle);
+        _constraints = BuildSamplingPipeline(samplingPipeline);
 
 
         _tokenCache = new Dictionary<int, string>(_vocabSize);
 
         InitializeTokenCache();
 
-        LoadInitialPrompt(options, contextSize);
+        LoadInitialPrompt(options);
     }
+
+    internal LanguageModel(ISamplingPipeline constraints, ILlamaInstance instance, ILogger<LanguageModel> logger, string modelPath, LanguageModelOptions options)
+    {
+        _constraints = constraints;
+        _instance = instance;
+        _logger = logger;
+        ModelPath = modelPath;
+        Options = LanguageModelOptions.Default;
+        _vocabSize = _instance.GetVocabSize();
+
+    }
+
 
     /// <summary>
     /// </summary>
-    private int Threads { get; }
+    private int Threads => Options.Threads;
 
 
     /// <inheritdoc />
@@ -134,7 +111,7 @@ public class LanguageModel : ILanguageModel
 
         var tokens = new int[text.Length + 1];
 
-        var numberOfTokens = _contextHandle.llama_tokenize(text, tokens, tokens.Length, true);
+        var numberOfTokens = _instance.Tokenize(text, tokens, tokens.Length, true);
 
         if (numberOfTokens == 0)
         {
@@ -168,10 +145,10 @@ public class LanguageModel : ILanguageModel
         }
 
         _logger.LogDebug("Converting token {Token} to string", token);
-        var ptr = _contextHandle.llama_token_to_str(token);
-        var s = ptr.PtrToString(_encoding);
 
-        _tokenCache[token] = s;
+
+
+        _tokenCache[token] = _instance.TokenToString(token, _encoding);
         return _tokenCache[token];
     }
 
@@ -199,7 +176,7 @@ public class LanguageModel : ILanguageModel
             {
                 _logger.LogDebug("Async inference for input {Input} completed", input);
 
-                _contextHandle.llama_print_timings();
+                _instance.PrintTimings();
                 result.Complete();
             }, cancellationToken);
 
@@ -217,6 +194,31 @@ public class LanguageModel : ILanguageModel
         return result;
     }
 
+    private SamplingPipeline BuildSamplingPipeline(Action<ISamplingPipelineBuilder>? samplingPipeline)
+    {
+        _logger.LogDebug("Initializing constraints");
+
+        var samplingPipelineBuilder = new SamplingPipelineBuilder(_logger);
+
+        if (samplingPipeline == null)
+        {
+            samplingPipeline = SamplingPipelinePreset.Default;
+        }
+
+        samplingPipeline?.Invoke(samplingPipelineBuilder);
+
+        return samplingPipelineBuilder.Build(_instance);
+    }
+
+    private static LLamaContextParams GetContextParams(LanguageModelOptions options)
+    {
+        var contextParams = LlamaNative.llama_context_default_params();
+
+        contextParams.Apply(options);
+        contextParams.progress_callback = ProgressCallback;
+        return contextParams;
+    }
+
     /// <summary>
     ///     Initializes the token cache so that we can quickly look up tokens by their index
     ///     this reduces the number of calls to the native library
@@ -226,8 +228,8 @@ public class LanguageModel : ILanguageModel
         _logger.LogDebug("Caching tokens");
         for (var i = 0; i < _vocabSize; i++)
         {
-            var token = _contextHandle.llama_token_to_str(i);
-            _tokenCache.Add(i, token.PtrToString(_encoding));
+            var token = _instance.TokenToString(i, _encoding);
+            _tokenCache.Add(i, token);
         }
     }
 
@@ -235,10 +237,11 @@ public class LanguageModel : ILanguageModel
     ///     Initializes the model with an initial prompt if one is provided
     /// </summary>
     /// <param name="options"></param>
-    /// <param name="contextSize"></param>
     /// <exception cref="InitialPromptTooLongException"></exception>
-    private void LoadInitialPrompt(LanguageModelOptions options, int contextSize)
+    private void LoadInitialPrompt(LanguageModelOptions options)
     {
+        var contextSize = _instance.GetContextSize();
+
         if (!string.IsNullOrWhiteSpace(options.InitialPrompt))
         {
             _logger.LogDebug("Tokenizing initial prompt {InitialPrompt}", options.InitialPrompt);
@@ -275,7 +278,7 @@ public class LanguageModel : ILanguageModel
 
         var list = new List<string>();
 
-        var logits = GetLogits(_contextHandle, _vocabSize);
+        var logits = GetLogits(_instance, _vocabSize);
 
         var currentOutput = Array.Empty<int>();
         for (var i = 0; i < options.MaxNumberOfTokens; i++)
@@ -285,7 +288,7 @@ public class LanguageModel : ILanguageModel
             var id = _constraints.ApplyConstraints(candidates, logits, currentOutput, options);
 
 
-            if (id == _endOfSequenceToken)
+            if (id == EndOfSequenceToken)
             {
                 break;
             }
@@ -301,7 +304,7 @@ public class LanguageModel : ILanguageModel
                 inferenceCallback?.Invoke(s);
             }
 
-            if (_contextHandle.llama_eval(embedsInCurrentBatch, 1, _embeds.Length, Threads) != 0)
+            if (_instance.Eval(embedsInCurrentBatch, 1, _embeds.Length, Threads) != 0)
             {
                 _logger.LogError("Failed to evaluate model");
 
@@ -334,10 +337,10 @@ public class LanguageModel : ILanguageModel
 
         var embeds = new int[input.Length + 1];
 
-        var amountOfTokens = _contextHandle.llama_tokenize(input, embeds, embeds.Length, true);
+        var amountOfTokens = _instance.Tokenize(input, embeds, embeds.Length, true);
         Array.Resize(ref embeds, amountOfTokens);
 
-        if (embeds.Where((t, i) => _contextHandle.llama_eval(new[] { t }, 1, i, Threads) != 0).Any())
+        if (embeds.Where((t, i) => _instance.Eval(new[] { t }, 1, i, Threads) != 0).Any())
         {
             _logger.LogError("Failed to evaluate model");
 
@@ -371,9 +374,9 @@ public class LanguageModel : ILanguageModel
     /// <param name="contextHandle">The handle to the current language model context.</param>
     /// <param name="length">The length of the span to return.</param>
     /// <returns>A span of floats representing the logits for each token in the vocabulary.</returns>
-    private static unsafe Span<float> GetLogits(SafeLLamaContextHandle contextHandle, int length)
+    private static unsafe Span<float> GetLogits(ILlamaInstance contextHandle, int length)
     {
-        var logits = contextHandle.llama_get_logits();
+        var logits = contextHandle.GetLogits();
         return new Span<float>(logits, length);
     }
 
@@ -389,7 +392,7 @@ public class LanguageModel : ILanguageModel
     /// <param name="modelPath">The path to the language model file.</param>
     /// <param name="loraAdapterPath">The path to the LORA adapter file.</param>
     /// <param name="optionsLoraThreads">The number of threads to use for LORA inference.</param>
-    private void InitializeLora(SafeLLamaContextHandle contextHandle, string modelPath,
+    private void InitializeLora(ILlamaInstance contextHandle, string modelPath,
         string loraAdapterPath, int optionsLoraThreads)
     {
         if (File.Exists(loraAdapterPath) == false)
@@ -399,7 +402,7 @@ public class LanguageModel : ILanguageModel
         }
 
         _logger.LogDebug("Initializing Lora adapter from file {LoraAdapterPath}", loraAdapterPath);
-        var r = contextHandle.llama_apply_lora_from_file(loraAdapterPath, modelPath,
+        var r = contextHandle.ApplyLoraFromFile(loraAdapterPath, modelPath,
             optionsLoraThreads);
 
         if (r != 0)
@@ -417,7 +420,7 @@ public class LanguageModel : ILanguageModel
     {
         if (isDisposing)
         {
-            _contextHandle.Dispose();
+            _instance.Dispose();
         }
     }
 }

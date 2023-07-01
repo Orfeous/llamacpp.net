@@ -8,7 +8,7 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
-    <InternalsVisibleTo>LlamaCpp.Net.Test</InternalsVisibleTo>
+    <InternalsVisibleTo>LlamaCpp.Net.Tests</InternalsVisibleTo>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
