@@ -5,6 +5,7 @@ using LlamaCpp.Net.Extensions;
 using LlamaCpp.Net.Models;
 using LlamaCpp.Net.Native;
 using LlamaCpp.Net.Native.Abstractions;
+using LlamaCpp.Net.Native.API;
 using LlamaCpp.Net.Native.Models;
 using LlamaCpp.Net.Samplers.Abstractions;
 using LlamaCpp.Net.Samplers.Pipelines;
@@ -91,8 +92,8 @@ public class LanguageModel : ILanguageModel
 
 
         _endOfSequenceToken = LlamaNative.llama_token_eos();
-        _vocabSize = _contextHandle.Vocab();
-        var contextSize = _contextHandle.Context();
+        _vocabSize = _contextHandle.GetVocabSize();
+        var contextSize = _contextHandle.GetContextSize();
         _logger.LogDebug("Initializing constraints");
 
         var samplingPipelineBuilder = new SamplingPipelineBuilder(logger);
