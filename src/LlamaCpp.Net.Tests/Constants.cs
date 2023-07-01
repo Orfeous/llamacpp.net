@@ -1,4 +1,4 @@
-﻿namespace LlamaCpp.Net.Test;
+﻿namespace LlamaCpp.Net.Tests;
 
 public static class Constants
 {

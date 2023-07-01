@@ -6,9 +6,10 @@ using Microsoft.Extensions.Logging.Abstractions;
 using NUnit.Framework;
 using System.Diagnostics;
 using System.Text;
+
 #pragma warning disable CA1707 // Identifiers should not contain underscores
 
-namespace LlamaCpp.Net.Test
+namespace LlamaCpp.Net.Tests
 {
     [SetUpFixture]
     public class SetupTrace
