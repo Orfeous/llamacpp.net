@@ -1,5 +1,7 @@
-﻿using LlamaCpp.Net.Native.Abstractions;
+﻿using LlamaCpp.Net.Exceptions;
+using LlamaCpp.Net.Native.Abstractions;
 using System;
+using System.Runtime.InteropServices;
 
 namespace LlamaCpp.Net.Native.API;
 
@@ -7,9 +9,24 @@ internal unsafe class LlamaInstance : ILlamaInstance
 {
     private readonly SafeLLamaContextHandle _contextHandle;
 
-    public LlamaInstance(SafeLLamaContextHandle contextHandle)
+    public LlamaInstance(string modelPath, LLamaContextParams contextParams)
     {
-        _contextHandle = contextHandle;
+        IntPtr context;
+        try
+        {
+            context = LlamaNative.llama_init_from_file(modelPath, contextParams);
+        }
+        catch (SEHException e)
+        {
+            throw new ModelFailedInitializationException(modelPath, e);
+        }
+
+        if (context == IntPtr.Zero)
+        {
+            throw new ModelFailedInitializationException(modelPath);
+        }
+
+        _contextHandle = new SafeLLamaContextHandle(context);
     }
 
     public void Dispose()

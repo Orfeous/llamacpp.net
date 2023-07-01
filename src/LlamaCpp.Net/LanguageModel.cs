@@ -14,7 +14,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -65,26 +64,8 @@ public class LanguageModel : ILanguageModel
         contextParams.Apply(options);
         contextParams.progress_callback = ProgressCallback;
 
-        IntPtr context;
-        try
-        {
-            _logger.LogDebug("Initializing model from file {ModelPath}", modelPath);
-            context = LlamaNative.llama_init_from_file(modelPath, contextParams);
-        }
-        catch (SEHException e)
-        {
-            _logger.LogError(e, "Failed to initialize model from file {ModelPath}", modelPath);
-            throw new ModelFailedInitializationException(modelPath, e);
-        }
 
-        if (context == IntPtr.Zero)
-        {
-            throw new ModelFailedInitializationException(modelPath);
-        }
-
-        var handle = new SafeLLamaContextHandle(context);
-
-        _contextHandle = new LlamaInstance(handle);
+        _contextHandle = new LlamaInstance(modelPath, contextParams);
         if (!string.IsNullOrWhiteSpace(options.LoraAdapterPath))
         {
             InitializeLora(_contextHandle, modelPath, options.LoraAdapterPath, options.LoraThreads);
