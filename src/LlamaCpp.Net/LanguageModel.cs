@@ -25,9 +25,9 @@ namespace LlamaCpp.Net;
 public class LanguageModel : ILanguageModel
 {
     private readonly SamplingPipeline _constraints;
-    private readonly ILlamaInstance _contextHandle;
     private readonly Encoding _encoding = Encoding.UTF8;
     private readonly int _endOfSequenceToken;
+    private readonly ILlamaInstance _instance;
     private readonly ILogger<LanguageModel> _logger;
     private readonly Dictionary<int, string> _tokenCache;
     private readonly int _vocabSize;
@@ -59,41 +59,26 @@ public class LanguageModel : ILanguageModel
         Options = options;
         Threads = options.Threads;
 
-        var contextParams = LlamaNative.llama_context_default_params();
+        var contextParams = GetContextParams(options);
 
-        contextParams.Apply(options);
-        contextParams.progress_callback = ProgressCallback;
-
-
-        _contextHandle = new LlamaInstance(modelPath, contextParams);
+        _instance = new LlamaInstance(modelPath, contextParams);
         if (!string.IsNullOrWhiteSpace(options.LoraAdapterPath))
         {
-            InitializeLora(_contextHandle, modelPath, options.LoraAdapterPath, options.LoraThreads);
+            InitializeLora(_instance, modelPath, options.LoraAdapterPath, options.LoraThreads);
         }
 
 
         _endOfSequenceToken = LlamaNative.llama_token_eos();
-        _vocabSize = _contextHandle.GetVocabSize();
-        var contextSize = _contextHandle.GetContextSize();
-        _logger.LogDebug("Initializing constraints");
+        _vocabSize = _instance.GetVocabSize();
 
-        var samplingPipelineBuilder = new SamplingPipelineBuilder(logger);
-
-        if (samplingPipeline == null)
-        {
-            samplingPipeline = SamplingPipelinePreset.Default;
-        }
-
-        samplingPipeline?.Invoke(samplingPipelineBuilder);
-
-        _constraints = samplingPipelineBuilder.Build(_contextHandle);
+        _constraints = BuildSamplingPipeline(samplingPipeline);
 
 
         _tokenCache = new Dictionary<int, string>(_vocabSize);
 
         InitializeTokenCache();
 
-        LoadInitialPrompt(options, contextSize);
+        LoadInitialPrompt(options);
     }
 
     /// <summary>
@@ -116,7 +101,7 @@ public class LanguageModel : ILanguageModel
 
         var tokens = new int[text.Length + 1];
 
-        var numberOfTokens = _contextHandle.Tokenize(text, tokens, tokens.Length, true);
+        var numberOfTokens = _instance.Tokenize(text, tokens, tokens.Length, true);
 
         if (numberOfTokens == 0)
         {
@@ -150,7 +135,7 @@ public class LanguageModel : ILanguageModel
         }
 
         _logger.LogDebug("Converting token {Token} to string", token);
-        var ptr = _contextHandle.TokenToStr(token);
+        var ptr = _instance.TokenToStr(token);
         var s = ptr.PtrToString(_encoding);
 
         _tokenCache[token] = s;
@@ -181,7 +166,7 @@ public class LanguageModel : ILanguageModel
             {
                 _logger.LogDebug("Async inference for input {Input} completed", input);
 
-                _contextHandle.PrintTimings();
+                _instance.PrintTimings();
                 result.Complete();
             }, cancellationToken);
 
@@ -199,6 +184,31 @@ public class LanguageModel : ILanguageModel
         return result;
     }
 
+    private SamplingPipeline BuildSamplingPipeline(Action<ISamplingPipelineBuilder>? samplingPipeline)
+    {
+        _logger.LogDebug("Initializing constraints");
+
+        var samplingPipelineBuilder = new SamplingPipelineBuilder(_logger);
+
+        if (samplingPipeline == null)
+        {
+            samplingPipeline = SamplingPipelinePreset.Default;
+        }
+
+        samplingPipeline?.Invoke(samplingPipelineBuilder);
+
+        return samplingPipelineBuilder.Build(_instance);
+    }
+
+    private static LLamaContextParams GetContextParams(LanguageModelOptions options)
+    {
+        var contextParams = LlamaNative.llama_context_default_params();
+
+        contextParams.Apply(options);
+        contextParams.progress_callback = ProgressCallback;
+        return contextParams;
+    }
+
     /// <summary>
     ///     Initializes the token cache so that we can quickly look up tokens by their index
     ///     this reduces the number of calls to the native library
@@ -208,7 +218,7 @@ public class LanguageModel : ILanguageModel
         _logger.LogDebug("Caching tokens");
         for (var i = 0; i < _vocabSize; i++)
         {
-            var token = _contextHandle.TokenToStr(i);
+            var token = _instance.TokenToStr(i);
             _tokenCache.Add(i, token.PtrToString(_encoding));
         }
     }
@@ -217,10 +227,11 @@ public class LanguageModel : ILanguageModel
     ///     Initializes the model with an initial prompt if one is provided
     /// </summary>
     /// <param name="options"></param>
-    /// <param name="contextSize"></param>
     /// <exception cref="InitialPromptTooLongException"></exception>
-    private void LoadInitialPrompt(LanguageModelOptions options, int contextSize)
+    private void LoadInitialPrompt(LanguageModelOptions options)
     {
+        var contextSize = _instance.GetContextSize();
+
         if (!string.IsNullOrWhiteSpace(options.InitialPrompt))
         {
             _logger.LogDebug("Tokenizing initial prompt {InitialPrompt}", options.InitialPrompt);
@@ -257,7 +268,7 @@ public class LanguageModel : ILanguageModel
 
         var list = new List<string>();
 
-        var logits = GetLogits(_contextHandle, _vocabSize);
+        var logits = GetLogits(_instance, _vocabSize);
 
         var currentOutput = Array.Empty<int>();
         for (var i = 0; i < options.MaxNumberOfTokens; i++)
@@ -283,7 +294,7 @@ public class LanguageModel : ILanguageModel
                 inferenceCallback?.Invoke(s);
             }
 
-            if (_contextHandle.Eval(embedsInCurrentBatch, 1, _embeds.Length, Threads) != 0)
+            if (_instance.Eval(embedsInCurrentBatch, 1, _embeds.Length, Threads) != 0)
             {
                 _logger.LogError("Failed to evaluate model");
 
@@ -316,10 +327,10 @@ public class LanguageModel : ILanguageModel
 
         var embeds = new int[input.Length + 1];
 
-        var amountOfTokens = _contextHandle.Tokenize(input, embeds, embeds.Length, true);
+        var amountOfTokens = _instance.Tokenize(input, embeds, embeds.Length, true);
         Array.Resize(ref embeds, amountOfTokens);
 
-        if (embeds.Where((t, i) => _contextHandle.Eval(new[] { t }, 1, i, Threads) != 0).Any())
+        if (embeds.Where((t, i) => _instance.Eval(new[] { t }, 1, i, Threads) != 0).Any())
         {
             _logger.LogError("Failed to evaluate model");
 
@@ -399,7 +410,7 @@ public class LanguageModel : ILanguageModel
     {
         if (isDisposing)
         {
-            _contextHandle.Dispose();
+            _instance.Dispose();
         }
     }
 }
