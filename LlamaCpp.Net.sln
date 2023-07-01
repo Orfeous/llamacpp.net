@@ -30,6 +30,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LlamaCpp.Net.Benchmarks", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LlamaCpp.Net.Tests", "src\LlamaCpp.Net.Tests\LlamaCpp.Net.Tests.csproj", "{13F9C11F-30EF-427F-BA3A-9362E3E281CC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LlamaCpp.Net.Examples.WebApi", "Examples\LlamaCpp.Net.Examples.WebApi\LlamaCpp.Net.Examples.WebApi.csproj", "{31E8C7CB-ECAC-4503-8C2D-2D37F0BA45F7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,6 +58,10 @@ Global
 		{13F9C11F-30EF-427F-BA3A-9362E3E281CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{13F9C11F-30EF-427F-BA3A-9362E3E281CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{13F9C11F-30EF-427F-BA3A-9362E3E281CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31E8C7CB-ECAC-4503-8C2D-2D37F0BA45F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31E8C7CB-ECAC-4503-8C2D-2D37F0BA45F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31E8C7CB-ECAC-4503-8C2D-2D37F0BA45F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31E8C7CB-ECAC-4503-8C2D-2D37F0BA45F7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -66,6 +72,7 @@ Global
 		{12092785-9EA1-40CA-B672-E60A29B65021} = {08BDD104-1D27-4C15-A24D-72B392BDA472}
 		{80D90F6A-A983-40E9-A2E6-ABE8CAA592F4} = {41E88449-8687-45F0-962E-3CAAE63F9F26}
 		{13F9C11F-30EF-427F-BA3A-9362E3E281CC} = {41E88449-8687-45F0-962E-3CAAE63F9F26}
+		{31E8C7CB-ECAC-4503-8C2D-2D37F0BA45F7} = {08BDD104-1D27-4C15-A24D-72B392BDA472}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {98439AAA-311B-4475-89C2-8D6C2652B8B2}
