@@ -10,8 +10,8 @@ public record LanguageModelOptions
     /// </summary>
     public static LanguageModelOptions Default => new LanguageModelOptions
     {
-        ContextSize = 512,
-        GpuLayerCount = 0,
+        ContextSize = 2048,
+        GpuLayerCount = 20,
         Seed = -1,
         UseFp16Memory = false,
         UseMemoryLock = true,

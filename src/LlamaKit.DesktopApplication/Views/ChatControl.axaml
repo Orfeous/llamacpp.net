@@ -1,0 +1,116 @@
+<UserControl x:Class="LlamaKit.DesktopApplication.Views.ChatControl"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:LlamaKit.DesktopApplication.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:objectModel="clr-namespace:System.Collections.ObjectModel;assembly=System.ObjectModel"
+             xmlns:desktopApplication="clr-namespace:LlamaKit.DesktopApplication"
+
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:DataType="vm:ChatViewModel">
+
+    <!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+    <Design.DataContext>
+
+        <vm:ChatViewModel>
+            <vm:ChatViewModel.ModelName>LlamaKit</vm:ChatViewModel.ModelName>
+
+            <vm:ChatViewModel.Messages>
+
+                <objectModel:ObservableCollection x:TypeArguments="vm:MessageViewModel">
+                    <vm:MessageViewModel Sender="You" Message="Hi! What can you tell me about cats?" />
+
+                    <vm:MessageViewModel Sender="LlamaKit" Message="Cats are popular domestic pets that are known for their agility, grace, and independence. They are also known for being very clean animals, spending a lot of time grooming themselves. Cats are typically very social animals and enjoy human interaction, but can also be independent and aloof. They are known for their hunting instincts and often enjoy playing with toys that mimic prey, such as mice or birds." />
+
+
+                </objectModel:ObservableCollection>
+            </vm:ChatViewModel.Messages>
+        </vm:ChatViewModel>
+    </Design.DataContext>
+
+
+    <DockPanel LastChildFill="True">
+
+        <Border DockPanel.Dock="Bottom" Padding="8">
+
+            <Grid>
+                <TextBox Text="{Binding MessageText, Mode=TwoWay} "
+                         TextWrapping="Wrap"
+                         Background="Transparent"
+
+                         HorizontalAlignment="Stretch"
+                         HorizontalContentAlignment="Left"
+                         VerticalAlignment="Stretch"
+                         VerticalContentAlignment="Center"
+                         Margin="8,0,12,0"
+                         Padding="8"
+
+
+                         AcceptsReturn="False">
+                    <TextBox.KeyBindings>
+
+                        <KeyBinding Command="{Binding InsertNewLineCommand}"
+                                    Gesture="Shift+Enter" />
+                        <KeyBinding Command="{Binding SendCommand}" CommandParameter="{Binding MessageText}"
+                                    Gesture="Enter" />
+
+                    </TextBox.KeyBindings>
+                </TextBox>
+
+            </Grid>
+        </Border>
+
+
+        <Grid RowDefinitions="Auto,*">
+            <Border Grid.Row="0" Padding="15" Background="White">
+
+                <StackPanel>
+
+                    <TextBlock FontFamily="Bahnschrift" Text="{Binding ModelName}"></TextBlock>
+
+
+                </StackPanel>
+            </Border>
+
+            <ScrollViewer Grid.Row="1"
+
+                          Name="ChatScrollViewer"
+                          HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto">
+
+
+                <Grid>
+
+                <SelectingItemsControl Name="MessagesItemsControl"
+                                       ItemsSource="{Binding Messages}"
+                                       AutoScrollToSelectedItem="False">
+                    <SelectingItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Vertical" 
+                                        />
+                        </ItemsPanelTemplate>
+                    </SelectingItemsControl.ItemsPanel>
+                    <SelectingItemsControl.DataTemplates>
+                        <DataTemplate DataType="vm:MessageViewModel">
+                            <Grid Margin="8">
+                                    <desktopApplication:MessageControl DataContext="{Binding }" />
+
+
+                            </Grid>
+                        </DataTemplate>
+                    </SelectingItemsControl.DataTemplates>
+                </SelectingItemsControl>
+
+                </Grid>
+
+
+
+            </ScrollViewer>
+
+        </Grid>
+    </DockPanel>
+
+
+</UserControl>

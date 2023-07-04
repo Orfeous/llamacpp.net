@@ -20,6 +20,7 @@ public class SamplingPipelinePreset
     public static Action<ISamplingPipelineBuilder> Chat =>
         builder => builder.AddTemperatureSampler(0.8f)
             .AddRepetitionPenaltySampler(1.1f)
+            .AddFrequencyAndPresencePenaltySampler(0.8f, 0.3f)
             .AddTopPSampler(0.7f, 200)
             .AddTopKSampler(0, 200);
 

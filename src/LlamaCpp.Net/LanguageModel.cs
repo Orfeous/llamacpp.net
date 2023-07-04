@@ -202,7 +202,7 @@ public class LanguageModel : ILanguageModel
 
         if (samplingPipeline == null)
         {
-            samplingPipeline = SamplingPipelinePreset.Default;
+            samplingPipeline = SamplingPipelinePreset.Chat;
         }
 
         samplingPipeline?.Invoke(samplingPipelineBuilder);
