@@ -70,5 +70,7 @@ jobs:
       - name: Publish Github Nuget
         run: dotnet nuget push "src\LlamaCpp.Net\bin\Release\LlamaCpp.Net.*.nupkg" --api-key ${{ secrets.NUGET_SECRET }} --source "github"
 
+      - name: Publish release
+        run: .\build.ps1 -t PublishReleaseTask
       # - name: Publish Nuget.org
       #   run: nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}}
