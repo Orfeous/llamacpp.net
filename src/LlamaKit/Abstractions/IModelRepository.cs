@@ -1,4 +1,6 @@
-﻿namespace LlamaKit.Abstractions;
+﻿using LlamaKit.Models;
+
+namespace LlamaKit.Abstractions;
 
 public interface IModelRepository
 {

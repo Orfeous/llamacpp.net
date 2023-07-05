@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using LlamaKit.Abstractions;
+using LlamaKit.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LlamaKit.DesktopApplication.ViewModels;

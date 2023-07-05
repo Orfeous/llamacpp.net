@@ -7,14 +7,12 @@ namespace LlamaKit.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddLlama(this IServiceCollection services, IConfiguration configuration)
+        public static void AddLlama(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<LlamaKitOptions>(c => configuration.GetSection(LlamaKitOptions.LlamaKit).Bind(c));
 
             services.AddSingleton<ILanguageModelFactory, LanguageModelFactory>();
             services.AddSingleton<IModelRepository, ModelRepository>();
-
-            return services;
         }
     }
 }

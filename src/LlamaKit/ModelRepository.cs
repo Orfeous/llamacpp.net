@@ -1,5 +1,6 @@
 ﻿using ByteSizeLib;
 using LlamaKit.Abstractions;
+using LlamaKit.Models;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 
