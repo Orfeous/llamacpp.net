@@ -1,11 +1,11 @@
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace LlamaKit.DesktopApplication.Views;
+namespace LlamaKit.DesktopApplication.Views.Pages;
 
-public partial class ChatControl : UserControl
+public partial class ChatPageView : UserControl
 {
-    public ChatControl()
+    public ChatPageView()
     {
         InitializeComponent();
     }

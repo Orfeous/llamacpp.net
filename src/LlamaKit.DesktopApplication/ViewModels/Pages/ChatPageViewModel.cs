@@ -1,40 +1,41 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using LlamaCpp.Net.Abstractions;
-using LlamaCpp.Net.Configuration;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using LlamaCpp.Net.Abstractions;
+using LlamaCpp.Net.Configuration;
+using LlamaKit.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace LlamaKit.DesktopApplication.ViewModels;
+namespace LlamaKit.DesktopApplication.ViewModels.Pages;
 
-public partial class ChatViewModel : ViewModelBase
+public partial class ChatPageViewModel : PageViewModel, IRecipient<LoadLanguageModelCommand>
 {
-    public ChatViewModel()
+    public ChatPageViewModel()
     {
-        this.Messages = new ObservableCollection<MessageViewModel>();
-
-
-    }
-    public ChatViewModel(string modelName, ILanguageModel languageModel)
-    {
-        this.LanguageModel = languageModel;
-        this.ModelName = modelName;
-
         this.Messages = new ObservableCollection<MessageViewModel>();
 
         this.Messages.CollectionChanged += (sender, args) =>
         {
             this.OnPropertyChanged(new PropertyChangedEventArgs(nameof(this.Messages)));
         };
+
+        this.Factory = App.Current.Services.GetRequiredService<ILanguageModelFactory>();
+
+        WeakReferenceMessenger.Default.Register(this);
     }
+
+    private ILanguageModelFactory Factory { get; }
+
 
     public ObservableCollection<MessageViewModel> Messages { get; set; }
 
 
-    private ILanguageModel LanguageModel { get; set; }
+    private ILanguageModel? LanguageModel { get; set; }
 
-    [ObservableProperty] public string modelName;
+    [ObservableProperty] private string _modelName;
 
     [ObservableProperty] private string _messageText;
 
@@ -43,8 +44,8 @@ public partial class ChatViewModel : ViewModelBase
     private async Task InsertNewLine()
     {
         this.MessageText += "\n";
-
     }
+
     [RelayCommand(AllowConcurrentExecutions = false)]
     private async Task Send(string message)
     {
@@ -82,4 +83,32 @@ public partial class ChatViewModel : ViewModelBase
     }
 
     public bool IsLoading { get; set; }
+
+    [ObservableProperty]
+    public bool allowInput = false;
+
+    public void Receive(LoadLanguageModelCommand message)
+    {
+        if (LanguageModel != null)
+        {
+            this.LanguageModel?.Dispose();
+        }
+
+        this.ModelName = message.Model.Name;
+        this.LoadLanguageModelCommand.ExecuteAsync(message.Model.Path);
+    }
+
+    [RelayCommand]
+    private async Task LoadLanguageModel(string modelName)
+    {
+        this.LanguageModel?.Dispose();
+
+
+        this.ModelName = modelName;
+
+        AllowInput = false;
+        this.LanguageModel = await this.Factory.CreateModelAsync(modelName, LanguageModelOptions.Default);
+
+        AllowInput = true;
+    }
 }

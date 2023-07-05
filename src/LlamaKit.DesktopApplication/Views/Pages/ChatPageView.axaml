@@ -1,4 +1,4 @@
-<UserControl x:Class="LlamaKit.DesktopApplication.Views.ChatControl"
+<UserControl x:Class="LlamaKit.DesktopApplication.Views.Pages.ChatPageView"
              xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:LlamaKit.DesktopApplication.ViewModels"
@@ -6,36 +6,39 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:objectModel="clr-namespace:System.Collections.ObjectModel;assembly=System.ObjectModel"
              xmlns:desktopApplication="clr-namespace:LlamaKit.DesktopApplication"
+             xmlns:pages="clr-namespace:LlamaKit.DesktopApplication.ViewModels.Pages"
 
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:DataType="vm:ChatViewModel">
+             x:DataType="pages:ChatPageViewModel">
 
     <!-- This only sets the DataContext for the previewer in an IDE,
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
     <Design.DataContext>
 
-        <vm:ChatViewModel>
-            <vm:ChatViewModel.ModelName>LlamaKit</vm:ChatViewModel.ModelName>
+        <pages:ChatPageViewModel>
+            <pages:ChatPageViewModel.ModelName>LlamaKit</pages:ChatPageViewModel.ModelName>
 
-            <vm:ChatViewModel.Messages>
+            <pages:ChatPageViewModel.Messages>
 
                 <objectModel:ObservableCollection x:TypeArguments="vm:MessageViewModel">
                     <vm:MessageViewModel Sender="You" Message="Hi! What can you tell me about cats?" />
 
-                    <vm:MessageViewModel Sender="LlamaKit" Message="Cats are popular domestic pets that are known for their agility, grace, and independence. They are also known for being very clean animals, spending a lot of time grooming themselves. Cats are typically very social animals and enjoy human interaction, but can also be independent and aloof. They are known for their hunting instincts and often enjoy playing with toys that mimic prey, such as mice or birds." />
+                    <vm:MessageViewModel Sender="LlamaKit"
+                                         Message="Cats are popular domestic pets that are known for their agility, grace, and independence. They are also known for being very clean animals, spending a lot of time grooming themselves. Cats are typically very social animals and enjoy human interaction, but can also be independent and aloof. They are known for their hunting instincts and often enjoy playing with toys that mimic prey, such as mice or birds." />
 
 
                 </objectModel:ObservableCollection>
-            </vm:ChatViewModel.Messages>
-        </vm:ChatViewModel>
+            </pages:ChatPageViewModel.Messages>
+        </pages:ChatPageViewModel>
     </Design.DataContext>
+
 
 
     <DockPanel LastChildFill="True">
 
         <Border DockPanel.Dock="Bottom" Padding="8">
 
-            <Grid>
+            <Grid IsVisible="{Binding AllowInput}">
                 <TextBox Text="{Binding MessageText, Mode=TwoWay} "
                          TextWrapping="Wrap"
                          Background="Transparent"
@@ -66,9 +69,15 @@
         <Grid RowDefinitions="Auto,*">
             <Border Grid.Row="0" Padding="15" Background="White">
 
-                <StackPanel>
+                <StackPanel >
 
                     <TextBlock FontFamily="Bahnschrift" Text="{Binding ModelName}"></TextBlock>
+
+                    <ProgressBar
+                        HorizontalAlignment="Left"
+
+                        IsVisible="{Binding LoadLanguageModelCommand.IsRunning}"
+                        IsIndeterminate="True" />
 
 
                 </StackPanel>
@@ -83,28 +92,24 @@
 
                 <Grid>
 
-                <SelectingItemsControl Name="MessagesItemsControl"
-                                       ItemsSource="{Binding Messages}"
-                                       AutoScrollToSelectedItem="False">
-                    <SelectingItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Vertical" 
-                                        />
-                        </ItemsPanelTemplate>
-                    </SelectingItemsControl.ItemsPanel>
-                    <SelectingItemsControl.DataTemplates>
-                        <DataTemplate DataType="vm:MessageViewModel">
-                            <Grid Margin="8">
+                    <SelectingItemsControl Name="MessagesItemsControl"
+                                           ItemsSource="{Binding Messages}"
+                                           AutoScrollToSelectedItem="False">
+                        <SelectingItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Spacing="8" Orientation="Vertical" />
+                            </ItemsPanelTemplate>
+                        </SelectingItemsControl.ItemsPanel>
+                        <SelectingItemsControl.DataTemplates>
+                            <DataTemplate DataType="vm:MessageViewModel">
+                                <Grid>
                                     <desktopApplication:MessageControl DataContext="{Binding }" />
-
-
-                            </Grid>
-                        </DataTemplate>
-                    </SelectingItemsControl.DataTemplates>
-                </SelectingItemsControl>
+                                </Grid>
+                            </DataTemplate>
+                        </SelectingItemsControl.DataTemplates>
+                    </SelectingItemsControl>
 
                 </Grid>
-
 
 
             </ScrollViewer>

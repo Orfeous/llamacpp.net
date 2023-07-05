@@ -11,14 +11,13 @@ public partial class LanguageModelOptionsViewModel : ViewModelBase
         this.PromptSuffix = "\n\nASSISTANT:";
         this.InitialPrompt =
             "A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions. USER: hello, who are you? ASSISTANT:\r\n\r\n";
-
-
     }
 
 
     public LanguageModelOptions ToOptions()
     {
-        var options = LanguageModelOptions.Default with
+        var options = LanguageModelOptions.Default
+            with
         {
             InitialPrompt = this.InitialPrompt,
         };
@@ -42,12 +41,9 @@ public partial class LanguageModelOptionsViewModel : ViewModelBase
         return options;
     }
 
-    [ObservableProperty]
-    public string? initialPrompt;
+    [ObservableProperty] public string? initialPrompt;
 
-    [ObservableProperty]
-    public string? promptPrefix;
+    [ObservableProperty] private string? promptPrefix;
 
-    [ObservableProperty]
-    public string? promptSuffix;
+    [ObservableProperty] private string? promptSuffix;
 }

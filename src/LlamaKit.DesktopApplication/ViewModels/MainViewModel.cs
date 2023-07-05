@@ -1,8 +1,11 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.DependencyInjection;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using LlamaKit.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LlamaKit.DesktopApplication.ViewModels;
 
@@ -25,7 +28,18 @@ public partial class MainViewModel : ViewModelBase
         }
 
 
+        _currentPageViewModel = _pageViewModels[nameof(Pages.ChatPageViewModel)];
+
     }
+
+    // page view models
+
+    private readonly Dictionary<string, PageViewModel> _pageViewModels = new Dictionary<string, PageViewModel>()
+    {
+        { nameof(Pages.ChatPageViewModel), new Pages.ChatPageViewModel() }
+
+    };
+
 
     public LanguageModelOptionsViewModel LanguageModelOptionsViewModel { get; set; } = new LanguageModelOptionsViewModel();
 
@@ -34,37 +48,43 @@ public partial class MainViewModel : ViewModelBase
     public IModelRepository ModelRepository { get; set; }
 
     [RelayCommand]
-    public Task Create(RepositoryModel model)
+    private Task Create(RepositoryModel model)
     {
-        var languageModel = this.Factory.CreateModel(model.Name, LanguageModelOptionsViewModel.ToOptions());
+        WeakReferenceMessenger.Default.Send(new LoadLanguageModelCommand(model));
 
-        this.Loading = true;
-        this.ChatViewModel = new ChatViewModel(model.Name, languageModel);
-
-        this.Loading = false;
 
         return Task.CompletedTask;
     }
 
     public bool Loading { get; set; }
 
-    [ObservableProperty] private ChatViewModel _chatViewModel;
+    [ObservableProperty]
+    private PageViewModel _currentPageViewModel;
+
+
+    [RelayCommand]
+    private Task NavigateTo(string pageName)
+    {
+        this.CurrentPageViewModel = _pageViewModels[pageName];
+
+        return Task.CompletedTask;
+    }
 }
 
-public partial class MessageViewModel : ViewModelBase
+public class LoadLanguageModelCommand
 {
-    public MessageViewModel(string sender, string message)
+
+    public LoadLanguageModelCommand(RepositoryModel model)
     {
-        this.Sender = sender;
-        this.Message = message;
+        Model = model;
     }
 
-    public MessageViewModel()
-    {
-        this.Sender = string.Empty;
-        this.Message = string.Empty;
-    }
+    public RepositoryModel Model { get; set; }
+}
 
-    [ObservableProperty] private string _message;
-    [ObservableProperty] private string _sender;
+/// <summary>
+/// An abstract class for enabling page navigation.
+/// </summary>
+public abstract class PageViewModel : ViewModelBase
+{
 }

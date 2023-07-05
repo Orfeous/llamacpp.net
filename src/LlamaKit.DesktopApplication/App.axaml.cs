@@ -1,11 +1,17 @@
-﻿using Avalonia;
+﻿using System;
+using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Controls.Templates;
 using Avalonia.Markup.Xaml;
+using LlamaKit.Configuration;
+using LlamaKit.DependencyInjection;
 using LlamaKit.DesktopApplication.ViewModels;
 using LlamaKit.DesktopApplication.Views;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging;
 
 namespace LlamaKit.DesktopApplication;
 
@@ -69,10 +75,49 @@ public partial class App : Application
     public static IServiceProvider ConfigureServices(IConfiguration configuration)
     {
         var services = new ServiceCollection();
-        services.AddLogging();
 
+        services.AddLogging(builder =>
+        {
+            builder.AddConfiguration(configuration.GetSection("Logging"));
+            builder.AddConsole();
+            builder.AddDebug();
+        });
+
+
+        // add file provider 
+
+        var c = new LlamaKitOptions();
+        configuration.GetSection(LlamaKitOptions.LlamaKit).Bind(c);
+
+
+        services.AddSingleton<IFileProvider>(provider => new PhysicalFileProvider(c.ModelDirectory));
+
+        // add llama 
         services.AddLlama(configuration);
 
         return services.BuildServiceProvider();
+    }
+}
+
+public class ViewLocator : IDataTemplate
+{
+    public Control Build(object data)
+    {
+        var name = data.GetType().FullName!.Replace("ViewModel", "View");
+        var type = Type.GetType(name);
+
+        if (type != null)
+        {
+            return (Control)Activator.CreateInstance(type)!;
+        }
+        else
+        {
+            return new TextBlock { Text = "Not Found: " + name };
+        }
+    }
+
+    public bool Match(object data)
+    {
+        return data is ViewModelBase;
     }
 }
