@@ -1,7 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using LlamaCpp.Net.Configuration;
+using LlamaKit.DesktopApplication.ViewModels.Abstractions;
 
-namespace LlamaKit.DesktopApplication.ViewModels;
+namespace LlamaKit.DesktopApplication.ViewModels.Controls;
 
 public partial class LanguageModelOptionsViewModel : ViewModelBase
 {

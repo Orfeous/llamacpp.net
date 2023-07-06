@@ -7,6 +7,7 @@ using Avalonia.Markup.Xaml;
 using LlamaKit.Configuration;
 using LlamaKit.DependencyInjection;
 using LlamaKit.DesktopApplication.ViewModels;
+using LlamaKit.DesktopApplication.ViewModels.Abstractions;
 using LlamaKit.DesktopApplication.Views;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

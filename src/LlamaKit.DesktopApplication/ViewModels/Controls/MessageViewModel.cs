@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using FluentIcons.Common;
+using LlamaKit.DesktopApplication.ViewModels.Abstractions;
 
-namespace LlamaKit.DesktopApplication.ViewModels;
+namespace LlamaKit.DesktopApplication.ViewModels.Controls;
 
 public partial class MessageViewModel : ViewModelBase
 {
@@ -16,6 +18,23 @@ public partial class MessageViewModel : ViewModelBase
         this.Message = string.Empty;
     }
 
+
     [ObservableProperty] private string _message;
     [ObservableProperty] private string _sender;
+
+    public Symbol Icon
+    {
+        get
+        {
+            if (Sender == "You")
+            {
+                return Symbol.Person;
+            }
+
+            else
+            {
+                return Symbol.Chat;
+            }
+        }
+    }
 }

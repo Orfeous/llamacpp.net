@@ -6,9 +6,7 @@
         xmlns:views="clr-namespace:LlamaKit.DesktopApplication.Views"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         TransparencyLevelHint="AcrylicBlur"
-        ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaChromeHints="PreferSystemChrome"
-        ExtendClientAreaTitleBarHeightHint="-1"
         SystemDecorations="Full"
 
         x:Class="LlamaKit.DesktopApplication.Views.MainWindow"

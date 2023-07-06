@@ -3,14 +3,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 
              xmlns:viewModels="clr-namespace:LlamaKit.DesktopApplication.ViewModels"
-             x:DataType="viewModels:LanguageModelOptionsViewModel"
+             x:DataType="controls:LanguageModelOptionsViewModel"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:avalonia="clr-namespace:Markdown.Avalonia;assembly=Markdown.Avalonia"
+             xmlns:controls="clr-namespace:LlamaKit.DesktopApplication.ViewModels.Controls"
              mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="150">
 
     <Design.DataContext>
-        <viewModels:LanguageModelOptionsViewModel InitialPrompt="Hello, world!" />
+        <controls:LanguageModelOptionsViewModel InitialPrompt="Hello, world!" />
     </Design.DataContext>
 
 

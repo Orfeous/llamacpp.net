@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using LlamaKit.Abstractions;
+using LlamaKit.DesktopApplication.ViewModels.Abstractions;
 using LlamaKit.Models;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -42,7 +43,7 @@ public partial class MainViewModel : ViewModelBase
     };
 
 
-    public LanguageModelOptionsViewModel LanguageModelOptionsViewModel { get; set; } = new LanguageModelOptionsViewModel();
+    public Controls.LanguageModelOptionsViewModel LanguageModelOptionsViewModel { get; set; } = new Controls.LanguageModelOptionsViewModel();
 
     public ILanguageModelFactory Factory { get; set; }
 
