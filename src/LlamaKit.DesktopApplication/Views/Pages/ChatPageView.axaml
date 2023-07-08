@@ -9,7 +9,7 @@
              xmlns:controls="clr-namespace:LlamaKit.DesktopApplication.ViewModels.Controls"
              xmlns:avalonia="clr-namespace:FluentIcons.Avalonia;assembly=FluentIcons.Avalonia"
 
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="800"
              x:DataType="pages:ChatPageViewModel">
 
     <!-- This only sets the DataContext for the previewer in an IDE,
@@ -19,6 +19,12 @@
         <pages:ChatPageViewModel>
             <pages:ChatPageViewModel.ModelName>LlamaKit</pages:ChatPageViewModel.ModelName>
             <pages:ChatPageViewModel.TogglePane>True</pages:ChatPageViewModel.TogglePane>
+            <pages:ChatPageViewModel.InferenceOptions>
+
+                <pages:InferenceOptionsViewModel>
+                    <pages:InferenceOptionsViewModel.SamplingMethod>Default</pages:InferenceOptionsViewModel.SamplingMethod>
+                </pages:InferenceOptionsViewModel>
+            </pages:ChatPageViewModel.InferenceOptions>
 
             <pages:ChatPageViewModel.Messages>
 
@@ -111,27 +117,42 @@
 
                 <SplitView.Pane>
 
-                    <StackPanel Margin="16" DataContext="{Binding InferenceOptions}">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                                  Margin="16" DataContext="{Binding InferenceOptions}">
 
 
-                        <StackPanel Spacing="8">
-                            <Label Content="Penalize newlines" />
-                            <CheckBox IsChecked="{Binding PenalizeNewLine}" />
+                        <StackPanel>
+                            <StackPanel Spacing="8">
+                                <Label Content="Penalize newlines" />
+                                <CheckBox IsChecked="{Binding PenalizeNewLine}" />
 
-                            <Label Content="Maximum tokens" />
+                                <Label Content="Maximum tokens" />
 
 
-                            <NumericUpDown Minimum="0" Maximum="3000" Value="{Binding MaxNumberOfTokens}" />
+                                <NumericUpDown Minimum="0" Maximum="3000" Value="{Binding MaxNumberOfTokens}" />
 
-                            <Label Content="Repetition Lookback" />
+                                <Label Content="Repetition Lookback" />
 
-                            <NumericUpDown Minimum="0" Maximum="3000" Value="{Binding RepetitionLookback}" />
+                                <NumericUpDown Minimum="0" Maximum="3000" Value="{Binding RepetitionLookback}" />
 
-                            <Label Content="Sampling Method" />
+                                <Label Content="Sampling Method" />
 
-                            <ComboBox ItemsSource="{Binding SamplingMethods}" SelectedItem="{Binding SamplingMethod}" />
+                                <ComboBox ItemsSource="{Binding SamplingMethods}"
+                                          SelectedItem="{Binding SamplingMethod}" VerticalAlignment="Stretch" />
+
+                                <Label Content="Temperature" />
+
+                                <NumericUpDown Minimum="-1" Maximum="5" Increment="0.01" Value="{Binding Temperature}" />
+
+
+                            </StackPanel>
+                            <StackPanel Spacing="8" Margin="0,16" IsVisible="{Binding IsDefaultSamplingMethod}">
+                                <Label Content="Top K" />
+
+
+                            </StackPanel>
                         </StackPanel>
-                    </StackPanel>
+                    </ScrollViewer>
                 </SplitView.Pane>
                 <ScrollViewer
                     Name="ChatScrollViewer"

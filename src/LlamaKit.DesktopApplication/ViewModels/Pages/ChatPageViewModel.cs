@@ -9,11 +9,10 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using CsvHelper;
-using CsvHelper.Configuration;
 using LlamaCpp.Net.Abstractions;
 using LlamaCpp.Net.Configuration;
 using LlamaKit.Abstractions;
-using LlamaKit.DesktopApplication.ViewModels.Controls;
+using LlamaKit.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LlamaKit.DesktopApplication.ViewModels.Pages;
@@ -71,7 +70,10 @@ public partial class ChatPageViewModel : PageViewModel, IRecipient<LoadLanguageM
 
         this.Messages.Add(responseMessage);
 
-        await foreach (var part in this.LanguageModel.InferAsync(message, InferenceOptions.ToInferenceOptions()))
+        var inferenceOptions = this.InferenceOptions.ToInferenceOptions();
+        inferenceOptions.PromptPrefix = Preset.PromptPrefix;
+        inferenceOptions.PromptSuffix = Preset.PromptSuffix;
+        await foreach (var part in this.LanguageModel.InferAsync(message, inferenceOptions))
         {
             if (responseMessage.Message == "...")
             {
@@ -82,6 +84,7 @@ public partial class ChatPageViewModel : PageViewModel, IRecipient<LoadLanguageM
         }
 
         responseMessage.Message = responseMessage.Message.Trim();
+
 
         this.IsLoading = false;
     }
@@ -124,39 +127,30 @@ public partial class ChatPageViewModel : PageViewModel, IRecipient<LoadLanguageM
 
     public void Receive(LoadLanguageModelCommand message)
     {
-        if (LanguageModel != null)
-        {
-            this.LanguageModel?.Dispose();
-        }
-
-        this.ModelName = message.Model.Name;
-        this.LoadLanguageModelCommand.ExecuteAsync(message.Model.Path);
+        this.LoadLanguageModelCommand.ExecuteAsync(message);
     }
 
     [RelayCommand]
-    private async Task LoadLanguageModel(string modelName)
+    private async Task LoadLanguageModel(LoadLanguageModelCommand model)
     {
+        Messages.Clear();
         this.LanguageModel?.Dispose();
 
+        this.Preset = model.Preset;
 
-        this.ModelName = Path.GetFileNameWithoutExtension(modelName).Split(".")[0];
+        this.ModelName = Path.GetFileNameWithoutExtension(model.Name).Split(".")[0];
 
 
 
         AllowInput = false;
-        this.LanguageModel = await this.Factory.CreateModelAsync(modelName, LanguageModelOptions.Default);
+        this.LanguageModel = await this.Factory.CreateModelAsync(model.Path, LanguageModelOptions.Default with
+        {
+            InitialPrompt = model.Preset.InitialPrompt,
+        });
+
 
         AllowInput = true;
     }
-}
 
-internal sealed class MessageViewModelMap : ClassMap<MessageViewModel>
-{
-    public MessageViewModelMap()
-    {
-        Map(m => m.Sender).Index(0);
-        Map(m => m.Icon).Index(1);
-        Map(m => m.Message).Index(2);
-    }
-
+    public PresetModel Preset { get; set; }
 }

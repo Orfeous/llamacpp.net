@@ -1,4 +1,11 @@
-﻿using LlamaCpp.Net.Abstractions;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using LlamaCpp.Net.Abstractions;
 using LlamaCpp.Net.Configuration;
 using LlamaCpp.Net.Exceptions;
 using LlamaCpp.Net.Extensions;
@@ -10,13 +17,6 @@ using LlamaCpp.Net.Native.Models;
 using LlamaCpp.Net.Samplers.Abstractions;
 using LlamaCpp.Net.Samplers.Pipelines;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace LlamaCpp.Net;
 #pragma warning disable CA1848
@@ -24,7 +24,6 @@ namespace LlamaCpp.Net;
 /// <inheritdoc />
 public class LanguageModel : ILanguageModel
 {
-    private readonly ISamplingPipeline _constraints;
     private readonly Encoding _encoding = Encoding.UTF8;
     private static int EndOfSequenceToken => LlamaNative.llama_token_eos();
     private readonly ILlamaInstance _instance;
@@ -42,8 +41,7 @@ public class LanguageModel : ILanguageModel
     /// <param name="options"></param>
     /// <param name="samplingPipeline"></param>
     /// <exception cref="FileNotFoundException"></exception>
-    public LanguageModel(string modelPath, ILogger<LanguageModel> logger, LanguageModelOptions? options = null,
-        Action<ISamplingPipelineBuilder>? samplingPipeline = null)
+    public LanguageModel(string modelPath, ILogger<LanguageModel> logger, LanguageModelOptions? options = null)
     {
         _logger = logger;
         ModelPath = modelPath;
@@ -69,8 +67,6 @@ public class LanguageModel : ILanguageModel
 
         _vocabSize = _instance.GetVocabSize();
 
-        _constraints = BuildSamplingPipeline(samplingPipeline);
-
 
         _tokenCache = new Dictionary<int, string>(_vocabSize);
 
@@ -79,15 +75,14 @@ public class LanguageModel : ILanguageModel
         LoadInitialPrompt(options);
     }
 
-    internal LanguageModel(ISamplingPipeline constraints, ILlamaInstance instance, ILogger<LanguageModel> logger, string modelPath, LanguageModelOptions options)
+    internal LanguageModel(ISamplingPipeline constraints, ILlamaInstance instance, ILogger<LanguageModel> logger,
+        string modelPath, LanguageModelOptions options)
     {
-        _constraints = constraints;
         _instance = instance;
         _logger = logger;
         ModelPath = modelPath;
         Options = LanguageModelOptions.Default;
         _vocabSize = _instance.GetVocabSize();
-
     }
 
 
@@ -147,7 +142,6 @@ public class LanguageModel : ILanguageModel
         _logger.LogDebug("Converting token {Token} to string", token);
 
 
-
         _tokenCache[token] = _instance.TokenToString(token, _encoding);
         return _tokenCache[token];
     }
@@ -174,7 +168,7 @@ public class LanguageModel : ILanguageModel
             }, cancellationToken)
             .ContinueWith(_ =>
             {
-                _logger.LogDebug("Async inference for input {Input} completed", input);
+                _logger.LogDebug("Async inference for input \"{Input}\" completed", input);
 
                 _instance.PrintTimings();
                 result.Complete();
@@ -192,22 +186,6 @@ public class LanguageModel : ILanguageModel
 
         _logger.LogDebug("Inference for input {Input} completed", input);
         return result;
-    }
-
-    private SamplingPipeline BuildSamplingPipeline(Action<ISamplingPipelineBuilder>? samplingPipeline)
-    {
-        _logger.LogDebug("Initializing constraints");
-
-        var samplingPipelineBuilder = new SamplingPipelineBuilder(_logger);
-
-        if (samplingPipeline == null)
-        {
-            samplingPipeline = SamplingPipelinePreset.Chat;
-        }
-
-        samplingPipeline?.Invoke(samplingPipelineBuilder);
-
-        return samplingPipelineBuilder.Build(_instance);
     }
 
     private static LLamaContextParams GetContextParams(LanguageModelOptions options)
@@ -274,9 +252,24 @@ public class LanguageModel : ILanguageModel
     private List<string> GenerateModelOutput(string input, InferenceOptions options,
         Action<string>? inferenceCallback = null)
     {
+        if (!string.IsNullOrEmpty(options.PromptPrefix))
+        {
+            _logger.LogDebug("Adding prompt prefix {PromptPrefix} to input", options.PromptPrefix);
+            input = options.PromptPrefix + input;
+        }
+
+        if (!string.IsNullOrEmpty(options.PromptSuffix))
+        {
+            _logger.LogDebug("Adding prompt suffix {PromptSuffix} to input", options.PromptSuffix);
+            input += options.PromptSuffix;
+        }
+
         EvaluatePrompt(input);
 
         var list = new List<string>();
+
+
+        var constraints = BuildConstraints(options).Build(_instance);
 
         var logits = GetLogits(_instance, _vocabSize);
 
@@ -285,7 +278,8 @@ public class LanguageModel : ILanguageModel
         {
             var candidates = GetCandidates(_vocabSize, logits);
 
-            var id = _constraints.ApplyConstraints(candidates, logits, currentOutput, options);
+            var id = constraints.ApplyConstraints(candidates, logits, currentOutput, options.PenalizeNewLine,
+                options.RepetitionLookback);
 
 
             if (id == EndOfSequenceToken)
@@ -312,9 +306,50 @@ public class LanguageModel : ILanguageModel
             }
         }
 
+        _logger.LogDebug("Inference completed");
+        _logger.LogDebug("Output: {Output}", string.Join("", list));
 
         return list;
     }
+
+    private ISamplingPipelineBuilder BuildConstraints(
+        InferenceOptions options)
+    {
+        ISamplingPipelineBuilder constraints = new SamplingPipelineBuilder(_logger);
+
+        if (options.Temperature < 0)
+        {
+            // should set sampling method to greedy
+
+            return constraints;
+        }
+        else
+        {
+            if (options.SamplingMethod == SamplingMethod.Mirostat)
+            {
+                constraints = constraints.AddTemperatureSampler(options.Temperature)
+                    .SetEndSampler(SamplingMethod.Mirostat);
+            }
+            else if (options.SamplingMethod == SamplingMethod.MirostatV2)
+            {
+                constraints = constraints.AddTemperatureSampler(options.Temperature)
+                    .SetEndSampler(SamplingMethod.MirostatV2);
+            }
+            else
+            {
+                constraints = constraints
+                    .AddTopKSampler(options.TopK, options.TopKMinKeep)
+                    .AddTailFreeSampler(options.TailFreeZ, options.TailFreeMinKeep)
+                    .AddTypicalSampler(options.LocalTypicalK, options.LocalTypicalMinKeep)
+                    .AddTopPSampler(options.TopP, options.TopPMinKeep)
+                    .AddTemperatureSampler(options.Temperature)
+                    .SetEndSampler(SamplingMethod.Default);
+            }
+        }
+
+        return constraints;
+    }
+
 
     private void EvaluatePrompt(string input)
     {
@@ -323,15 +358,6 @@ public class LanguageModel : ILanguageModel
             return;
         }
 
-        if (!string.IsNullOrEmpty(Options.PromptPrefix))
-        {
-            input = Options.PromptPrefix + input;
-        }
-
-        if (!string.IsNullOrEmpty(Options.PromptSuffix))
-        {
-            input += Options.PromptSuffix;
-        }
 
         _logger.LogDebug("Evaluating prompt {Prompt}", input);
 

@@ -1,11 +1,11 @@
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace LlamaKit.DesktopApplication;
+namespace LlamaKit.DesktopApplication.Views.Controls;
 
-public partial class LanguageModelOptionsControl : UserControl
+public partial class ModelSelectorControl : UserControl
 {
-    public LanguageModelOptionsControl()
+    public ModelSelectorControl()
     {
         InitializeComponent();
     }

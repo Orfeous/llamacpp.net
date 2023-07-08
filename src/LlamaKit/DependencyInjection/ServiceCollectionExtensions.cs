@@ -1,5 +1,6 @@
 ﻿using LlamaKit.Abstractions;
 using LlamaKit.Configuration;
+using LlamaKit.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,6 +14,7 @@ namespace LlamaKit.DependencyInjection
 
             services.AddSingleton<ILanguageModelFactory, LanguageModelFactory>();
             services.AddSingleton<IModelRepository, ModelRepository>();
+            services.AddSingleton<IPresetRepository, PresetRepository>();
         }
     }
 }

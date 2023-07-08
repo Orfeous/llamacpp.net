@@ -1,0 +1,115 @@
+<UserControl x:Class="LlamaKit.DesktopApplication.Views.Controls.ModelSelectorControl"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+
+             xmlns:viewModels="clr-namespace:LlamaKit.DesktopApplication.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:avalonia="clr-namespace:Markdown.Avalonia;assembly=Markdown.Avalonia"
+             xmlns:controls="clr-namespace:LlamaKit.DesktopApplication.ViewModels.Controls"
+             xmlns:desktopApplication="clr-namespace:LlamaKit.DesktopApplication"
+             xmlns:avalonia1="clr-namespace:FluentIcons.Avalonia;assembly=FluentIcons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="600">
+
+    <Design.DataContext>
+        <controls:ModelSelectorViewModel>
+
+        </controls:ModelSelectorViewModel>
+    </Design.DataContext>
+
+    <Grid ShowGridLines="True">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="2*" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <ListBox ItemsSource="{Binding Models}" x:Name="ModelListBox"
+                 Background="Transparent" SelectedItem="{Binding SelectedItem}">
+
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid Margin="0,8">
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+
+
+                        </StackPanel>
+
+
+                    </Grid>
+
+                </DataTemplate>
+
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <Grid Grid.Row="1"
+              Margin="8"
+              IsVisible="{Binding !!SelectedItem}"
+
+              Background="{DynamicResource ThemeAccentBrush4}" ColumnDefinitions="Auto,*,Auto"
+              RowDefinitions="Auto,Auto,Auto,*">
+
+
+            <Label Content="Model" VerticalAlignment="Center"></Label>
+
+
+            <TextBlock VerticalAlignment="Center" Grid.Row="0" Grid.Column="1" Text="{Binding SelectedItem.Name}"
+                       Margin="8" />
+
+
+            <Button Grid.Row="0" Grid.Column="2" Content="Create" Command="{Binding CreateCommand}"
+                    CommandParameter="{Binding SelectedItem}" HorizontalAlignment="Right" Margin="8" />
+
+
+            <Label Grid.Column="0" Grid.Row="1" Content="Preset" VerticalAlignment="Center"></Label>
+
+            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Stretch">
+
+                <ComboBox ItemsSource="{Binding SelectedItem.Presets}"
+                          SelectedItem="{Binding SelectedItem.SelectedPreset}"
+                          Margin="8" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding DisplayName}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+            </StackPanel>
+            <Button Grid.Row="1" Grid.Column="2" Content="View" HorizontalAlignment="Right" Margin="8">
+                <Button.Flyout>
+                    <Flyout Placement="RightEdgeAlignedBottom" ShowMode="Standard">
+                        <StackPanel Spacing="8" Width="200">
+                            <Label Content="Initial Prompt" />
+
+                            <TextBox IsReadOnly="True"
+                                     Text="{Binding SelectedItem.SelectedPreset.InitialPrompt}" Height="100" Margin="8" />
+
+                            <Label Content="Prompt Prefix" />
+
+                            <TextBox IsReadOnly="True"
+                                     Text="{Binding SelectedItem.SelectedPreset.PromptPrefix}" Height="100" Margin="8" />
+
+                            <Label Content="Prompt Suffix" />
+
+                            <TextBox IsReadOnly="True"
+                                     Text="{Binding SelectedItem.SelectedPreset.PromptSuffix}" Height="100" Margin="8" />
+                        </StackPanel>
+
+
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
+        </Grid>
+
+
+    </Grid>
+
+
+</UserControl>

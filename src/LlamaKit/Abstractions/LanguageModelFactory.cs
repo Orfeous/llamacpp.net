@@ -1,7 +1,6 @@
 ﻿using LlamaCpp.Net;
 using LlamaCpp.Net.Abstractions;
 using LlamaCpp.Net.Configuration;
-using LlamaCpp.Net.Samplers.Abstractions;
 using Microsoft.Extensions.Logging;
 
 namespace LlamaKit.Abstractions;
@@ -12,19 +11,19 @@ public class LanguageModelFactory : ILanguageModelFactory
     private readonly ILogger<LanguageModelFactory> _logger;
 
     public LanguageModelFactory(ILogger<LanguageModelFactory> logger,
-        ILoggerFactory loggerFactory, IModelRepository modelRepository)
+        ILoggerFactory loggerFactory)
     {
         _logger = logger;
         _loggerFactory = loggerFactory;
     }
 
     public ILanguageModel CreateModel(string filePath,
-        LanguageModelOptions? options = null, Action<ISamplingPipelineBuilder>? builder = null)
+        LanguageModelOptions? options = null)
     {
         if (File.Exists(filePath))
         {
             _logger.LogInformation($"Creating model for {filePath}");
-            return new LanguageModel(filePath, new Logger<LanguageModel>(_loggerFactory), options, builder);
+            return new LanguageModel(filePath, new Logger<LanguageModel>(_loggerFactory), options);
         }
 
         else

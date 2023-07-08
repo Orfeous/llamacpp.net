@@ -6,6 +6,7 @@
              xmlns:desktopApplication="clr-namespace:LlamaKit.DesktopApplication"
              xmlns:views="clr-namespace:LlamaKit.DesktopApplication.Views"
              xmlns:pages="clr-namespace:LlamaKit.DesktopApplication.Views.Pages"
+             xmlns:controls="clr-namespace:LlamaKit.DesktopApplication.Views.Controls"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="LlamaKit.DesktopApplication.Views.MainView"
              x:DataType="vm:MainViewModel">
@@ -18,62 +19,15 @@
     <SplitView IsPaneOpen="True" DisplayMode="CompactInline" OpenPaneLength="300">
 
         <SplitView.Pane>
-            <Grid Margin="0 ,32,0,0">
 
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <SelectingItemsControl ItemsSource="{Binding Models}" Margin="8">
-
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Grid Margin="0,8">
-
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel>
-                                    <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
-                                    <TextBlock Text="{Binding Size}"></TextBlock>
-                                </StackPanel>
-
-
-                                <Button Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center"
-                                        Content="Start"
-                                        Command="{Binding DataContext.CreateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                        CommandParameter="{Binding}" />
-
-                            </Grid>
-
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </SelectingItemsControl>
-
-                <Grid Grid.Row="1">
-
-
-                    <Expander Header="Model Options" ExpandDirection="Up" HorizontalAlignment="Stretch"
-                              CornerRadius="0">
-
-                        <desktopApplication:LanguageModelOptionsControl
-                            DataContext="{Binding LanguageModelOptionsViewModel}">
-                        </desktopApplication:LanguageModelOptionsControl>
-
-                    </Expander>
-
-
-                </Grid>
-
-            </Grid>
+            <controls:ModelSelectorControl DataContext="{Binding ModelSelectorViewModel}" />
         </SplitView.Pane>
         <Grid Grid.Column="2">
 
 
-            <TransitioningContentControl 
-                Content="{Binding CurrentPageViewModel}"
-            ></TransitioningContentControl>
+            <TransitioningContentControl
+                Content="{Binding CurrentPageViewModel}">
+            </TransitioningContentControl>
 
 
         </Grid>
