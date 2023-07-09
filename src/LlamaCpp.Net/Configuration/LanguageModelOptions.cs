@@ -10,8 +10,8 @@ public record LanguageModelOptions
     /// </summary>
     public static LanguageModelOptions Default => new LanguageModelOptions
     {
-        ContextSize = 512,
-        GpuLayerCount = 0,
+        ContextSize = 2048,
+        GpuLayerCount = 20,
         Seed = -1,
         UseFp16Memory = false,
         UseMemoryLock = true,
@@ -60,17 +60,6 @@ public record LanguageModelOptions
     /// </summary>
     public int LoraThreads { get; init; } = 20;
 
-    /// <summary>
-    /// This will be prepended to the prompt when generating text.
-    /// Can be used to add a prefix to the prompt, like, User: or something.
-    /// </summary>
-    public string PromptPrefix { get; init; } = string.Empty;
-
-    /// <summary>
-    /// This will be appended to the prompt when generating text.
-    /// This can be used to add a suffix to the prompt, like, Assistant: or something.
-    /// </summary>
-    public string PromptSuffix { get; init; } = string.Empty;
 
     /// <summary>
     /// 

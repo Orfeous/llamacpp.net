@@ -1,0 +1,187 @@
+<UserControl x:Class="LlamaKit.DesktopApplication.Views.Pages.ChatPageView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:objectModel="clr-namespace:System.Collections.ObjectModel;assembly=System.ObjectModel"
+             xmlns:desktopApplication="clr-namespace:LlamaKit.DesktopApplication"
+             xmlns:pages="clr-namespace:LlamaKit.DesktopApplication.ViewModels.Pages"
+             xmlns:controls="clr-namespace:LlamaKit.DesktopApplication.ViewModels.Controls"
+             xmlns:avalonia="clr-namespace:FluentIcons.Avalonia;assembly=FluentIcons.Avalonia"
+
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="800"
+             x:DataType="pages:ChatPageViewModel">
+
+    <!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+    <Design.DataContext>
+
+        <pages:ChatPageViewModel>
+            <pages:ChatPageViewModel.ModelName>LlamaKit</pages:ChatPageViewModel.ModelName>
+            <pages:ChatPageViewModel.TogglePane>True</pages:ChatPageViewModel.TogglePane>
+            <pages:ChatPageViewModel.InferenceOptions>
+
+                <pages:InferenceOptionsViewModel>
+                    <pages:InferenceOptionsViewModel.SamplingMethod>Default</pages:InferenceOptionsViewModel.SamplingMethod>
+                </pages:InferenceOptionsViewModel>
+            </pages:ChatPageViewModel.InferenceOptions>
+
+            <pages:ChatPageViewModel.Messages>
+
+                <objectModel:ObservableCollection x:TypeArguments="controls:MessageViewModel">
+                    <controls:MessageViewModel Sender="You" Message="Hi! What can you tell me about cats?" />
+
+                    <controls:MessageViewModel Sender="LlamaKit"
+                                               Message="Cats are popular domestic pets that are known for their agility, grace, and independence. They are also known for being very clean animals, spending a lot of time grooming themselves. Cats are typically very social animals and enjoy human interaction, but can also be independent and aloof. They are known for their hunting instincts and often enjoy playing with toys that mimic prey, such as mice or birds." />
+
+
+                </objectModel:ObservableCollection>
+            </pages:ChatPageViewModel.Messages>
+        </pages:ChatPageViewModel>
+    </Design.DataContext>
+
+
+    <DockPanel LastChildFill="True">
+
+        <Border DockPanel.Dock="Bottom" Padding="8">
+
+            <Grid IsVisible="{Binding AllowInput}">
+                <TextBox Text="{Binding MessageText, Mode=TwoWay} "
+                         TextWrapping="Wrap"
+                         Background="Transparent"
+
+                         HorizontalAlignment="Stretch"
+                         HorizontalContentAlignment="Left"
+                         VerticalAlignment="Stretch"
+                         VerticalContentAlignment="Center"
+                         Margin="8,0,12,0"
+                         Padding="8"
+
+
+                         AcceptsReturn="False">
+                    <TextBox.KeyBindings>
+
+                        <KeyBinding Command="{Binding InsertNewLineCommand}"
+                                    Gesture="Shift+Enter" />
+                        <KeyBinding Command="{Binding SendCommand}" CommandParameter="{Binding MessageText}"
+                                    Gesture="Enter" />
+
+                    </TextBox.KeyBindings>
+                </TextBox>
+
+            </Grid>
+        </Border>
+
+
+        <Grid RowDefinitions="Auto,*">
+            <Border Grid.Row="0" Padding="15" Background="White">
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+
+                        <TextBlock FontFamily="Bahnschrift" Text="{Binding ModelName}" />
+
+                        <ProgressBar
+                            HorizontalAlignment="Left"
+                            IsVisible="{Binding LoadLanguageModelCommand.IsRunning}"
+
+                            Margin="0,8"
+                            IsIndeterminate="True" />
+
+
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+
+                        <Button Command="{Binding ExportCommand}">
+
+                            <Button.Content>
+                                <avalonia:SymbolIcon Symbol="Share" />
+                            </Button.Content>
+                        </Button>
+                        <ToggleButton IsChecked="{Binding TogglePane}">
+
+                            <ToggleButton.Content>
+                                <avalonia:SymbolIcon Symbol="Settings" />
+                            </ToggleButton.Content>
+                        </ToggleButton>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <SplitView Grid.Row="1" PanePlacement="Right" DisplayMode="Overlay" IsPaneOpen="{Binding TogglePane}">
+
+                <SplitView.Pane>
+
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                                  Margin="16" DataContext="{Binding InferenceOptions}">
+
+
+                        <StackPanel>
+                            <StackPanel Spacing="8">
+                                <Label Content="Penalize newlines" />
+                                <CheckBox IsChecked="{Binding PenalizeNewLine}" />
+
+                                <Label Content="Maximum tokens" />
+
+
+                                <NumericUpDown Minimum="0" Maximum="3000" Value="{Binding MaxNumberOfTokens}" />
+
+                                <Label Content="Repetition Lookback" />
+
+                                <NumericUpDown Minimum="0" Maximum="3000" Value="{Binding RepetitionLookback}" />
+
+                                <Label Content="Sampling Method" />
+
+                                <ComboBox ItemsSource="{Binding SamplingMethods}"
+                                          SelectedItem="{Binding SamplingMethod}" VerticalAlignment="Stretch" />
+
+                                <Label Content="Temperature" />
+
+                                <NumericUpDown Minimum="-1" Maximum="5" Increment="0.01" Value="{Binding Temperature}" />
+
+
+                            </StackPanel>
+                            <StackPanel Spacing="8" Margin="0,16" IsVisible="{Binding IsDefaultSamplingMethod}">
+                                <Label Content="Top K" />
+
+
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </SplitView.Pane>
+                <ScrollViewer
+                    Name="ChatScrollViewer"
+                    HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto">
+                    <Grid>
+
+                        <SelectingItemsControl Name="MessagesItemsControl"
+                                               ItemsSource="{Binding Messages}"
+                                               AutoScrollToSelectedItem="False">
+                            <SelectingItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Spacing="8" Orientation="Vertical" />
+                                </ItemsPanelTemplate>
+                            </SelectingItemsControl.ItemsPanel>
+                            <SelectingItemsControl.DataTemplates>
+                                <DataTemplate DataType="controls:MessageViewModel">
+                                    <Grid>
+                                        <desktopApplication:MessageControl DataContext="{Binding }" />
+                                    </Grid>
+                                </DataTemplate>
+                            </SelectingItemsControl.DataTemplates>
+                        </SelectingItemsControl>
+                    </Grid>
+                </ScrollViewer>
+            </SplitView>
+
+        </Grid>
+    </DockPanel>
+
+
+</UserControl>

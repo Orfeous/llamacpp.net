@@ -1,6 +1,6 @@
-﻿using LlamaCpp.Net.Native.Abstractions;
+﻿using System;
+using LlamaCpp.Net.Native.Abstractions;
 using LlamaCpp.Net.Samplers.Abstractions;
-using System;
 
 namespace LlamaCpp.Net.Samplers;
 
@@ -26,7 +26,6 @@ internal sealed class FrequencyAndPresencePenaltySampler : ISampler
 
     public void Sample(ILlamaInstance context, IntPtr intPtr, int[] currentOutput)
     {
-
         context.SampleFrequencyAndPresencePenalties(intPtr, currentOutput, (ulong)currentOutput.Length,
             _alphaFrequency, _alphaPresence);
     }

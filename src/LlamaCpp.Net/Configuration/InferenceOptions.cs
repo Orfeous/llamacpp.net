@@ -36,4 +36,16 @@ public record InferenceOptions
     /// When using one of the repetition penalty samplers, this value is used to determine how far to look back.
     /// </summary>
     public int RepetitionLookback { get; set; } = 10;
+
+    public float Temperature { get; set; } = 1.0f;
+    public int TopK { get; set; }
+    public ulong TopKMinKeep { get; set; }
+    public ulong TailFreeMinKeep { get; set; }
+    public int TailFreeZ { get; set; }
+    public int LocalTypicalK { get; set; }
+    public ulong LocalTypicalMinKeep { get; set; }
+    public float TopP { get; set; }
+    public ulong TopPMinKeep { get; set; }
+    public string? PromptPrefix { get; set; }
+    public string? PromptSuffix { get; set; }
 }

@@ -30,7 +30,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LlamaCpp.Net.Benchmarks", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LlamaCpp.Net.Tests", "src\LlamaCpp.Net.Tests\LlamaCpp.Net.Tests.csproj", "{13F9C11F-30EF-427F-BA3A-9362E3E281CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LlamaCpp.Net.Examples.WebApi", "Examples\LlamaCpp.Net.Examples.WebApi\LlamaCpp.Net.Examples.WebApi.csproj", "{31E8C7CB-ECAC-4503-8C2D-2D37F0BA45F7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LlamaCpp.Net.Examples.WebApi", "Examples\LlamaCpp.Net.Examples.WebApi\LlamaCpp.Net.Examples.WebApi.csproj", "{31E8C7CB-ECAC-4503-8C2D-2D37F0BA45F7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LlamaKit", "LlamaKit", "{4C7B1262-AFB1-48F7-A3F8-7DC8C0D0455D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LlamaKit.DesktopApplication", "src\LlamaKit.DesktopApplication\LlamaKit.DesktopApplication.csproj", "{CE62D42B-6C21-49DC-A163-58CFFD738070}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LlamaKit", "src\LlamaKit\LlamaKit.csproj", "{98752BAE-439A-4934-A6E4-6801A5FB65A1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -62,6 +68,14 @@ Global
 		{31E8C7CB-ECAC-4503-8C2D-2D37F0BA45F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31E8C7CB-ECAC-4503-8C2D-2D37F0BA45F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31E8C7CB-ECAC-4503-8C2D-2D37F0BA45F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE62D42B-6C21-49DC-A163-58CFFD738070}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE62D42B-6C21-49DC-A163-58CFFD738070}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE62D42B-6C21-49DC-A163-58CFFD738070}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE62D42B-6C21-49DC-A163-58CFFD738070}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98752BAE-439A-4934-A6E4-6801A5FB65A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98752BAE-439A-4934-A6E4-6801A5FB65A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98752BAE-439A-4934-A6E4-6801A5FB65A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98752BAE-439A-4934-A6E4-6801A5FB65A1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -73,6 +87,8 @@ Global
 		{80D90F6A-A983-40E9-A2E6-ABE8CAA592F4} = {41E88449-8687-45F0-962E-3CAAE63F9F26}
 		{13F9C11F-30EF-427F-BA3A-9362E3E281CC} = {41E88449-8687-45F0-962E-3CAAE63F9F26}
 		{31E8C7CB-ECAC-4503-8C2D-2D37F0BA45F7} = {08BDD104-1D27-4C15-A24D-72B392BDA472}
+		{CE62D42B-6C21-49DC-A163-58CFFD738070} = {4C7B1262-AFB1-48F7-A3F8-7DC8C0D0455D}
+		{98752BAE-439A-4934-A6E4-6801A5FB65A1} = {4C7B1262-AFB1-48F7-A3F8-7DC8C0D0455D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {98439AAA-311B-4475-89C2-8D6C2652B8B2}

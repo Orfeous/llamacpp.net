@@ -1,4 +1,8 @@
-﻿namespace LlamaCpp.Net.Samplers.Abstractions;
+﻿using LlamaCpp.Net.Configuration;
+using LlamaCpp.Net.Native.Abstractions;
+using LlamaCpp.Net.Samplers.Pipelines;
+
+namespace LlamaCpp.Net.Samplers.Abstractions;
 
 /// <summary>
 /// </summary>
@@ -99,4 +103,7 @@ public interface ISamplingPipelineBuilder
     /// </param>
     /// ">
     ISamplingPipelineBuilder AddFrequencyAndPresencePenaltySampler(float alphaFrequency, float alphaPresence);
+
+    internal SamplingPipeline Build(ILlamaInstance instance);
+    ISamplingPipelineBuilder SetEndSampler(SamplingMethod endSampler);
 }
