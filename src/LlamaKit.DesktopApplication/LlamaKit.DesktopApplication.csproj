@@ -28,7 +28,7 @@
     <PackageReference Include="CsvHelper" Version="30.0.1" />
     <PackageReference Include="FluentIcons.Avalonia" Version="1.1.207" />
     <PackageReference Include="Markdown.Avalonia" Version="0.10.14" />
-    <PackageReference Include="Markdown.Avalonia.Tight" Version="11.0.0-d1" />
+    <PackageReference Include="Markdown.Avalonia.Tight" Version="11.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="7.0.0" />
