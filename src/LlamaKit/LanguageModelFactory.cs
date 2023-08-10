@@ -1,14 +1,15 @@
 ﻿using LlamaCpp.Net;
 using LlamaCpp.Net.Abstractions;
 using LlamaCpp.Net.Configuration;
+using LlamaKit.Abstractions;
 using Microsoft.Extensions.Logging;
 
-namespace LlamaKit.Abstractions;
+namespace LlamaKit;
 
 public class LanguageModelFactory : ILanguageModelFactory
 {
-    private readonly ILoggerFactory _loggerFactory;
     private readonly ILogger<LanguageModelFactory> _logger;
+    private readonly ILoggerFactory _loggerFactory;
 
     public LanguageModelFactory(ILogger<LanguageModelFactory> logger,
         ILoggerFactory loggerFactory)
@@ -23,14 +24,11 @@ public class LanguageModelFactory : ILanguageModelFactory
         if (File.Exists(filePath))
         {
             _logger.LogInformation($"Creating model for {filePath}");
-            return new LanguageModel(filePath, new Logger<LanguageModel>(_loggerFactory), options);
+            return new LanguageModel(filePath, options, new Logger<LanguageModel>(_loggerFactory));
         }
 
-        else
-        {
-            _logger.LogError($"Model file {filePath} not found");
-            throw new FileNotFoundException($"Model file {filePath} not found");
-        }
+        _logger.LogError($"Model file {filePath} not found");
+        throw new FileNotFoundException($"Model file {filePath} not found");
     }
 
     public Task<ILanguageModel> CreateModelAsync(string filePath, LanguageModelOptions options)

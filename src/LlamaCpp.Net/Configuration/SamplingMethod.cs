@@ -17,6 +17,10 @@ public enum SamplingMethod
     /// <summary>
     /// Mirosat V2 sampling
     /// </summary>
-    MirostatV2
-
+    MirostatV2,
+    /// <summary>
+    /// Greedy sampling
+    /// This will result in deterministic results.
+    /// </summary>
+    Greedy
 }

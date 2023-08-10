@@ -1,12 +1,9 @@
-﻿using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using LlamaKit.Abstractions;
 using LlamaKit.DesktopApplication.ViewModels.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace LlamaKit.DesktopApplication.ViewModels.Controls;
 
@@ -49,17 +46,4 @@ public partial class ModelSelectorViewModel : ViewModelBase
 
     [ObservableProperty] private LanguageModelViewModel selectedItem;
 
-    [RelayCommand]
-    private Task Create(LanguageModelViewModel languageModel)
-    {
-        WeakReferenceMessenger.Default.Send(new LoadLanguageModelCommand()
-        {
-            Name = languageModel.Name,
-            Path = languageModel.Path,
-            Preset = languageModel.SelectedPreset
-        });
-
-
-        return Task.CompletedTask;
-    }
 }

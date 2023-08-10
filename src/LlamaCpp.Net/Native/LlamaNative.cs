@@ -1,6 +1,6 @@
-﻿using LlamaCpp.Net.Native.Loaders;
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
+using LlamaCpp.Net.Native.Loaders;
 
 namespace LlamaCpp.Net.Native
 {
@@ -182,7 +182,7 @@ namespace LlamaCpp.Net.Native
         /// <param name="n_threads"></param>
         /// <returns></returns>
         [DllImport(LibraryLoader.NativeLibraryName, EntryPoint = "llama_eval", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern int llama_eval_with_pointer(SafeLLamaContextHandle ctx, llama_token* tokens, int n_tokens, int n_past, int n_threads);
+        internal static extern int llama_eval_with_pointer(SafeLLamaContextHandle ctx, int* tokens, int n_tokens, int n_past, int n_threads);
 
         /// <summary>
         /// todo

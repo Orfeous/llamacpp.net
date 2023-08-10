@@ -1,9 +1,9 @@
-﻿using LlamaCpp.Net.Exceptions;
-using LlamaCpp.Net.Native.Abstractions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using LlamaCpp.Net.Exceptions;
+using LlamaCpp.Net.Native.Abstractions;
 
 namespace LlamaCpp.Net.Native.API;
 

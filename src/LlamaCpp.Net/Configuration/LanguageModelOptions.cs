@@ -3,7 +3,7 @@
 /// <summary>
 ///     A class to hold the options for the language model
 /// </summary>
-public record LanguageModelOptions
+public class LanguageModelOptions
 {
     /// <summary>
     ///     Default options for the language model

@@ -1,28 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using LlamaCpp.Net.Configuration;
 using LlamaCpp.Net.Native;
 using LlamaCpp.Net.Native.Abstractions;
 using LlamaCpp.Net.Native.Models;
-using LlamaCpp.Net.Samplers.Abstractions;
+using Microsoft.Extensions.Logging;
 
 namespace LlamaCpp.Net.Samplers.Pipelines;
 
 /// <inheritdoc />
-internal sealed unsafe class SamplingPipeline : ISamplingPipeline
+internal sealed unsafe class SamplingPipeline
 {
     private readonly ILlamaInstance _contextHandle;
+    private readonly ILogger _logger;
     private readonly int _newLineToken;
-    private readonly IList<ISampler> _samplers;
-    private readonly SamplingMethod _endSampler;
 
 
-    public SamplingPipeline(ILlamaInstance contextHandle, IList<ISampler> samplers, SamplingMethod endSampler)
+    public SamplingPipeline(ILlamaInstance contextHandle, ILogger logger)
     {
         _contextHandle = contextHandle;
-        _samplers = samplers;
-        _endSampler = endSampler;
+        _logger = logger;
         _newLineToken = LlamaNative.llama_token_nl();
     }
 
@@ -31,11 +27,9 @@ internal sealed unsafe class SamplingPipeline : ISamplingPipeline
     public int ApplyConstraints(TokenDataArray candidatesP,
         Span<float> logits,
         int[] currentOutput,
-        bool penalizeNewLine = false,
-        int repetitionLookback = 0
-        )
+        InferenceOptions options
+    )
     {
-        // Pin the data array to prevent the garbage collector from moving it around
         var handle = candidatesP.data.Pin();
 
         // Create a native representation of the token data array
@@ -49,38 +43,92 @@ internal sealed unsafe class SamplingPipeline : ISamplingPipeline
 
         // create a subset of currentOutput that only contains the last n tokens
         // this is used to apply the frequency penalty
-        var n = repetitionLookback;
+        var n = options.RepetitionLookback;
 
-        var currentOutputSet = currentOutput.Length > n
-            ? currentOutput[^n..]
-            : currentOutput;
-
+        // get the smallest value of n, the length of the current output, and the context size
+        var lastNRepeat = (ulong)Math.Min(Math.Min(n, currentOutput.Length), _contextHandle.GetContextSize());
 
 
-        if (_samplers.Any())
-        {
-            foreach (var sampler in _samplers)
-            {
-                sampler.Sample(_contextHandle, ptr, currentOutputSet);
-            }
-        }
+        // apply sample repetition penalty
 
+
+        _contextHandle.SampleRepetitionPenalty(ptr, currentOutput, lastNRepeat, options.RepeatPenalty);
+
+        // apply frequency penalty
+
+        _contextHandle.SampleFrequencyAndPresencePenalties(ptr, currentOutput, lastNRepeat, options.FrequencyPenalty,
+            options.PresencePenalty);
 
         var newLineLogit = logits[_newLineToken];
 
-        if (!penalizeNewLine)
+
+        var endSampler = options.SamplingMethod;
+
+        if (options.Temperature <= 0 || endSampler == SamplingMethod.Greedy)
+        {
+            // Greedy sampling
+            return SampleTokenGreedy(ptr);
+        }
+
+
+        if (endSampler == SamplingMethod.Mirostat)
+        {
+            _contextHandle.SampleTemperature(ptr, options.Temperature);
+        }
+        else if (options.SamplingMethod == SamplingMethod.MirostatV2)
+        {
+            _contextHandle.SampleTemperature(ptr, options.Temperature);
+        }
+        else
+        {
+            // Temperature sampling
+            _contextHandle.SampleTopK(ptr, options.TopK, 1);
+            _contextHandle.SampleTailFree(ptr, options.TailFreeZ, 1);
+            _contextHandle.SampleTypical(ptr, options.LocalTypicalK, 1);
+            _contextHandle.SampleTopP(ptr, options.TopP, 1);
+        }
+
+        if (!options.PenalizeNewLine)
         {
             logits[_newLineToken] = newLineLogit;
         }
 
-        var mu = 0.0f;
 
-        return _endSampler switch
+        const int mirostatM = 100;
+
+        return endSampler switch
         {
-            SamplingMethod.Mirostat => _contextHandle.SampleTokenMirostat(ptr, 1, 1, 100, &mu),
-            SamplingMethod.MirostatV2 => _contextHandle.SampleTokenMirostatV2(ptr, 1, 1, &mu),
-            SamplingMethod.Default => _contextHandle.SampleToken(ptr),
+            SamplingMethod.Mirostat => SampleTokenMirostat(options, ptr, mirostatM),
+            SamplingMethod.MirostatV2 => SampleTokenMirostatV2(options, ptr),
+            SamplingMethod.Default => SampleToken(ptr),
+            SamplingMethod.Greedy => SampleTokenGreedy(ptr),
             _ => throw new ArgumentOutOfRangeException(nameof(candidatesP))
         };
+    }
+
+    private int SampleTokenGreedy(IntPtr ptr)
+    {
+        return _contextHandle.SampleTokenGreedy(ptr);
+    }
+
+    private int SampleToken(IntPtr ptr)
+    {
+        return _contextHandle.SampleToken(ptr);
+    }
+
+    private int SampleTokenMirostatV2(InferenceOptions options, IntPtr ptr)
+    {
+        var mirostatMu = 2.0f * options.MirostatTau;
+
+        return _contextHandle.SampleTokenMirostatV2(ptr, options.MirostatTau, options.MirostatEta, &mirostatMu);
+    }
+
+    private int SampleTokenMirostat(InferenceOptions options, IntPtr ptr, int mirostatM)
+    {
+        var mirostatMu = 2.0f * options.MirostatTau;
+
+
+        return _contextHandle.SampleTokenMirostat(ptr, options.MirostatTau, options.MirostatEta, mirostatM,
+            &mirostatMu);
     }
 }

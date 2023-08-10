@@ -33,7 +33,7 @@ public interface ISamplingPipelineBuilder
     ///     value of 1.0 disables the effect of TFS.
     ///     By setting the parameter z, you can control how much the probabilities of less likely tokens are reduced
     /// </summary>
-    ISamplingPipelineBuilder AddTailFreeSampler(int tailFreeZ, ulong minKeep);
+    ISamplingPipelineBuilder AddTailFreeSampler(int tailFreeZ, ulong minKeep = 1);
 
 
     /// <summary>
@@ -47,7 +47,7 @@ public interface ISamplingPipelineBuilder
     ///     more focused and conservative text.
     ///     The default value for llama.cpp is 0.9.
     /// </summary>
-    ISamplingPipelineBuilder AddTopPSampler(float topP, ulong minKeep);
+    ISamplingPipelineBuilder AddTopPSampler(float topP, ulong minKeep = 1);
 
     /// <summary>
     ///     Top-K sampling described in academic paper "The Curious Case of Neural Text Degeneration"
@@ -60,7 +60,7 @@ public interface ISamplingPipelineBuilder
     ///     (e.g., 10) will focus on the most probable tokens and generate more conservative text.
     ///     A reasonable value, and the default for Llama.cpp is 40.
     /// </summary>
-    ISamplingPipelineBuilder AddTopKSampler(int topK, ulong minKeep);
+    ISamplingPipelineBuilder AddTopKSampler(int topK, ulong minKeep = 1);
 
 
     /// <summary>
@@ -72,7 +72,7 @@ public interface ISamplingPipelineBuilder
     ///     A value closer to 1 will promote more contextually coherent tokens,
     ///     while a value closer to 0 will promote more diverse tokens. A value equal to 1 disables locally typical sampling.
     /// </summary>
-    ISamplingPipelineBuilder AddTypicalSampler(int localTypicalK, ulong minKeep);
+    ISamplingPipelineBuilder AddTypicalSampler(int localTypicalK, ulong minKeep = 1);
 
 
     /// <summary>

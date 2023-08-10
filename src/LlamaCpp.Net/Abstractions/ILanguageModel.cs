@@ -26,7 +26,7 @@ public interface ILanguageModel : IDisposable
     /// </summary>
     /// <param name="text"></param>
     /// <returns></returns>
-    List<int> Tokenize(string text);
+    List<int> Tokenize(string text, bool addBos = true);
 
 
     /// <summary>
@@ -53,6 +53,6 @@ public interface ILanguageModel : IDisposable
     /// <param name="input"></param>
     /// <param name="options"></param>
     /// <returns></returns>
-    IEnumerable<string> Infer(string input, InferenceOptions? options = null);
+    string Infer(string input, InferenceOptions? options = null);
 
 }

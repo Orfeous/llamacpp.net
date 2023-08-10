@@ -1,4 +1,6 @@
-﻿namespace LlamaCpp.Net.Abstractions;
+﻿using LlamaCpp.Net.Models;
+
+namespace LlamaCpp.Net.Abstractions;
 
 /// <summary>
 /// </summary>

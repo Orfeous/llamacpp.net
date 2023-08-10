@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using LlamaCpp.Net.Abstractions;
+﻿using LlamaCpp.Net.Abstractions;
 using LlamaCpp.Net.Configuration;
 using LlamaCpp.Net.Exceptions;
 using LlamaCpp.Net.Extensions;
@@ -14,9 +7,16 @@ using LlamaCpp.Net.Native;
 using LlamaCpp.Net.Native.Abstractions;
 using LlamaCpp.Net.Native.API;
 using LlamaCpp.Net.Native.Models;
-using LlamaCpp.Net.Samplers.Abstractions;
 using LlamaCpp.Net.Samplers.Pipelines;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace LlamaCpp.Net;
 #pragma warning disable CA1848
@@ -26,12 +26,14 @@ public class LanguageModel : ILanguageModel
 {
     private readonly Encoding _encoding = Encoding.UTF8;
     private static int EndOfSequenceToken => LlamaNative.llama_token_eos();
+    private static int BeginOfSequenceToken => LlamaNative.llama_token_bos();
     private readonly ILlamaInstance _instance;
     private readonly ILogger<LanguageModel> _logger;
-    private readonly Dictionary<int, string> _tokenCache = new();
+    private readonly Dictionary<int, string> _tokenCache = new Dictionary<int, string>();
     private readonly int _vocabSize;
 
-    private int[] _embeds = Array.Empty<int>();
+    private int[] _currentContext = Array.Empty<int>();
+    private readonly int _contextSize;
 
     /// <summary>
     ///     The constructor for the language model
@@ -39,11 +41,11 @@ public class LanguageModel : ILanguageModel
     /// <param name="modelPath"></param>
     /// <param name="logger"></param>
     /// <param name="options"></param>
-    /// <param name="samplingPipeline"></param>
     /// <exception cref="FileNotFoundException"></exception>
-    public LanguageModel(string modelPath, ILogger<LanguageModel> logger, LanguageModelOptions? options = null)
+    public LanguageModel(string modelPath, LanguageModelOptions? options = null,
+        ILogger<LanguageModel>? logger = null)
     {
-        _logger = logger;
+        _logger = logger ?? new NullLogger<LanguageModel>();
         ModelPath = modelPath;
 
 
@@ -73,10 +75,12 @@ public class LanguageModel : ILanguageModel
         InitializeTokenCache();
 
         LoadInitialPrompt(options);
+
+        _contextSize = _instance.GetContextSize();
     }
 
-    internal LanguageModel(ISamplingPipeline constraints, ILlamaInstance instance, ILogger<LanguageModel> logger,
-        string modelPath, LanguageModelOptions options)
+    internal LanguageModel(ILlamaInstance instance, ILogger<LanguageModel> logger,
+        string modelPath)
     {
         _instance = instance;
         _logger = logger;
@@ -100,13 +104,13 @@ public class LanguageModel : ILanguageModel
     public LanguageModelOptions Options { get; init; }
 
     /// <inheritdoc />
-    public List<int> Tokenize(string text)
+    public List<int> Tokenize(string text, bool addBos = true)
     {
         _logger.LogDebug("Tokenizing text {Text}", text);
 
         var tokens = new int[text.Length + 1];
 
-        var numberOfTokens = _instance.Tokenize(text, tokens, tokens.Length, true);
+        var numberOfTokens = _instance.Tokenize(text, tokens, tokens.Length, addBos);
 
         if (numberOfTokens == 0)
         {
@@ -170,7 +174,6 @@ public class LanguageModel : ILanguageModel
             {
                 _logger.LogDebug("Async inference for input \"{Input}\" completed", input);
 
-                _instance.PrintTimings();
                 result.Complete();
             }, cancellationToken);
 
@@ -178,14 +181,16 @@ public class LanguageModel : ILanguageModel
     }
 
     /// <inheritdoc />
-    public IEnumerable<string> Infer(string input, InferenceOptions? options = null)
+    public string Infer(string input, InferenceOptions? options = null)
     {
         _logger.LogDebug("Starting inference for input {Input}", input);
         var opts = options ?? InferenceOptions.Default;
-        var result = GenerateModelOutput(input, opts);
+
+        var sb = new StringBuilder();
+        GenerateModelOutput(input, opts, s => sb.Append(s));
 
         _logger.LogDebug("Inference for input {Input} completed", input);
-        return result;
+        return sb.ToString();
     }
 
     private static LLamaContextParams GetContextParams(LanguageModelOptions options)
@@ -232,7 +237,7 @@ public class LanguageModel : ILanguageModel
                 throw new InitialPromptTooLongException(contextSize);
             }
 
-            EvaluatePrompt(options.InitialPrompt);
+            EvaluatePrompt(options.InitialPrompt, InferenceOptions.Default);
         }
 
         else
@@ -249,13 +254,145 @@ public class LanguageModel : ILanguageModel
     /// <param name="input"></param>
     /// <param name="inferenceCallback"></param>
     /// <returns></returns>
-    private List<string> GenerateModelOutput(string input, InferenceOptions options,
-        Action<string>? inferenceCallback = null)
+    private void GenerateModelOutput(string input, InferenceOptions options,
+        Action<string> inferenceCallback)
+    {
+        _logger.LogInformation(
+            "sampling: " +
+            "repeat_last_n = {RepeatLastN}, " +
+            "repeat_penalty = {RepeatPenalty}, " +
+            "presence_penalty = {PresencePenalty}, " +
+            "frequency_penalty = {FrequencyPenalty}, " +
+            "top_k = {TopK}, " +
+            "tfs_z = {TfsZ}, " +
+            "top_p = {TopP}, " +
+            "typical_p = {TypicalP}, " +
+            "temp = {Temp}, " +
+            "mirostat_lr = {MirostatTau}, " +
+            "mirostat_ent = {MirostatEta}",
+            options.RepeatLastN, options.RepeatPenalty, options.PresencePenalty, options.FrequencyPenalty, options.TopK,
+            options.TailFreeZ, options.TopP, options.LocalTypicalK, options.Temperature,
+            options.MirostatTau, options.MirostatEta);
+
+
+        _logger.LogInformation("generate: n_ctx = {ContextSize}, " +
+                               "n_batch = {BatchSize}, " +
+                               "n_predict = {PredictSize}, " +
+                               "n_keep = {KeepSize}",
+            _contextSize, options.BatchSize, options.MaxNumberOfTokens, options.KeepSize);
+
+        input = ApplyPromptModifications(input, options);
+
+        EvaluatePrompt(input, options);
+
+        var tokenizedAntiPrompts = options.Antiprompts.Select(s => Tokenize(s, false)).ToArray();
+
+        var constraints = new SamplingPipeline(this._instance, _logger);
+
+        var logits = GetLogits(_instance, _vocabSize);
+
+        var currentOutput = Array.Empty<int>();
+
+
+        while (currentOutput.Length < options.MaxNumberOfTokens || options.MaxNumberOfTokens == -1)
+        {
+            var candidates = GetCandidates(_vocabSize, logits);
+
+            var id = constraints.ApplyConstraints(candidates, logits, currentOutput, options);
+
+
+            if (id == EndOfSequenceToken)
+            {
+                _logger.LogDebug("End of sequence token found");
+                break;
+            }
+
+            var embedsInCurrentBatch = new[] { id };
+            _currentContext = _currentContext.Concat(embedsInCurrentBatch).ToArray();
+
+            currentOutput = currentOutput.Concat(embedsInCurrentBatch).ToArray();
+
+
+            var antiPromptFound = false;
+            // TODO : figure out a way to defer the callback until know for sure that it does not contain an antiprompt.
+            // Currently, the callback is called before the antiprompt is removed from the output, which may result in partial antiprompts being returned.
+            foreach (var p in tokenizedAntiPrompts)
+            {
+
+                if (p.Count > currentOutput.Length)
+                {
+                    continue;
+                }
+
+                var antiprompt = _currentContext.Skip(_currentContext.Length - p.Count).ToArray();
+
+                if (!antiprompt.SequenceEqual(p))
+                {
+                    continue;
+                }
+
+                _logger.LogDebug("Antiprompt found");
+
+                // remove antiprompt from current output
+
+                currentOutput = currentOutput.Take(currentOutput.Length - p.Count).ToArray();
+
+
+                antiPromptFound = true;
+                break;
+            }
+
+            if (antiPromptFound)
+            {
+                break;
+            }
+
+
+            if (_instance.Eval(embedsInCurrentBatch, 1, _currentContext.Length, Threads) == 0)
+            {
+                // success
+                continue;
+            }
+
+            _logger.LogError("Failed to evaluate model");
+
+            throw new ArgumentException("Failed to evaluate model");
+        }
+
+        foreach (var token in currentOutput)
+        {
+            if (token == EndOfSequenceToken || token == BeginOfSequenceToken)
+            {
+                continue;
+            }
+
+            var s = TokenToString(token);
+            if (token == currentOutput.First())
+            {
+                s = s.TrimStart();
+            }
+
+            if (token == currentOutput.Last())
+            {
+                s = s.TrimEnd();
+            }
+
+            inferenceCallback?.Invoke(s);
+        }
+
+        _logger.LogDebug("Inference completed: {Output}", currentOutput);
+    }
+
+    private string ApplyPromptModifications(string input, InferenceOptions options)
     {
         if (!string.IsNullOrEmpty(options.PromptPrefix))
         {
             _logger.LogDebug("Adding prompt prefix {PromptPrefix} to input", options.PromptPrefix);
             input = options.PromptPrefix + input;
+        }
+        else
+        {
+            _logger.LogDebug("No prompt prefix provided");
         }
 
         if (!string.IsNullOrEmpty(options.PromptSuffix))
@@ -263,117 +400,41 @@ public class LanguageModel : ILanguageModel
             _logger.LogDebug("Adding prompt suffix {PromptSuffix} to input", options.PromptSuffix);
             input += options.PromptSuffix;
         }
-
-        EvaluatePrompt(input);
-
-        var list = new List<string>();
-
-
-        var constraints = BuildConstraints(options).Build(_instance);
-
-        var logits = GetLogits(_instance, _vocabSize);
-
-        var currentOutput = Array.Empty<int>();
-        for (var i = 0; i < options.MaxNumberOfTokens; i++)
-        {
-            var candidates = GetCandidates(_vocabSize, logits);
-
-            var id = constraints.ApplyConstraints(candidates, logits, currentOutput, options.PenalizeNewLine,
-                options.RepetitionLookback);
-
-
-            if (id == EndOfSequenceToken)
-            {
-                break;
-            }
-
-            var embedsInCurrentBatch = new[] { id };
-            _embeds = _embeds.Concat(embedsInCurrentBatch).ToArray();
-
-            currentOutput = currentOutput.Concat(embedsInCurrentBatch).ToArray();
-
-            if (inferenceCallback != null)
-            {
-                var s = TokenToString(id);
-                inferenceCallback?.Invoke(s);
-            }
-
-            if (_instance.Eval(embedsInCurrentBatch, 1, _embeds.Length, Threads) != 0)
-            {
-                _logger.LogError("Failed to evaluate model");
-
-                throw new ArgumentException("Failed to evaluate model");
-            }
-        }
-
-        _logger.LogDebug("Inference completed");
-        _logger.LogDebug("Output: {Output}", string.Join("", list));
-
-        return list;
-    }
-
-    private ISamplingPipelineBuilder BuildConstraints(
-        InferenceOptions options)
-    {
-        ISamplingPipelineBuilder constraints = new SamplingPipelineBuilder(_logger);
-
-        if (options.Temperature < 0)
-        {
-            // should set sampling method to greedy
-
-            return constraints;
-        }
         else
         {
-            if (options.SamplingMethod == SamplingMethod.Mirostat)
-            {
-                constraints = constraints.AddTemperatureSampler(options.Temperature)
-                    .SetEndSampler(SamplingMethod.Mirostat);
-            }
-            else if (options.SamplingMethod == SamplingMethod.MirostatV2)
-            {
-                constraints = constraints.AddTemperatureSampler(options.Temperature)
-                    .SetEndSampler(SamplingMethod.MirostatV2);
-            }
-            else
-            {
-                constraints = constraints
-                    .AddTopKSampler(options.TopK, options.TopKMinKeep)
-                    .AddTailFreeSampler(options.TailFreeZ, options.TailFreeMinKeep)
-                    .AddTypicalSampler(options.LocalTypicalK, options.LocalTypicalMinKeep)
-                    .AddTopPSampler(options.TopP, options.TopPMinKeep)
-                    .AddTemperatureSampler(options.Temperature)
-                    .SetEndSampler(SamplingMethod.Default);
-            }
+            _logger.LogDebug("No prompt suffix provided");
         }
 
-        return constraints;
+        return input.Trim();
     }
 
-
-    private void EvaluatePrompt(string input)
+    private void EvaluatePrompt(string input, InferenceOptions inferenceOptions)
     {
         if (string.IsNullOrEmpty(input))
         {
             return;
         }
 
-
         _logger.LogDebug("Evaluating prompt {Prompt}", input);
 
         var embeds = new int[input.Length + 1];
 
         var amountOfTokens = _instance.Tokenize(input, embeds, embeds.Length, true);
+
+        var batchSize = inferenceOptions.BatchSize;
+
+
         Array.Resize(ref embeds, amountOfTokens);
 
-        if (embeds.Where((t, i) => _instance.Eval(new[] { t }, 1, i, Threads) != 0).Any())
+        var contextLength = Math.Min(_contextSize, _currentContext.Length) - 1;
+        if (contextLength < 0)
         {
-            _logger.LogError("Failed to evaluate model");
-
-            throw new ArgumentException("Failed to evaluate model");
+            contextLength = 0;
         }
 
-        _embeds = _embeds.Concat(embeds).ToArray();
+        _instance.Eval(embeds, embeds.Length, contextLength, Threads);
+
+        _currentContext = _currentContext.Concat(embeds).ToArray();
     }
 
 

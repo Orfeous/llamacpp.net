@@ -1,23 +1,21 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using CsvHelper;
+using LlamaCpp.Net.Abstractions;
+using LlamaKit.Abstractions;
+using LlamaKit.Repositories;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
-using CsvHelper;
-using LlamaCpp.Net.Abstractions;
-using LlamaCpp.Net.Configuration;
-using LlamaKit.Abstractions;
-using LlamaKit.Repositories;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace LlamaKit.DesktopApplication.ViewModels.Pages;
 
-public partial class ChatPageViewModel : PageViewModel, IRecipient<LoadLanguageModelCommand>
+public partial class ChatPageViewModel : PageViewModel
 {
     public ChatPageViewModel()
     {
@@ -30,7 +28,6 @@ public partial class ChatPageViewModel : PageViewModel, IRecipient<LoadLanguageM
 
         this.Factory = App.Current.Services.GetRequiredService<ILanguageModelFactory>();
 
-        WeakReferenceMessenger.Default.Register(this);
     }
 
     private ILanguageModelFactory Factory { get; }
@@ -125,32 +122,6 @@ public partial class ChatPageViewModel : PageViewModel, IRecipient<LoadLanguageM
         await csv.WriteRecordsAsync(messages);
     }
 
-    public void Receive(LoadLanguageModelCommand message)
-    {
-        this.LoadLanguageModelCommand.ExecuteAsync(message);
-    }
-
-    [RelayCommand]
-    private async Task LoadLanguageModel(LoadLanguageModelCommand model)
-    {
-        Messages.Clear();
-        this.LanguageModel?.Dispose();
-
-        this.Preset = model.Preset;
-
-        this.ModelName = Path.GetFileNameWithoutExtension(model.Name).Split(".")[0];
-
-
-
-        AllowInput = false;
-        this.LanguageModel = await this.Factory.CreateModelAsync(model.Path, LanguageModelOptions.Default with
-        {
-            InitialPrompt = model.Preset.InitialPrompt,
-        });
-
-
-        AllowInput = true;
-    }
 
     public PresetModel Preset { get; set; }
 }

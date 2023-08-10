@@ -1,5 +1,5 @@
-﻿using System.Diagnostics;
-using NUnit.Framework;
+﻿using NUnit.Framework;
+using System.Diagnostics;
 
 namespace LlamaCpp.Net.Tests;
 
@@ -9,7 +9,10 @@ public class SetupTrace
     [OneTimeSetUp]
     public void StartTest()
     {
-        Trace.Listeners.Add(new ConsoleTraceListener());
+        Trace.Listeners.Add(new ConsoleTraceListener()
+        {
+
+        });
     }
 
     [OneTimeTearDown]

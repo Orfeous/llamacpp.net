@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LlamaKit.DesktopApplication.ViewModels.Abstractions;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace LlamaKit.DesktopApplication.ViewModels;
 
@@ -10,7 +10,6 @@ public partial class MainViewModel : ViewModelBase
 {
     public MainViewModel()
     {
-        this.ModelSelectorViewModel = new Controls.ModelSelectorViewModel();
 
         _currentPageViewModel = _pageViewModels[nameof(Pages.ChatPageViewModel)];
     }

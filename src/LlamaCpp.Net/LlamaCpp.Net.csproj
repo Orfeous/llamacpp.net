@@ -48,8 +48,4 @@
 
 
     </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="Samplers\Configuration\" />
-    </ItemGroup>
 </Project>

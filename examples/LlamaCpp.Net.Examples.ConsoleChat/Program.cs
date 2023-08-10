@@ -1,6 +1,5 @@
 ﻿using LlamaCpp.Net.Abstractions;
 using LlamaCpp.Net.Configuration;
-using LlamaCpp.Net.Samplers.Pipelines;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -15,22 +14,14 @@ namespace LlamaCpp.Net.Examples.ConsoleChat
             if (string.IsNullOrWhiteSpace(args[0])) { Console.WriteLine("Please provide the model's full path as an argument"); Environment.Exit(1); }
             var _modelPath = args[0];
 
-            var modelOptions = LanguageModelOptions.Default with
-            {
-                PromptSuffix = "\n\n### Response:",
-                GpuLayerCount = 10,
-                ContextSize = 2048,
-                Threads = 24,
+            _modelPath = "D:\\LLM\\wizardLM-7B.ggmlv3.q4_0.bin";
 
-                UseFp16Memory = false
-            };
+            var modelOptions = LanguageModelOptions.Default;
             var host = new HostBuilder()
                 .ConfigureServices(services =>
                 {
                     services.AddSingleton<ILanguageModel>(s =>
-                        new LanguageModel(_modelPath, s.GetRequiredService<ILogger<LanguageModel>>(),
-                            modelOptions, SamplingPipelinePreset.Default
-                        )
+                        new LanguageModel(_modelPath, modelOptions, s.GetRequiredService<ILogger<LanguageModel>>())
                     );
                 })
                 .ConfigureLogging(logging =>
@@ -55,7 +46,7 @@ namespace LlamaCpp.Net.Examples.ConsoleChat
                     continue;
                 }
 
-                await foreach (var text in model.InferAsync(prompt, inferenceOptions with { SamplingMethod = SamplingMethod.Mirostat, MaxNumberOfTokens = 1000 }))
+                await foreach (var text in model.InferAsync(prompt, inferenceOptions))
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.Write(text);

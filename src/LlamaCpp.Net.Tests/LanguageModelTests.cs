@@ -1,8 +1,6 @@
 ﻿using FluentAssertions;
-using LlamaCpp.Net.Configuration;
 using LlamaCpp.Net.Exceptions;
 using LlamaCpp.Net.Native.Abstractions;
-using LlamaCpp.Net.Samplers.Pipelines;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
@@ -15,7 +13,6 @@ namespace LlamaCpp.Net.Tests;
 public class LanguageModelTests
 {
     private MockRepository _repository;
-    private Mock<ISamplingPipeline> _samplingPipelineMock;
     private Mock<ILlamaInstance> _instanceMock;
     private Logger<LanguageModel> _logger;
 
@@ -24,7 +21,6 @@ public class LanguageModelTests
     {
         this._repository = new MockRepository(MockBehavior.Strict);
 
-        this._samplingPipelineMock = this._repository.Create<ISamplingPipeline>();
         this._instanceMock = this._repository.Create<ILlamaInstance>();
 
         this._instanceMock.Setup(x => x.GetVocabSize())
@@ -35,11 +31,9 @@ public class LanguageModelTests
 
     public LanguageModel CreateModel()
     {
-        return new LanguageModel(_samplingPipelineMock.Object,
-            _instanceMock.Object,
+        return new LanguageModel(_instanceMock.Object,
             _logger,
-            Path.Join(Constants.ModelDirectory, "wizardLM-7B.ggmlv3.q4_0.bin"),
-            LanguageModelOptions.Default
+            Path.Join(Constants.ModelDirectory, "wizardLM-7B.ggmlv3.q4_0.bin")
         );
     }
 

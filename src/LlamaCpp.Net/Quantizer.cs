@@ -1,4 +1,5 @@
 ﻿using LlamaCpp.Net.Abstractions;
+using LlamaCpp.Net.Models;
 using LlamaCpp.Net.Native;
 
 namespace LlamaCpp.Net;
@@ -27,7 +28,7 @@ public class Quantizer : IQuantizer
     /// <exception cref="QuantizeException">Thrown when quantization fails with an error code.</exception>
     public void Quantize(string inputModelFilePath, string outputFilePath, ModelType outputModelType, int threads)
     {
-        var ftype = ModelTypeMapper.ToFType(outputModelType);
+        var ftype = Mappers.ModelTypeMapper.ToFType(outputModelType);
         var quantizeResult = LlamaNative.llama_model_quantize(inputModelFilePath, outputFilePath, ftype, threads);
 
         if (quantizeResult != 0)
