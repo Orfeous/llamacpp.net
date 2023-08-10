@@ -3,14 +3,12 @@ using Cake.Common.IO;
 using Cake.Core.Diagnostics;
 using Cake.Frosting;
 using LlamaCpp.Net.Build.Configuration;
-using LlamaCpp.Net.Build.Tasks.Libraries.Llama.Cmake;
 using System.Linq;
 
 namespace LlamaCpp.Net.Build.Tasks.Libraries
 {
     [TaskName("Cmake.MoveToRuntimeDirectory")]
     [TaskDescription("Moves the C++ build output to the runtime directory, so it can be used in development")]
-    [IsDependentOn(typeof(BuildTask))]
 
     public sealed class MoveToRuntimeDirectoryTask : FrostingTask<BuildContext>
     {

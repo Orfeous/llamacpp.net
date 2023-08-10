@@ -12,6 +12,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{41E88449-8687-45F0-962E-3CAAE63F9F26}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{B52CB79E-C6BB-49A1-BB97-9C600BDF50A6}"
+	ProjectSection(SolutionItems) = preProject
+		lib\CMakeLists.txt = lib\CMakeLists.txt
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LlamaCpp.Net.Build", "src\LlamaCpp.Net.Build\LlamaCpp.Net.Build.csproj", "{D1D30BD2-E338-479F-A0C4-1A8E3EDBB902}"
 EndProject
@@ -40,7 +43,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LlamaKit", "src\LlamaKit\Ll
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LlamaKit.ConsoleApplication", "src\LlamaKit.ConsoleApplication\LlamaKit.ConsoleApplication.csproj", "{0EF27A4A-A910-4A8E-B420-F7EF92A4D1C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LlamaKit.Tests", "LlamaKit.Tests\LlamaKit.Tests.csproj", "{9D7BB12C-5874-4F7B-A195-182D768E3114}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LlamaKit.Tests", "LlamaKit.Tests\LlamaKit.Tests.csproj", "{9D7BB12C-5874-4F7B-A195-182D768E3114}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

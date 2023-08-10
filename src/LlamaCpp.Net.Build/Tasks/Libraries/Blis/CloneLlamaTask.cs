@@ -1,8 +1,7 @@
 ﻿using Cake.Common.IO;
 using Cake.Frosting;
-using LlamaCpp.Net.Build.Tasks.Libraries.Git;
 
-namespace LlamaCpp.Net.Build.Tasks.Libraries.Llama
+namespace LlamaCpp.Net.Build.Tasks.Libraries.Blis
 {
     [TaskName("Git.CloneLlamaCpp")]
     [TaskDescription("Downloads the LlamaCpp repository and checks out the correct commit")]
