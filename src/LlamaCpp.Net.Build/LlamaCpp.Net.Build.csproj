@@ -3,13 +3,22 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>False</GenerateDocumentationFile>
+    <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Cake.Frosting" Version="3.0.0" />
-    <PackageReference Include="LibGit2Sharp" Version="0.27.2" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Cake.FileHelpers" Version="6.1.3" />
+        <PackageReference Include="Cake.Frosting" Version="3.1.0" />
+        <PackageReference Include="LibGit2Sharp" Version="0.27.2" />
+        <PackageReference Include="NuGet.Packaging" Version="6.6.1" />
+        <PackageReference Include="Octokit" Version="7.1.0" />
 
+    </ItemGroup>
+    <ItemGroup>
+        <None Update="DefaultMessage.txt">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 </Project>

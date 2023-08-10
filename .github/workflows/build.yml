@@ -1,0 +1,76 @@
+name: CI Build
+
+on:
+#  push:
+#    branches: [main, develop]
+
+#  pull_request:
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+        dotnet-version: [ '6.0' ]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      # Checkout the repo
+      - uses: actions/checkout@v3
+
+      # Setup dotnet
+      - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+
+      # Setup cuda
+      - uses: Jimver/cuda-toolkit@v0.2.10
+        id: cuda-toolkit
+        with:
+          cuda: '12.1.0'
+          method: local
+
+      # Caching these should make the build significantly quicker
+      - name: Cache External Libraries
+        uses: actions/cache@v3
+        with:
+          key: extlibs
+          enableCrossOsArchive: true
+          path: |
+            .\lib\ClBlast
+            .\lib\llama.cpp
+            .\lib\OpenBlas
+            .\lib\OpenCl
+      # Caching these should make the build significantly quicker
+      - name: Cache External Libraries
+        uses: actions/cache@v3
+        with:
+          key: extlibstmp
+          path: |
+            .\tmp\ClBlast
+            .\tmp\llama.cpp
+            .\tmp\OpenBlas
+            .\tmp\OpenCl
+
+      # Cake Build dependencies
+      - name: Cake Build dependencies
+        run: .\build.ps1 -t Default
+
+      # Cake build nuget package
+      - name: Build nuget
+        run: .\build.ps1 -t Dotnet.Build
+
+      - name: Setup Github nuget repo
+        run: dotnet nuget add source --username Orfeous --password ${{ secrets.NUGET_SECRET }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Orfeous/index.json"
+
+      - name: Publish Github Nuget
+        run: dotnet nuget push "src\LlamaCpp.Net\bin\Release\LlamaCpp.Net.*.nupkg" --api-key ${{ secrets.NUGET_SECRET }} --source "github"
+
+      - name: Publish release
+        run: .\build.ps1 -t PublishReleaseTask
+      # - name: Publish Nuget.org
+      #   run: nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}}

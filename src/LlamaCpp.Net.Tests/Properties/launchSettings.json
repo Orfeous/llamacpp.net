@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "LlamaCpp.Net.Test": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

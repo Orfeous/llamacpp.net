@@ -1,0 +1,66 @@
+<UserControl x:Class="LlamaKit.DesktopApplication.MessageControl"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:viewModels="clr-namespace:LlamaKit.DesktopApplication.ViewModels"
+             x:DataType="controls:MessageViewModel"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:avalonia="clr-namespace:Markdown.Avalonia;assembly=Markdown.Avalonia"
+             xmlns:avalonia1="clr-namespace:FluentIcons.Avalonia;assembly=FluentIcons.Avalonia"
+             xmlns:controls="clr-namespace:LlamaKit.DesktopApplication.ViewModels.Controls"
+
+             mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="150">
+
+    <Design.DataContext>
+        <controls:MessageViewModel Sender="You" Message="Hi!" />
+    </Design.DataContext>
+
+
+    <Grid Margin="8">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" MinWidth="50" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Margin="0,8" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+
+
+            <Border Height="32" Width="32" CornerRadius="8" BorderBrush="#e3e3e3" Margin="0,0" BorderThickness="1"
+                    VerticalAlignment="Center" HorizontalAlignment="Left"
+                    Background="{DynamicResource MessageBackgroundBrush}">
+
+                <avalonia1:SymbolIcon Symbol="{Binding Icon}" IsFilled="True" HorizontalAlignment="Center"
+                                      VerticalAlignment="Center" FontSize="24"
+                                      Foreground="{DynamicResource MessageIconBrush}" />
+            </Border>
+
+        </StackPanel>
+        <StackPanel Grid.Column="1">
+
+            <Border
+                BorderBrush="#e3e3e3" BorderThickness="1" CornerRadius="8"
+                Margin="0"
+                HorizontalAlignment="Left"
+                MinWidth="300"
+                Background="{DynamicResource MessageBackgroundBrush}"
+                Padding="16">
+                <SelectableTextBlock TextWrapping="WrapWithOverflow" Text="{Binding Message}"
+                                     HorizontalAlignment="Left"
+                                     VerticalAlignment="Stretch"
+                                     Padding="0,0,0,0"
+                                     Margin="0"
+                                     Background="Transparent">
+
+                    <SelectableTextBlock.Styles>
+                        <Style Selector="SelectableTextBlock.error">
+                            <Setter Property="Foreground" Value="{DynamicResource MessageErrorBrush}" />
+                        </Style>
+                    </SelectableTextBlock.Styles>
+                </SelectableTextBlock>
+            </Border>
+
+        </StackPanel>
+
+    </Grid>
+
+</UserControl>
