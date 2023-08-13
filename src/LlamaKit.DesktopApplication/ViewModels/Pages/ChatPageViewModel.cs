@@ -68,8 +68,6 @@ public partial class ChatPageViewModel : PageViewModel
         this.Messages.Add(responseMessage);
 
         var inferenceOptions = this.InferenceOptions.ToInferenceOptions();
-        inferenceOptions.PromptPrefix = Preset.PromptPrefix;
-        inferenceOptions.PromptSuffix = Preset.PromptSuffix;
         await foreach (var part in this.LanguageModel.InferAsync(message, inferenceOptions))
         {
             if (responseMessage.Message == "...")

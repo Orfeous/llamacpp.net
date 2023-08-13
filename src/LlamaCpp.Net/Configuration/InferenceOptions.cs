@@ -63,8 +63,6 @@ public class InferenceOptions
     public int LocalTypicalK { get; set; } = 1;
 
     public float TopP { get; set; } = 0.95f;
-    public string? PromptPrefix { get; set; } = string.Empty;
-    public string? PromptSuffix { get; set; } = string.Empty;
 
     /// <summary>
     /// Last N tokens to penalize

@@ -17,6 +17,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using HandlebarsDotNet;
 
 namespace LlamaCpp.Net;
 #pragma warning disable CA1848
@@ -39,11 +40,14 @@ public class LanguageModel : ILanguageModel
     ///     The constructor for the language model
     /// </summary>
     /// <param name="modelPath"></param>
+    /// <param name="template"></param>
     /// <param name="logger"></param>
     /// <param name="options"></param>
     /// <exception cref="FileNotFoundException"></exception>
     public LanguageModel(string modelPath, LanguageModelOptions? options = null,
-        ILogger<LanguageModel>? logger = null)
+        string template = "{{Prompt}}",
+        ILogger<LanguageModel>? logger = null
+        )
     {
         _logger = logger ?? new NullLogger<LanguageModel>();
         ModelPath = modelPath;
@@ -77,7 +81,10 @@ public class LanguageModel : ILanguageModel
         LoadInitialPrompt(options);
 
         _contextSize = _instance.GetContextSize();
+        RenderTemplate = Handlebars.Compile(template);
     }
+
+    private HandlebarsTemplate<object, object> RenderTemplate { get; set; }
 
     internal LanguageModel(ILlamaInstance instance, ILogger<LanguageModel> logger,
         string modelPath)
@@ -87,6 +94,7 @@ public class LanguageModel : ILanguageModel
         ModelPath = modelPath;
         Options = LanguageModelOptions.Default;
         _vocabSize = _instance.GetVocabSize();
+        RenderTemplate= Handlebars.Compile("{{Prompt}}");
     }
 
 
@@ -281,7 +289,7 @@ public class LanguageModel : ILanguageModel
                                "n_keep = {KeepSize}",
             _contextSize, options.BatchSize, options.MaxNumberOfTokens, options.KeepSize);
 
-        input = ApplyPromptModifications(input, options);
+        input = RenderTemplate(new {Prompt = input});
 
         EvaluatePrompt(input, options);
 
@@ -383,31 +391,7 @@ public class LanguageModel : ILanguageModel
         _logger.LogDebug("Inference completed: {Output}", currentOutput);
     }
 
-    private string ApplyPromptModifications(string input, InferenceOptions options)
-    {
-        if (!string.IsNullOrEmpty(options.PromptPrefix))
-        {
-            _logger.LogDebug("Adding prompt prefix {PromptPrefix} to input", options.PromptPrefix);
-            input = options.PromptPrefix + input;
-        }
-        else
-        {
-            _logger.LogDebug("No prompt prefix provided");
-        }
-
-        if (!string.IsNullOrEmpty(options.PromptSuffix))
-        {
-            _logger.LogDebug("Adding prompt suffix {PromptSuffix} to input", options.PromptSuffix);
-            input += options.PromptSuffix;
-        }
-        else
-        {
-            _logger.LogDebug("No prompt suffix provided");
-        }
-
-        return input.Trim();
-    }
-
+ 
     private void EvaluatePrompt(string input, InferenceOptions inferenceOptions)
     {
         if (string.IsNullOrEmpty(input))

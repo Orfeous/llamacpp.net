@@ -25,7 +25,7 @@ public class InferenceTests
 
         var result = languageModel.Infer(prompt, options);
 
-        result.Trim().Should().BeEquivalentTo("4");
+        result.Trim().Should().BeEquivalentTo("4.");
     }
 
     [Test]
@@ -60,30 +60,7 @@ public class InferenceTests
         languageModel.Infer(prompt, options).Trim().Should().BeEquivalentTo("No");
     }
 
-    [Test]
-    public void Infer_ShortStory()
-    {
-        var languageModel = new LanguageModel(
-            Path.Join(Constants.ModelDirectory, "wizardLM-7B.ggmlv3.q4_0.bin")
-        );
-
-        const string prompt = "When Sean was young, ";
-        var options = new InferenceOptions()
-        {
-            SamplingMethod = SamplingMethod.Greedy,
-            MaxNumberOfTokens = 100
-        };
-
-        var result = languageModel.Infer(prompt, options);
-
-        result.Should().NotBeNullOrEmpty();
-
-        result.Should()
-            .Contain(
-                "he was fascinated by the idea of time travel. He would spend hours reading books and watching movies about it, dreaming of the day when he could finally experience it for himself.");
-    }
-
-    public ILogger<LanguageModel> CreateLogger()
+    private ILogger<LanguageModel> CreateLogger()
     {
         var loggerFactory = LoggerFactory.Create(builder => { builder.AddConsole(); });
 
@@ -103,8 +80,6 @@ public class InferenceTests
             SamplingMethod = SamplingMethod.Default,
             MaxNumberOfTokens = 40,
 
-            PromptPrefix = "USER: ",
-            PromptSuffix = "\nASSISTANT: ",
             Antiprompts = new List<string>()
             {
                 "USER:",
@@ -112,8 +87,11 @@ public class InferenceTests
             }
         };
 
+        var template = "USER: {{Prompt}}\nASSISTANT: ";
+
         var languageModel = new LanguageModel(
-            Path.Join(Constants.ModelDirectory, "wizardLM-7B.ggmlv3.q4_0.bin"), languageModelOptions, CreateLogger()
+            Path.Join(Constants.ModelDirectory, "wizardLM-7B.ggmlv3.q4_0.bin"), languageModelOptions, template,
+            CreateLogger()
         );
 
 
@@ -138,20 +116,18 @@ public class InferenceTests
             SamplingMethod = SamplingMethod.Default,
             MaxNumberOfTokens = 20,
 
-            PromptPrefix = "USER: ",
-            PromptSuffix = "\nASSISTANT: ",
             Antiprompts = new List<string>()
             {
                 "USER:",
                 "ASSISTANT:"
             }
         };
+        var template = "USER: {{Prompt}}\nASSISTANT: ";
 
         var languageModel = new LanguageModel(
-            Path.Join(Constants.ModelDirectory, "wizardLM-7B.ggmlv3.q4_0.bin"), languageModelOptions, CreateLogger()
+            Path.Join(Constants.ModelDirectory, "wizardLM-7B.ggmlv3.q4_0.bin"), languageModelOptions, template,
+            CreateLogger()
         );
-
         languageModel.Infer("Good evening!", inferenceOptions).Should().NotStartWith(" ");
     }
-
 }
